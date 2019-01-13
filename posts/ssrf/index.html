@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<meta name="author" content="ifish">
+		
+		<meta name="generator" content="Hugo 0.45.1" />
+		<title>ssrf &middot; if1sh</title>
+		<link rel="shortcut icon" href="https://ifishzz.github.io//images/favicon.ico">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/style.css">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/font-awesome.min.css">
+		
+
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://ifishzz.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://ifishzz.github.io//posts'>Archive</a>
+	<a href='https://ifishzz.github.io//tags'>Tags</a>
+	<a href='https://ifishzz.github.io//categories'>Cate</a>
+
+	<a href='https://ifishzz.github.io//about'>About</a>
+
+	
+
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        ssrf
+                    </h1>
+                    <h2 class="headline">
+                    Dec 31, 2018 00:00
+                    · 2362 words
+                    · 5 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://ifishzz.github.io//tags/ssrf">ssrf</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#0x00-ssrf是什么">0x00 SSRF是什么</a></li>
+<li><a href="#0x01-ssrf-漏洞出现的场景">0x01 SSRF 漏洞出现的场景</a></li>
+<li><a href="#0x02-漏洞产生">0x02 漏洞产生</a></li>
+<li><a href="#0x03-漏洞验证">0x03 漏洞验证</a></li>
+<li><a href="#0x04-利用思路">0x04 利用思路</a></li>
+<li><a href="#0x05-绕过技巧">0x05 绕过技巧</a></li>
+<li><a href="#0x06-漏洞防御">0x06 漏洞防御</a></li>
+<li><a href="#0x07-案例">0x07 案例</a></li>
+<li><a href="#0x08-参考资料">0x08 参考资料</a></li>
+</ul></li>
+</ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    
+
+<h2 id="0x00-ssrf是什么">0x00 SSRF是什么</h2>
+
+<p>SSRF，Server-Side Request Forgery，服务端请求伪造，是一种由攻击者构造形成由服务器端发起请求的一个漏洞。一般情况下，SSRF 攻击的目标是从外网无法访问的内部系统。</p>
+
+<p>攻击者可以利用 SSRF 实现的攻击主要有 5 种：</p>
+
+<ul>
+<li>可以对外网、服务器所在内网、本地进行端口扫描，获取一些服务的 banner 信息</li>
+<li>攻击运行在内网或本地的应用程序（比如溢出）</li>
+<li>对内网 WEB 应用进行指纹识别，通过访问默认文件实现</li>
+<li>攻击内外网的 web 应用，主要是使用 GET 参数就可以实现的攻击（比如 Struts2，sqli 等）</li>
+<li>利用 file 协议读取本地文件等</li>
+</ul>
+
+<h2 id="0x01-ssrf-漏洞出现的场景">0x01 SSRF 漏洞出现的场景</h2>
+
+<p><em>能够对外发起网络请求的地方，就可能存在 SSRF 漏洞</em></p>
+
+<ul>
+<li><p>社交分享功能：获取超链接的标题等内容进行显示</p></li>
+
+<li><p>转码服务：通过URL地址把原地址的网页内容调优使其适合手机屏幕浏览</p></li>
+
+<li><p>在线翻译：给网址翻译对应网页的内容</p></li>
+
+<li><p>图片加载/下载：例如富文本编辑器中的点击下载图片到本地；通过URL地址加载或下载图片</p></li>
+
+<li><p>图片/文章收藏功能：主要其会取URL地址中title以及文本的内容作为显示以求一个好的用具体验</p></li>
+
+<li><p>云服务厂商：它会远程执行一些命令来判断网站是否存活等，所以如果可以捕获相应的信息，就可以进行ssrf测试</p></li>
+
+<li><p>网站采集，网站抓取的地方：一些网站会针对你输入的url进行一些信息采集工作</p></li>
+
+<li><p>数据库内置功能：数据库的比如mongodb的copyDatabase函数</p></li>
+
+<li><p>邮件系统：比如接收邮件服务器地址</p></li>
+
+<li><p>编码处理, 属性信息处理，文件处理：比如ffpmg，ImageMagick，docx，pdf，xml处理器等</p></li>
+
+<li><p>未公开的api实现以及其他扩展调用URL的功能：可以利用google 语法加上这些关键字去寻找SSRF漏洞</p></li>
+</ul>
+
+<p>一些的url中的关键字：share、wap、url、link、src、source、target、u、3g、display、sourceURl、imageURL、domain……</p>
+
+<ul>
+<li><p>从远程服务器请求资源（upload from url 如discuz！；import &amp; expost rss feed 如web blog；使用了xml引擎对象的地方 如wordpress xmlrpc.php）</p>
+
+<h2 id="0x02-漏洞产生">0x02 漏洞产生</h2></li>
+
+<li><p>file_get_content</p>
+
+<pre><code>&lt;?php
+if(isset($_GET['url'])){
+$con=file_get_contents($_GET['url']);
+$filen='./img/'.rand().'img.jpg';
+file_put_contents($filen,$con);
+$img=&quot;&lt;img src=\&quot;&quot;.$filen.&quot;\&quot;/&gt;&quot;;
+}
+echo $img;
+?&gt;
+读取外部图片,可用file读/etc/passwd
+</code></pre></li>
+
+<li><p>fsockopen</p>
+
+<pre><code>&lt;?php
+$url=&quot;www.baidu.com&quot;;
+$fp = fsockopen($url, 80, $errno, $errstr, 30);
+if (!$fp) {
+echo &quot;$errstr ($errno)&lt;br /&gt;\n&quot;;
+} else {
+$out = &quot;GET / HTTP/1.1\r\n&quot;;
+$out .= &quot;Host: &quot;.$url.&quot;\r\n&quot;;
+$out .= &quot;Connection: Close\r\n\r\n&quot;;
+fwrite($fp, $out);
+while (!feof($fp)) {
+    echo fgets($fp, 128);
+}
+fclose($fp);
+}
+?&gt;
+</code></pre></li>
+
+<li><p>curl_exec</p>
+
+<pre><code>&lt;?php
+//初始化
+$curl = curl_init();
+//设置抓取的url
+curl_setopt($curl, CURLOPT_URL, 'http://www.baidu.com');
+//设置头文件的信息作为数据流输出
+curl_setopt($curl, CURLOPT_HEADER, 1);
+//设置获取的信息以文件流的形式返回，而不是直接输出。
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+//执行命令
+$data = curl_exec($curl);
+//关闭URL请求
+curl_close($curl);
+//显示获得的数据
+print_r($data);
+?&gt;
+无回显,nc监听,有302跳转,curl可利用协议多
+</code></pre>
+
+<h2 id="0x03-漏洞验证">0x03 漏洞验证</h2></li>
+
+<li><p>排除法：浏览器f12查看源代码看是否是在本地进行了请求</p></li>
+</ul>
+
+<p>比如：该资源地址类型为 <a href="http://www.xxx.com/a.php?image=（地址）的就可能存在SSRF漏洞">http://www.xxx.com/a.php?image=（地址）的就可能存在SSRF漏洞</a></p>
+
+<ul>
+<li>dnslog等工具进行测试，看是否被访问</li>
+</ul>
+
+<p>可以在盲打后台用例中将当前准备请求的uri 和参数编码成base64，这样盲打后台解码后就知道是哪台机器哪个cgi触发的请求。</p>
+
+<ul>
+<li>抓包分析发送的请求是不是由服务器的发送的，如果不是客户端发出的请求，则有可能是，接着找存在HTTP服务的内网地址</li>
+</ul>
+
+<p>从漏洞平台中的历史漏洞寻找泄漏的存在web应用内网地址</p>
+
+<p>通过二级域名暴力猜解工具模糊猜测内网地址</p>
+
+<ul>
+<li><p>直接返回的Banner、title、content等信息</p></li>
+
+<li><p>留意bool型SSRF</p>
+
+<h2 id="0x04-利用思路">0x04 利用思路</h2></li>
+
+<li><p>获取web应用可达服务器服务的banner信息以及收集内网web应用的指纹识别，如开放的端口，中间件版本信息等。</p></li>
+
+<li><p>攻击运行在内网的系统或应用程序，获取内网各系统弱口令进行内网漫游、对有漏洞的内网web应用实施攻击获取webshell，如st2命令执行、discuz ssrf通过redis实施getshell等。</p></li>
+
+<li><p>利用有脆弱性的组件结合ftp://,file:///,gopher://,dict://等协议实施攻击。如FFmpeg任意文件读取，xxe攻击等。</p></li>
+</ul>
+
+<h2 id="0x05-绕过技巧">0x05 绕过技巧</h2>
+
+<p>1.<a href="http://baidu.com@www.baidu.com/与http://www.baidu.com/请求时是相同的">http://baidu.com@www.baidu.com/与http://www.baidu.com/请求时是相同的</a></p>
+
+<p>2.各种IP地址的进制转换</p>
+
+<p>3.URL跳转绕过：<a href="http://www.hackersb.cn/redirect.php?url=http://192.168.0.1/">http://www.hackersb.cn/redirect.php?url=http://192.168.0.1/</a></p>
+
+<p>4.短网址绕过 <a href="http://t.cn/RwbLKDx">http://t.cn/RwbLKDx</a></p>
+
+<p>5.xip.io来绕过：<a href="http://xxx.192.168.0.1.xip.io/">http://xxx.192.168.0.1.xip.io/</a> == 192.168.0.1 (xxx 任意）</p>
+
+<p>指向任意ip的域名：xip.io(37signals开发实现的定制DNS服务)</p>
+
+<p>6.限制了子网段，可以加 :80 端口绕过。<a href="http://tieba.baidu.com/f/commit/share/openShareApi?url=http://10.42.7.78:80">http://tieba.baidu.com/f/commit/share/openShareApi?url=http://10.42.7.78:80</a></p>
+
+<p>7.探测内网域名，或者将自己的域名解析到内网ip</p>
+
+<p>8.例如 <a href="http://10.153.138.81/ts.php">http://10.153.138.81/ts.php</a> , 修复时容易出现的获取host时以/分割来确定host，</p>
+
+<p>但这样可以用 <a href="http://abc@10.153.138.81/">http://abc@10.153.138.81/</a> 绕过</p>
+
+<h2 id="0x06-漏洞防御">0x06 漏洞防御</h2>
+
+<p>1.禁止跳转</p>
+
+<p>2.过滤返回信息，验证远程服务器对请求的响应是比较容易的方法。如果web应用是去获取某一种类型的文件。那么在把返回结果展示给用户之前先验证返回的信息是否符合标准。</p>
+
+<p>3.禁用不需要的协议，仅仅允许http和https请求。可以防止类似于file://, gopher://, ftp:// 等引起的问题</p>
+
+<p>4.设置URL白名单或者限制内网IP（使用gethostbyname()判断是否为内网IP）</p>
+
+<p>5.限制请求的端口为http常用的端口，比如 80、443、8080、8090</p>
+
+<p>6.统一错误信息，避免用户可以根据错误信息来判断远端服务器的端口状态。</p>
+
+<h2 id="0x07-案例">0x07 案例</h2>
+
+<ol>
+<li>内网探测的话用burpsuite就可以,设置变量跑,也有猪猪侠内网探测的脚本</li>
+<li>302脚本
+<code>
+&lt;?php
+$ip = $_GET['ip'];
+$port = $_GET['port'];
+$scheme = $_GET['s'];
+$data = $_GET['data'];
+header(&quot;Location: $scheme://$ip:$port/$data&quot;);
+?&gt;
+</code>
+具体案例看猪猪侠</li>
+</ol>
+
+<h2 id="0x08-参考资料">0x08 参考资料</h2>
+
+<p><a href="https://www.anquanke.com/post/id/145519?from=timeline#h2-5">https://www.anquanke.com/post/id/145519?from=timeline#h2-5</a>
+<a href="https://xz.aliyun.com/t/2115#toc-8">https://xz.aliyun.com/t/2115#toc-8</a>
+<a href="https://www.cnblogs.com/zhaijiahui/p/7828585.html#autoid-7-1-4">https://www.cnblogs.com/zhaijiahui/p/7828585.html#autoid-7-1-4</a>
+<a href="https://ctf-wiki.github.io/ctf-wiki/web/ssrf/#ssrf_2">https://ctf-wiki.github.io/ctf-wiki/web/ssrf/#ssrf_2</a>
+<a href="http://www.91ri.org/17111.html">http://www.91ri.org/17111.html</a></p>
+
+                </section>
+            </article>
+
+            
+                
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+    
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/ifishzz">ifish</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://ifishzz.github.io//js/jquery-3.3.1.min.js"></script>
+<script src="https://ifishzz.github.io//js/main.js"></script>
+<script src="https://ifishzz.github.io//js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+  
+
+
+
+<script>
+var baiduAnalytics = '';
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?" + baiduAnalytics;
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+    </body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Dnslog on if1sh</title>
+    <link>https://ifishzz.github.io/tags/dnslog/</link>
+    <description>Recent content in Dnslog on if1sh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 31 Dec 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ifishzz.github.io/tags/dnslog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>dnslog</title>
+      <link>https://ifishzz.github.io/posts/dnslog/</link>
+      <pubDate>Mon, 31 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/dnslog/</guid>
+      <description>DNSLog 是一款监控 DNS 解析记录和 HTTP 访问记录的工具 带外通道,对无回显攻击来说,很好用 红色dns服务器是我们可控的 监听本地53/udp端口，用以模拟解析</description>
+    </item>
+    
+  </channel>
+</rss>

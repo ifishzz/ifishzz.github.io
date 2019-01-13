@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Git on if1sh</title>
+    <link>https://ifishzz.github.io/tags/git/</link>
+    <description>Recent content in Git on if1sh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 22 Dec 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ifishzz.github.io/tags/git/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>git</title>
+      <link>https://ifishzz.github.io/posts/git/</link>
+      <pubDate>Sat, 22 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/git/</guid>
+      <description>初始化 初始化一个Git仓库，使用git init命令 添加文件到Git仓库，分两步： 使用命令git add &amp;lt;file&amp;gt;，注意，可反复多次使</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>if1sh</title>
+    <link>https://ifishzz.github.io/</link>
+    <description>Recent content on if1sh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 03 Jan 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ifishzz.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>hugo and travis automation deploy</title>
+      <link>https://ifishzz.github.io/posts/hugo-and-travis-automation-deploy/</link>
+      <pubDate>Thu, 03 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/hugo-and-travis-automation-deploy/</guid>
+      <description>0x00 准备工作 repo：blog-hugo github-page：ifishzzz.github.io 0x01 travis设置 https://github.com/settings/tokens 先在github生成一</description>
+    </item>
+    
+    <item>
+      <title>dnslog</title>
+      <link>https://ifishzz.github.io/posts/dnslog/</link>
+      <pubDate>Mon, 31 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/dnslog/</guid>
+      <description>DNSLog 是一款监控 DNS 解析记录和 HTTP 访问记录的工具 带外通道,对无回显攻击来说,很好用 红色dns服务器是我们可控的 监听本地53/udp端口，用以模拟解析</description>
+    </item>
+    
+    <item>
+      <title>ssrf</title>
+      <link>https://ifishzz.github.io/posts/ssrf/</link>
+      <pubDate>Mon, 31 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/ssrf/</guid>
+      <description>0x00 SSRF是什么 SSRF，Server-Side Request Forgery，服务端请求伪造，是一种由攻击者构造形成由服务器端发起请求的一个漏洞。一般情</description>
+    </item>
+    
+    <item>
+      <title>xss</title>
+      <link>https://ifishzz.github.io/posts/xss/</link>
+      <pubDate>Sun, 30 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/xss/</guid>
+      <description>0x01 编码知识 HTML编码 实体编码 &amp;lt; : &amp;amp;lt;或者&amp;amp;#60; &amp;gt; : &amp;amp;gt; 或者 &amp;amp;#62; 进制编码 &amp;amp;#xH;(十六进制格式)、&amp;amp;#</description>
+    </item>
+    
+    <item>
+      <title>git</title>
+      <link>https://ifishzz.github.io/posts/git/</link>
+      <pubDate>Sat, 22 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/git/</guid>
+      <description>初始化 初始化一个Git仓库，使用git init命令 添加文件到Git仓库，分两步： 使用命令git add &amp;lt;file&amp;gt;，注意，可反复多次使</description>
+    </item>
+    
+    <item>
+      <title>信息收集</title>
+      <link>https://ifishzz.github.io/posts/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</link>
+      <pubDate>Fri, 21 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</guid>
+      <description>横向，纵向 信息收集 子域名 site：topsec.com.cn 搜集子站 site: topsec.com.cn filetype:doc/txt 搜集敏感文件 site: topsec.com.cn 管理 /topsec.com.cn admin /topsec.com.cn login 搜集后台 site: topsec.com.cn intext:@topsec.com.cn 搜集邮箱 site: topsec.com.cn intitl</description>
+    </item>
+    
+    <item>
+      <title>markdown</title>
+      <link>https://ifishzz.github.io/posts/markdown/</link>
+      <pubDate>Tue, 18 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/markdown/</guid>
+      <description>标题 在想要设置为标题的文字前面加#来表示 一个#是一级标题，二个#是二级标题，以此类推。支持六级标题 标准语法一般在#后跟个空格再写文字 字体 加粗</description>
+    </item>
+    
+  </channel>
+</rss>

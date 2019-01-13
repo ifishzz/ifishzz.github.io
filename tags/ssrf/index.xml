@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ssrf on if1sh</title>
+    <link>https://ifishzz.github.io/tags/ssrf/</link>
+    <description>Recent content in Ssrf on if1sh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 31 Dec 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ifishzz.github.io/tags/ssrf/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ssrf</title>
+      <link>https://ifishzz.github.io/posts/ssrf/</link>
+      <pubDate>Mon, 31 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/ssrf/</guid>
+      <description>0x00 SSRF是什么 SSRF，Server-Side Request Forgery，服务端请求伪造，是一种由攻击者构造形成由服务器端发起请求的一个漏洞。一般情</description>
+    </item>
+    
+  </channel>
+</rss>
