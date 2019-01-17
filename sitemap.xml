@@ -78,6 +78,11 @@
   </url>
   
   <url>
+    <loc>https://ifishzz.github.io/tags/nginx/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://ifishzz.github.io/posts/</loc>
     <lastmod>2019-01-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -120,8 +125,17 @@
   </url>
   
   <url>
+    <loc>https://ifishzz.github.io/posts/vscode/</loc>
+  </url>
+  
+  <url>
     <loc>https://ifishzz.github.io/tags/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</loc>
     <lastmod>2018-12-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ifishzz.github.io/categories/%E6%9C%8D%E5%8A%A1%E5%99%A8/</loc>
     <priority>0</priority>
   </url>
   
