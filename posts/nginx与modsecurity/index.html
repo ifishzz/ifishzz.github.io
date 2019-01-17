@@ -48,7 +48,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 1, 0001 00:00
-                    · 874 words
+                    · 891 words
                     · 2 minute read
                       <span class="tags">
                       
@@ -72,6 +72,7 @@
 <li><a href="#配置规则">配置规则</a></li>
 <li><a href="#配置nginx">配置nginx</a></li>
 <li><a href="#bug">bug</a></li>
+<li><a href="#启动nginx">启动nginx</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -231,7 +232,13 @@ vi /usr/local/nginx/modsecurity.conf
 /mapping 注释掉
 </code></pre>
 
-<p>翻车翻得不要不要的</p>
+<h2 id="启动nginx">启动nginx</h2>
+
+<p>nginx -t 查看是否错误</p>
+
+<p>nginx -c /usr/local/nginx/nginx.conf 启动</p>
+
+<p>nginx -s: stop, quit, reopen, reload</p>
 
                 </section>
             </article>
