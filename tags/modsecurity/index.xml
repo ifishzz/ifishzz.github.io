@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Modsecurity on if1sh</title>
+    <link>https://ifishzz.github.io/tags/modsecurity/</link>
+    <description>Recent content in Modsecurity on if1sh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    
+	<atom:link href="https://ifishzz.github.io/tags/modsecurity/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>nginx部署modsecurity</title>
+      <link>https://ifishzz.github.io/posts/nginx%E4%B8%8Emodsecurity/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/nginx%E4%B8%8Emodsecurity/</guid>
+      <description>0x01 环境配置 cenos7 mini yum -y update 关闭selinux与防火墙 yum -y install gcc-g++ gcc-c++ gcc-g++ gcc-c++ httpd-devel apr apr-util-devel apr-devel pcre pcre-devel libxml2 libxml2-devel zlib zlib-devel openssl openssl-devel pcre pcre-devel libtool git wget 1下载tengine or nginx or openresty wget http://tengine.taobao.org/download/tengine-2.2.1.tar.gz wget https://openresty.org/download/openresty-1.11.2.5.tar.gz 2下载mo</description>
+    </item>
+    
+  </channel>
+</rss>
