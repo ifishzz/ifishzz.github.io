@@ -48,8 +48,8 @@
                     </h1>
                     <h2 class="headline">
                     Jan 18, 2019 00:00
-                    · 1619 words
-                    · 4 minute read
+                    · 2135 words
+                    · 5 minute read
                       <span class="tags">
                       
                       
@@ -91,7 +91,7 @@
 
 <p>1、环境准备：先安装准备环境</p>
 
-<p>yum install gcc gcc-c++ automake pcre pcre-devel zlip zlib-devel openssl openssl-devel</p>
+<p><code>yum install gcc gcc-c++ automake pcre pcre-devel zlip zlib-devel openssl openssl-devel</code></p>
 
 <p>gcc为GNU Compiler Collection的缩写，可以编译C和C++源代码等，它是GNU开发的C和C++以及其他很多种语言 的编译器（最早的时候只能编译C，后来很快进化成一个编译多种语言的集合，如Fortran、Pascal、Objective-C、Java、Ada、 Go等。）
 　　gcc 在编译C++源代码的阶段，只能编译 C++ 源文件，而不能自动和 C++ 程序使用的库链接（编译过程分为编译、链接两个阶段，注意不要和可执行文件这个概念搞混，相对可执行文件来说有三个重要的概念：编译（compile）、链接（link）、加载（load）。源程序文件被编译成目标文件，多个目标文件连同库被链接成一个最终的可执行文件，可执行文件被加载到内存中运行）。因此，通常使用 g++ 命令来完成 C++ 程序的编译和连接，该程序会自动调用 gcc 实现编译。
@@ -104,13 +104,33 @@
 <p>2、下载nginx 安装包：  官网地址：<a href="http://nginx.org/">http://nginx.org/</a></p>
 
 <p>在linux使用wget下载:
-wget <a href="http://nginx.org/download/nginx-1.14.2.tar.gz">http://nginx.org/download/nginx-1.14.2.tar.gz</a></p>
+<code>wget http://nginx.org/download/nginx-1.14.2.tar.gz</code></p>
 
 <p>3、解压安装包:
-tar zxf nginx-1.14.2.tar.gz</p>
+<code>tar zxf nginx-1.14.2.tar.gz</code></p>
 
-<p>4、编译nginx：make
+<p>4、编译nginx
 编译是为了检查系统环境是否符合编译安装的要求，比如是否有gcc编译工具，是否支持编译参数当中的模块，并根据开启的参数等生成Makefile文件为下一步做准备：</p>
+
+<pre><code>mkdir /opt/nginx &amp;&amp;chown nginx:nginx /opt/nginx/
+./configure  --prefix=/opt/nginx/ --sbin-path=/usr/bin/ --conf-path=/etc/nginx/nginx.conf --user=nginx --group=nginx
+#--prefix=/opt/nginx/ 指定nginx的安装目录是/opt/nginx
+#--sbin-path=/usr/bin/ 指定nginx二进制文件的路径是/usr/bin
+#--conf-path=/etc/nginx/nginx.conf  指定配置文件的路径
+#--user=nginx 指定进程运行的用户
+#--group=nginx 指定进程运行的用户
+</code></pre>
+
+<p>5、生成脚本及配置文件：<code>make</code>
+编译步骤，根据Makefile文件生成相应的模块</p>
+
+<p>6、安装：<code>make install</code></p>
+
+<p>备注：nginx完成安装以后，有四个主要的目录：
+conf：保存nginx所有的配置文件，其中nginx.conf是nginx服务器的最核心最主要的配置文件，其他的.conf则是用来配置nginx相关的功能的，例如fastcgi功能使用的是fastcgi.conf和fastcgi_params两个文件，配置文件一般都有个样板配置文件，是文件名.default结尾，使用的使用将其复制为并将default去掉即可。
+html目录中保存了nginx服务器的web文件，但是可以更改为其他目录保存web文件,另外还有一个50x的web文件是默认的错误页面提示页面。
+logs：用来保存nginx服务器的访问日志错误日志等日志，logs目录可以放在其他路径，比如/var/logs/nginx里面。
+sbin：保存nginx二进制启动脚本，可以接受不同的参数以实现不同的功能。</p>
 
                 </section>
             </article>
