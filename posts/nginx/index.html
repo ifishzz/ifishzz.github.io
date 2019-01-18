@@ -90,9 +90,9 @@
 
 <h2 id="0x01-安装">0x01 安装</h2>
 
-<ol>
+<ul>
 <li>环境准备：先安装准备环境</li>
-</ol>
+</ul>
 
 <p><code>yum install gcc gcc-c++ automake pcre pcre-devel zlip zlib-devel openssl openssl-devel</code></p>
 
@@ -104,20 +104,20 @@
 　　zlip zlib-devel：nginx启用压缩功能的时候，需要此模块的支持。
 　　openssl openssl-devel：开启SSL的时候需要此模块的支持。</p>
 
-<ol>
+<ul>
 <li>下载nginx 安装包：  官网地址：<a href="http://nginx.org/">http://nginx.org/</a></li>
-</ol>
+</ul>
 
 <p>在linux使用wget下载:
 <code>wget http://nginx.org/download/nginx-1.14.2.tar.gz</code></p>
 
-<ol>
+<ul>
 <li><p>解压安装包:
 <code>tar zxf nginx-1.14.2.tar.gz</code></p></li>
 
 <li><p>编译nginx
 编译是为了检查系统环境是否符合编译安装的要求，比如是否有gcc编译工具，是否支持编译参数当中的模块，并根据开启的参数等生成Makefile文件为下一步做准备：</p></li>
-</ol>
+</ul>
 
 <pre><code>mkdir /opt/nginx &amp;&amp;chown nginx:nginx /opt/nginx/
 ./configure  --prefix=/opt/nginx/ --sbin-path=/usr/bin/ --conf-path=/etc/nginx/nginx.conf --user=nginx --group=nginx
@@ -128,15 +128,15 @@
 #--group=nginx 指定进程运行的用户
 </code></pre>
 
-<ol>
+<ul>
 <li>生成脚本及配置文件：<code>make</code></li>
-</ol>
+</ul>
 
 <p>编译步骤，根据Makefile文件生成相应的模块</p>
 
-<ol>
+<ul>
 <li>安装：<code>make install</code></li>
-</ol>
+</ul>
 
 <p>备注：nginx完成安装以后，有四个主要的目录：</p>
 
@@ -150,20 +150,20 @@
 
 <p>sbin：保存nginx二进制启动脚本，可以接受不同的参数以实现不同的功能。</p>
 
-<ol>
+<ul>
 <li><p>检测 : <code>nginx -t</code></p></li>
 
 <li><p>启动 :</p></li>
-</ol>
+</ul>
 
 <pre><code>/opt/nginx/sbin/nginx 启动
 /usr/local/nginx/sbin/nginx/nginx   -s  reload  #不停止服务重读配置文件
 /usr/local/nginx/sbin/nginx/nginx   -s  stop  #停止 
 </code></pre>
 
-<ol>
+<ul>
 <li>验证端口开启</li>
-</ol>
+</ul>
 
 <pre><code>[root@Server1 sbin]# ps -ef | grep nginx
 root     13228     1  0 Apr23 ?        00:00:00 nginx: master process /usr/local/nginx/sbin/nginx/nginx  #nginx的主进程,只有一个主进程
@@ -176,9 +176,9 @@ nginx 13337 root 6u IPv4 5932680 0t0 TCP *:8090 (LISTEN)
 nginx 13338 nginx 6u IPv4 5932680 0t0 TCP *:8090 (LISTEN)
 </code></pre>
 
-<ol>
+<ul>
 <li>停止nginx</li>
-</ol>
+</ul>
 
 <pre><code>[root@Server1 nginx]# kill  -QUIT 13337  #平缓关闭Nginx，即不再接受新的请求，但是等当前请求处理完毕后再关闭Nginx。
 [root@Server1 nginx]# kill  -TERM  21665 #快速停止Nginx服务
@@ -188,9 +188,9 @@ nginx 13338 nginx 6u IPv4 5932680 0t0 TCP *:8090 (LISTEN)
 
 <h2 id="0x02-nginx-conf">0x02 nginx.conf</h2>
 
-<ol>
+<ul>
 <li>默认配置：配置文件默认保存在path/conf当中，默认的配置文件为nginx.conf，以下是编译安装后的默认配置</li>
-</ol>
+</ul>
 
 <pre><code>[root@Server1 conf]# grep -v &quot;#&quot; nginx.conf | grep -v  &quot;^$&quot;
 　　#全局生效，主要设置nginx的启动用户/组，启动的工作进程数量，Nginx的PID路径，日志路径等。
@@ -219,17 +219,17 @@ http {   #http块是Nginx服务器配置中的重要部分，缓存、代理和�
 }
 </code></pre>
 
-<ol>
+<ul>
 <li>配置nginx 主进程的启动用户和工作进程数</li>
-</ol>
+</ul>
 
 <pre><code>user  xxxx;   #每一条指令都要以分号结尾
 worker_processes  1; #可以指定启动的固定nginx进程数，或使用auto，auto是启动与当前CPU 线程相同的进程数，如CPU是四核八线程的就启动八个进程的Nginx工作进程。
 </code></pre>
 
-<ol>
+<ul>
 <li>绑定Nginx 工作进程到不同的CPU上</li>
-</ol>
+</ul>
 
 <p>默认Nginx是不进行保定的，绑定并不能是当前nginx进程独占以一核心CPU，但是可以保证此进程不会运行在其他核心上，这就极大减少了nginx 工作进程在不同cpu上的跳转，减少了CPU对进程的资源分配与回收，因此可以有效的提升nginx服务器的性能，配置如下</p>
 
@@ -243,9 +243,9 @@ worker_processes  8;
 worker_cpu_affinity 00000001 00000010 00000100 00001000 00010000 00100000 01000000 10000000；
 </code></pre>
 
-<ol>
+<ul>
 <li>PID和错误日志文件路径</li>
-</ol>
+</ul>
 
 <pre><code>#pid        logs/nginx.pid;   #可以指定绝对路径
 #error_log  logs/error.log;  #指定错误日志路径
@@ -263,9 +263,9 @@ error_log file [ debug | info | notice | warn | error | crit ]  | [{  debug_core
 error_log 指令的日志级别配置分为错误日志级别和调试日志级别，错误日志只能设置一个级别，而且错误日志必须书写在调试日志级别的前面，另外调试日志可以设置多个级别，其他配置方法可能无法满足需求。
 </code></pre>
 
-<ol>
+<ul>
 <li>配置文件的引入：include</li>
-</ol>
+</ul>
 
 <pre><code>include file；  #file是要导入的文件，支持相对路径，一般在html目录里面
 导入一个conf文件，并配置不同主机名的页面,编辑nginx.conf主配置文件:
