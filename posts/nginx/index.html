@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<meta name="author" content="ifish">
+		
+		<meta name="generator" content="Hugo 0.45.1" />
+		<title>nginx编译安装及配置 &middot; if1sh</title>
+		<link rel="shortcut icon" href="https://ifishzz.github.io//images/favicon.ico">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/style.css">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/font-awesome.min.css">
+		
+
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://ifishzz.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://ifishzz.github.io//posts'>Archive</a>
+	<a href='https://ifishzz.github.io//tags'>Tags</a>
+	<a href='https://ifishzz.github.io//categories'>Cate</a>
+
+	<a href='https://ifishzz.github.io//about'>About</a>
+
+	
+
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        nginx编译安装及配置
+                    </h1>
+                    <h2 class="headline">
+                    Jan 18, 2019 00:00
+                    · 684 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://ifishzz.github.io//tags/nginx">nginx</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                
+                <section id="post-body">
+                    <p>Nginx是单进程单线程模型，即启动的工作进程只有一个进程响应客户端请求，不像apache可以在一个进程内启动多个线程响应可请求，因此在内存占用上比apache小的很多。Nginx维持一万个非活动会话只要2.5M内存。Nginx和Mysql是CPU密集型的，就是对CPU的占用比较大，默认session在本地文件保存，支持将session保存在memcache，但是memcache默认支持最大1M的课hash对象。</p>
+
+<p>nginx的版本分为开发版、稳定版和过期版，nginx以功能丰富著称，它即可以作为http服务器，也可以作为反向代理服务器或者邮件服务器，能够快速的响应静态网页的请求，支持FastCGI/SSL/Virtual Host/URL Rwrite/Gzip/HTTP Basic Auth等功能，并且支持第三方的功能扩展。</p>
+
+<p>nginx安装可以使用yum或源码安装，推荐使用源码，一是yum的版本比较旧，二是使用源码可以自定义功能，方便业务的上的使用，源码安装需要提前准备标准的编译器，GCC的全称是（GNU Compiler collection），其有GNU开发，并以GPL即LGPL许可，是自由的类UNIX即苹果电脑Mac OS X操作系统的标准编译器，因为GCC原本只能处理C语言，所以原名为GNU C语言编译器，后来得到快速发展，可以处理C++,Fortran，pascal，objective-C，java以及Ada等其他语言，此外还需要Automake工具，以完成自动创建Makefile的工作，Nginx的一些模块需要依赖第三方库，比如pcre（支持rewrite），zlib（支持gzip模块）和openssl（支持ssl模块）</p>
+
+                </section>
+            </article>
+
+            
+                
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+    
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/ifishzz">ifish</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://ifishzz.github.io//js/jquery-3.3.1.min.js"></script>
+<script src="https://ifishzz.github.io//js/main.js"></script>
+<script src="https://ifishzz.github.io//js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+  
+
+
+
+<script>
+var baiduAnalytics = '';
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?" + baiduAnalytics;
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+    </body>
+</html>

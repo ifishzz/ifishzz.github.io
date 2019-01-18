@@ -48,8 +48,8 @@
                     </h1>
                     <h2 class="headline">
                     Jan 17, 2019 00:00
-                    · 891 words
-                    · 2 minute read
+                    · 1003 words
+                    · 3 minute read
                       <span class="tags">
                       
                       
@@ -230,6 +230,16 @@ nginx: [emerg] &quot;modsecurity_rules_file&quot; directive Rules error. File: /
 nginx: configuration file /usr/local/nginx/nginx.conf test failed 
 vi /usr/local/nginx/modsecurity.conf
 /mapping 注释掉
+
+bug3
+Starting nginx: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use) nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use) 
+nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use) 
+nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use) 
+nginx: [emerg] still could not bind()
+发现是nginx进程占用了80端口，所以我们把nginx进程kill掉，重新启动服务。
+lsof -i :80
+kill -9
 </code></pre>
 
 <h2 id="启动nginx">启动nginx</h2>
