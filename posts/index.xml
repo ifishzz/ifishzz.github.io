@@ -6,10 +6,19 @@
     <description>Recent content in Posts on if1sh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 03 Jan 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 17 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://ifishzz.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>nginx部署modsecurity</title>
+      <link>https://ifishzz.github.io/posts/nginx%E4%B8%8Emodsecurity/</link>
+      <pubDate>Thu, 17 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/nginx%E4%B8%8Emodsecurity/</guid>
+      <description>0x01 环境配置 cenos7 mini yum -y update 关闭selinux与防火墙 yum -y install gcc-g++ gcc-c++ gcc-g++ gcc-c++ httpd-devel apr apr-util-devel apr-devel pcre pcre-devel libxml2 libxml2-devel zlib zlib-devel openssl openssl-devel pcre pcre-devel libtool git wget 1下载tengine or nginx or openresty wget http://tengine.taobao.org/download/tengine-2.2.1.tar.gz wget https://openresty.org/download/openresty-1.11.2.5.tar.gz 2下载mo</description>
+    </item>
     
     <item>
       <title>hugo and travis automation deploy</title>
@@ -72,15 +81,6 @@
       
       <guid>https://ifishzz.github.io/posts/markdown/</guid>
       <description>标题 在想要设置为标题的文字前面加#来表示 一个#是一级标题，二个#是二级标题，以此类推。支持六级标题 标准语法一般在#后跟个空格再写文字 字体 加粗</description>
-    </item>
-    
-    <item>
-      <title>nginx部署modsecurity</title>
-      <link>https://ifishzz.github.io/posts/nginx%E4%B8%8Emodsecurity/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ifishzz.github.io/posts/nginx%E4%B8%8Emodsecurity/</guid>
-      <description>0x01 环境配置 cenos7 mini yum -y update 关闭selinux与防火墙 yum -y install gcc-g++ gcc-c++ gcc-g++ gcc-c++ httpd-devel apr apr-util-devel apr-devel pcre pcre-devel libxml2 libxml2-devel zlib zlib-devel openssl openssl-devel pcre pcre-devel libtool git wget 1下载tengine or nginx or openresty wget http://tengine.taobao.org/download/tengine-2.2.1.tar.gz wget https://openresty.org/download/openresty-1.11.2.5.tar.gz 2下载mo</description>
     </item>
     
   </channel>
