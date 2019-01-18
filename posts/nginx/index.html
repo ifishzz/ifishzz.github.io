@@ -48,7 +48,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 18, 2019 00:00
-                    · 4059 words
+                    · 4266 words
                     · 9 minute read
                       <span class="tags">
                       
@@ -70,6 +70,7 @@
 <ul>
 <li><a href="#0x00-简介">0x00 简介</a></li>
 <li><a href="#0x01-安装">0x01 安装</a></li>
+<li><a href="#0x02-nginx-conf">0x02 nginx.conf</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -152,106 +153,139 @@
 <ol>
 <li><p>检测 : <code>nginx -t</code></p></li>
 
-<li><p>启动 :</p>
+<li><p>启动 :</p></li>
+</ol>
 
 <pre><code>/opt/nginx/sbin/nginx 启动
 /usr/local/nginx/sbin/nginx/nginx   -s  reload  #不停止服务重读配置文件
 /usr/local/nginx/sbin/nginx/nginx   -s  stop  #停止 
-</code></pre></li>
+</code></pre>
 
-<li><p>验证端口开启
-```
-[root@Server1 sbin]# ps -ef | grep nginx
-root     13228     1  0 Apr23 ?        00:00:00 nginx: master process /usr/local/nginx/sbin/nginx/nginx  #nginx的主进程,只有一个主进程
-nginx    13229 13228  0 Apr23 ?        00:00:00 nginx: worker  process #nginx工作进程，默认只有一个，可以通过修改nginx.conf中的worker_processes  1; 参数启动多个工作进程
-root     13295  1400  0 00:01 pts/0    00:00:00 grep &ndash;color=auto nginx</p></li>
+<ol>
+<li>验证端口开启</li>
 </ol>
 
-<p>[root@Server1 local]# lsof -i:8090  #显示占用8090的进程
+<pre><code>[root@Server1 sbin]# ps -ef | grep nginx
+root     13228     1  0 Apr23 ?        00:00:00 nginx: master process /usr/local/nginx/sbin/nginx/nginx  #nginx的主进程,只有一个主进程
+nginx    13229 13228  0 Apr23 ?        00:00:00 nginx: worker  process #nginx工作进程，默认只有一个，可以通过修改nginx.conf中的worker_processes  1; 参数启动多个工作进程
+root     13295  1400  0 00:01 pts/0    00:00:00 grep --color=auto nginx
+
+[root@Server1 local]# lsof -i:8090  #显示占用8090的进程
 COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
 nginx 13337 root 6u IPv4 5932680 0t0 TCP *:8090 (LISTEN)
-nginx 13338 nginx 6u IPv4 5932680 0t0 TCP *:8090 (LISTEN)</p>
-
-<pre><code>
-10. 停止nginx
+nginx 13338 nginx 6u IPv4 5932680 0t0 TCP *:8090 (LISTEN)
 </code></pre>
 
-<p>[root@Server1 nginx]# kill  -QUIT 13337  #平缓关闭Nginx，即不再接受新的请求，但是等当前请求处理完毕后再关闭Nginx。
+<ol>
+<li>停止nginx</li>
+</ol>
+
+<pre><code>[root@Server1 nginx]# kill  -QUIT 13337  #平缓关闭Nginx，即不再接受新的请求，但是等当前请求处理完毕后再关闭Nginx。
 [root@Server1 nginx]# kill  -TERM  21665 #快速停止Nginx服务
-[root@Server1 nginx]# kill  -HUP 21703 #使用新的配置文件启动进程然后平缓停止原有的nginx进程，即平滑重启。
-[root@Server1 nginx]# kill -USR1 21703   #重新打开配置文件，用于nginx 日志切割</p>
-
-<pre><code>
-## 0x02 nginx.conf
-1. 默认配置：配置文件默认保存在path/conf当中，默认的配置文件为nginx.conf，以下是编译安装后的默认配置
-
+[root@Server1 nginx]# kill  -HUP 21703 #使用新的配置文件启动进程然后平缓停止原有的nginx进程，即平滑重启。 
+[root@Server1 nginx]# kill -USR1 21703   #重新打开配置文件，用于nginx 日志切割
 </code></pre>
 
-<p>[root@Server1 conf]# grep -v &ldquo;#&rdquo; nginx.conf | grep -v  &ldquo;^$&rdquo;
+<h2 id="0x02-nginx-conf">0x02 nginx.conf</h2>
+
+<ol>
+<li>默认配置：配置文件默认保存在path/conf当中，默认的配置文件为nginx.conf，以下是编译安装后的默认配置</li>
+</ol>
+
+<pre><code>[root@Server1 conf]# grep -v &quot;#&quot; nginx.conf | grep -v  &quot;^$&quot;
 　　#全局生效，主要设置nginx的启动用户/组，启动的工作进程数量，Nginx的PID路径，日志路径等。
 worker_processes  1;   #默认启动一个工作进程
 events {   #events设置快，主要影响nginx服务器与用户的网络连接，比如是否允许同时接受多个网络连接，使用哪种事件驱动模型处理请求，每个工作进程可以同时支持的最大连接数，是否开启对多工作进程下的网络连接进行序列化等。
     worker_connections  1024;   #设置nginx可以接受的最大并发，多个进程只和
 }
-http {   #http块是Nginx服务器配置中的重要部分，缓存、代理和日志格式定义等绝大多数功能和第三方模块都可以在这设置，http块可以包含多个server块，而一个server块中又可以包含多个location块，server块可以配置文件引入、MIME-Type定义、日志自定义、是否启用sendfile、连接超时时间和单个链接的请求上限等。</p>
+http {   #http块是Nginx服务器配置中的重要部分，缓存、代理和日志格式定义等绝大多数功能和第三方模块都可以在这设置，http块可以包含多个server块，而一个server块中又可以包含多个location块，server块可以配置文件引入、MIME-Type定义、日志自定义、是否启用sendfile、连接超时时间和单个链接的请求上限等。
 
-<pre><code>include       mime.types;  #文件扩展名与文件类型映射表
-default_type  application/octet-stream; #默认文件类型
-sendfile        on; #是否调用 sendfile 函数（zero copy --&gt;零copy方式）来输出文件，普通应用打开，可以大幅提升nginx的读文件性能，如果服务器是下载的就需要关闭，
-keepalive_timeout  65;  #长连接超时时间，单位是秒
-server { #设置一个虚拟机主机，可以包含自己的全局快，同时也可以包含多个locating模块。比如本虚拟机监听的端口、本虚拟机的名称和IP配置，多个server 可以使用一个端口，比如都使用8090端口提供web服务、
-    listen       8090;  #server的全局配置，配置监听的端口
-    server_name  localhost;  #本server的名称，当访问此名称的时候nginx会调用当前serevr内部的配置进程匹配。
-    location / {  #location其实是server的一个指令，为nginx服务器提供比较多而且灵活的指令，都是在location中提现的，主要是基于nginx接受到的请求字符串，对用户请求的UIL进行匹配，并对特定的指令进行处理，包括地址重定向、数据缓存和应答控制等功能都是在这部分实现，另外很多第三方模块的配置也是在location模块中配置。
-        root   html;  #相当于默认页面的目录名称，默认是相对路径，可以使用绝对路径配置。
-        index  index.html index.htm;
-    }
-    error_page   500 502 503 504  /50x.html;  #错误页面的文件名称
-    location = /50x.html {  #location处理对应的不同错误码的页面定义到/50x.html，这个跟对应其server中定义的目录下。
-        root   html;   #定义默认页面所在的目录
+    include       mime.types;  #文件扩展名与文件类型映射表
+    default_type  application/octet-stream; #默认文件类型
+    sendfile        on; #是否调用 sendfile 函数（zero copy --&gt;零copy方式）来输出文件，普通应用打开，可以大幅提升nginx的读文件性能，如果服务器是下载的就需要关闭，
+    keepalive_timeout  65;  #长连接超时时间，单位是秒
+    server { #设置一个虚拟机主机，可以包含自己的全局快，同时也可以包含多个locating模块。比如本虚拟机监听的端口、本虚拟机的名称和IP配置，多个server 可以使用一个端口，比如都使用8090端口提供web服务、
+        listen       8090;  #server的全局配置，配置监听的端口
+        server_name  localhost;  #本server的名称，当访问此名称的时候nginx会调用当前serevr内部的配置进程匹配。
+        location / {  #location其实是server的一个指令，为nginx服务器提供比较多而且灵活的指令，都是在location中提现的，主要是基于nginx接受到的请求字符串，对用户请求的UIL进行匹配，并对特定的指令进行处理，包括地址重定向、数据缓存和应答控制等功能都是在这部分实现，另外很多第三方模块的配置也是在location模块中配置。
+            root   html;  #相当于默认页面的目录名称，默认是相对路径，可以使用绝对路径配置。
+            index  index.html index.htm;
+        }
+        error_page   500 502 503 504  /50x.html;  #错误页面的文件名称
+        location = /50x.html {  #location处理对应的不同错误码的页面定义到/50x.html，这个跟对应其server中定义的目录下。
+            root   html;   #定义默认页面所在的目录
+        }
     }
 }
 </code></pre>
 
-<p>}</p>
+<ol>
+<li>配置nginx 主进程的启动用户和工作进程数</li>
+</ol>
 
-<pre><code>2. 配置nginx 主进程的启动用户和工作进程数
+<pre><code>user  xxxx;   #每一条指令都要以分号结尾
+worker_processes  1; #可以指定启动的固定nginx进程数，或使用auto，auto是启动与当前CPU 线程相同的进程数，如CPU是四核八线程的就启动八个进程的Nginx工作进程。
 </code></pre>
 
-<p>user  xxxx;   #每一条指令都要以分号结尾
-worker_processes  1; #可以指定启动的固定nginx进程数，或使用auto，auto是启动与当前CPU 线程相同的进程数，如CPU是四核八线程的就启动八个进程的Nginx工作进程。</p>
+<ol>
+<li>绑定Nginx 工作进程到不同的CPU上</li>
+</ol>
 
-<pre><code>3. 绑定Nginx 工作进程到不同的CPU上
-默认Nginx是不进行保定的，绑定并不能是当前nginx进程独占以一核心CPU，但是可以保证此进程不会运行在其他核心上，这就极大减少了nginx 工作进程在不同cpu上的跳转，减少了CPU对进程的资源分配与回收，因此可以有效的提升nginx服务器的性能，配置如下
-</code></pre>
+<p>默认Nginx是不进行保定的，绑定并不能是当前nginx进程独占以一核心CPU，但是可以保证此进程不会运行在其他核心上，这就极大减少了nginx 工作进程在不同cpu上的跳转，减少了CPU对进程的资源分配与回收，因此可以有效的提升nginx服务器的性能，配置如下</p>
 
-<p>[root@Server1 nginx]# grep process /proc/cpuinfo  | wc -l #确认CPU的核心数量
+<pre><code>[root@Server1 nginx]# grep process /proc/cpuinfo  | wc -l #确认CPU的核心数量
 四个线程CPU的配置：
-worker_processes  4;
-worker_cpu_affinity 0001 0010 0100 1000;</p>
+worker_processes  4; 
+worker_cpu_affinity 0001 0010 0100 1000;
 
-<p>八个线程CPU的配置：
-worker_processes  8;
-worker_cpu_affinity 00000001 00000010 00000100 00001000 00010000 00100000 01000000 10000000；</p>
-
-<pre><code>4. PID和错误日志文件路径
+八个线程CPU的配置：
+worker_processes  8; 
+worker_cpu_affinity 00000001 00000010 00000100 00001000 00010000 00100000 01000000 10000000；
 </code></pre>
 
-<p>#pid        logs/nginx.pid;   #可以指定绝对路径
+<ol>
+<li>PID和错误日志文件路径</li>
+</ol>
+
+<pre><code>#pid        logs/nginx.pid;   #可以指定绝对路径
 #error_log  logs/error.log;  #指定错误日志路径
 #error_log  logs/error.log  notice;  #指定一个日志记录级别
-#error_log  logs/error.log  info;</p>
+#error_log  logs/error.log  info;
 
-<p>支持的日志级别：
+支持的日志级别：
 语法:
 error_log file [ debug | info | notice | warn | error | crit ]  | [{  debug_core | debug_alloc | debug_mutex | debug_event | debug_http | debug_mail | debug_mysql } ]
 日志级别 = 错误日志级别 | 调试日志级别; 或者
 日志级别 = 错误日志级别;
-错误日志的级别: emerg, alert, crit, error, warn, notic, info, debug,
-调试日志的级别: debug_core, debug_alloc, debug_mutex, debug_event, debug_http, debug_mail, debug_mysql</p>
+错误日志的级别: emerg, alert, crit, error, warn, notic, info, debug, 
+调试日志的级别: debug_core, debug_alloc, debug_mutex, debug_event, debug_http, debug_mail, debug_mysql
 
-<p>error_log 指令的日志级别配置分为错误日志级别和调试日志级别，错误日志只能设置一个级别，而且错误日志必须书写在调试日志级别的前面，另外调试日志可以设置多个级别，其他配置方法可能无法满足需求。
-```</p>
+error_log 指令的日志级别配置分为错误日志级别和调试日志级别，错误日志只能设置一个级别，而且错误日志必须书写在调试日志级别的前面，另外调试日志可以设置多个级别，其他配置方法可能无法满足需求。
+</code></pre>
+
+<ol>
+<li>配置文件的引入：include</li>
+</ol>
+
+<pre><code>include file；  #file是要导入的文件，支持相对路径，一般在html目录里面
+导入一个conf文件，并配置不同主机名的页面,编辑nginx.conf主配置文件:
+include  /usr/local/nginx/conf.d/samsung.conf;  #在最后一个大括号里面加入一项，*是导入任何以conf结尾的配置文件
+
+在/usr/local/nginx/conf.d/创建一个samsung.conf，内容如下：
+[root@Server1 nginx]# grep -v &quot;#&quot; conf.d/samsung.conf  | grep -v &quot;^$&quot;
+    server {
+        listen       8090;
+        server_name  samsung.chinacloudapp.cn;
+        location / {
+            root   html;
+            index  index1.html index.htm;
+        }
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+}
+</code></pre>
 
                 </section>
             </article>
