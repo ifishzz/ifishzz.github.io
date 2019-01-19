@@ -13,10 +13,10 @@
     
     <item>
       <title>nginx编译安装及配置</title>
-      <link>https://ifishzz.github.io/posts/nginx/</link>
+      <link>https://ifishzz.github.io/posts/nginx1/</link>
       <pubDate>Fri, 18 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://ifishzz.github.io/posts/nginx/</guid>
+      <guid>https://ifishzz.github.io/posts/nginx1/</guid>
       <description>0x00 简介 Nginx是单进程单线程模型，即启动的工作进程只有一个进程响应客户端请求，不像apache可以在一个进程内启动多个线程响应可请求，因此</description>
     </item>
     
