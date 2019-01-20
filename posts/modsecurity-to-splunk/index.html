@@ -48,7 +48,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 20, 2019 00:00
-                    · 83 words
+                    · 350 words
                     · 1 minute read
                       <span class="tags">
                       
@@ -69,6 +69,12 @@
 <li>
 <ul>
 <li><a href="#0x00-简介">0x00 简介</a></li>
+<li><a href="#0x01基础环境准备">0x01基础环境准备</a>
+<ul>
+<li><a href="#服务端安装配置">服务端安装配置</a></li>
+<li><a href="#客户端安装配置">客户端安装配置</a></li>
+<li><a href="#web设置">web设置</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -80,13 +86,68 @@
 
 <h2 id="0x00-简介">0x00 简介</h2>
 
-<p>Splunk是一个托管的日志文件管理工具，它的主要功能包括：
-· 日志聚合功能
-· 搜索功能
-· 提取意义
-· 对结果进行分组，联合，拆分和格式化
-· 可视化功能
-· 电子邮件提醒功能</p>
+<p>Splunk是一个托管的日志文件管理工具，它的主要功能包括：</p>
+
+<p>日志聚合功能</p>
+
+<p>搜索功能</p>
+
+<p>提取意义</p>
+
+<p>对结果进行分组，联合，拆分和格式化</p>
+
+<p>可视化功能</p>
+
+<p>电子邮件提醒功能</p>
+
+<h2 id="0x01基础环境准备">0x01基础环境准备</h2>
+
+<pre><code>192.168.0.105 dvwa client
+
+192.168.0.157 splunk server
+</code></pre>
+
+<h3 id="服务端安装配置">服务端安装配置</h3>
+
+<pre><code>tar zxvf splunk-7.0.0-c8a78efdd40f-Linux-x86_64.tgz
+cd /splunk/bin
+./splunk start --accept-license
+./splunk enable boot-start 
+
+http://192.168.0.157:8000 
+admin/changeme
+许可证修改为free
+
+./splunk enable deploy-client 服务端开启转发许可
+</code></pre>
+
+<h3 id="客户端安装配置">客户端安装配置</h3>
+
+<pre><code>cd splunkforwarder/bin/
+./splunk start
+
+./splunk enable boot-start  配置自动启动
+chkconfig splunk on 
+ ./splunk set deploy-poll 192.168.0.157:8089	#设置server机器的ip和端口
+这里要输入账号密码admin/changeme
+./splunk add forward-server 192.168.0.157:9997	#添加一台转发的服务器 ip是服务器的地址 端口 9997 删除 add替换 remove
+./splunk list forward-server #列出服务器地址
+./splunk add monitor /var/log/httpd/access_log -index main -sourcetype access_combined #监听路径
+./splunk list monitor #列出日志清单
+</code></pre>
+
+<h3 id="web设置">web设置</h3>
+
+<pre><code>web页面-&gt;设置-&gt;转发和接收-&gt;接收数据-&gt;配置接收-&gt;新建-&gt;监听9997
+
+重启两边服务
+
+./splunk restart
+</code></pre>
+
+<p><img src="/images/splunk.png" alt="" /></p>
+
+<p>搜索语句后面再补</p>
 
                 </section>
             </article>
