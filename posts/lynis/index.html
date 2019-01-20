@@ -48,7 +48,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 19, 2019 00:00
-                    · 1546 words
+                    · 1611 words
                     · 4 minute read
                       <span class="tags">
                       
@@ -71,7 +71,7 @@
 <li><a href="#0x00-简介">0x00 简介</a></li>
 <li><a href="#0x01-安装与运行">0x01 安装与运行</a></li>
 <li><a href="#0x02-查看日志敏感信息">0x02 查看日志敏感信息</a></li>
-<li><a href="#0x03-小结">0x03 小结</a></li>
+<li><a href="#0x03-定时扫描">0x03 定时扫描</a></li>
 <li><a href="#0x04-附录">0x04 附录</a></li>
 </ul></li>
 </ul>
@@ -178,9 +178,17 @@ lynis audi system
 grep Suggestingon /var/log/lynis.log
 </code></pre>
 
-<h2 id="0x03-小结">0x03 小结</h2>
+<h2 id="0x03-定时扫描">0x03 定时扫描</h2>
 
-<p>范围广,不深入</p>
+<p>创建Lynis计划任务－cron job</p>
+
+<pre><code>如果你想为你的系统创建一个日扫描报告，你可以设置cron：
+$ crontab -e
+
+添加cron任务：
+
+30  22  *   *   *   root    /opt/lynis -c -Q --auditor &quot;automated&quot; --cronjob
+</code></pre>
 
 <h2 id="0x04-附录">0x04 附录</h2>
 
