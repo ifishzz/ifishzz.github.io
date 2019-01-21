@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<meta name="author" content="ifish">
+		
+		<meta name="generator" content="Hugo 0.45.1" />
+		<title>aide安全审计 &middot; if1sh</title>
+		<link rel="shortcut icon" href="https://ifishzz.github.io//images/favicon.ico">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/style.css">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/font-awesome.min.css">
+		
+
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://ifishzz.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://ifishzz.github.io//posts'>Archive</a>
+	<a href='https://ifishzz.github.io//tags'>Tags</a>
+	<a href='https://ifishzz.github.io//categories'>Cate</a>
+
+	<a href='https://ifishzz.github.io//about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://ifishzz.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        aide安全审计
+                    </h1>
+                    <h2 class="headline">
+                    Jan 21, 2019 00:00
+                    · 754 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://ifishzz.github.io//tags/aide">aide</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#安装">安装</a></li>
+<li><a href="#规则">规则</a></li>
+<li><a href="#使用">使用</a></li>
+</ul></li>
+</ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    
+
+<p>Aide通过创建一个数据库（它只是文件系统的选定部分的一个快照），通过配置文件中定义的正则表达式规则来工作。 一旦这个数据库被初始化，你可以验证系统文件的完整性。</p>
+
+<h2 id="安装">安装</h2>
+
+<pre><code>yum install aide
+
+vi /etc/aide.conf
+</code></pre>
+
+<h2 id="规则">规则</h2>
+
+<pre><code>PERMS = p+u+g+acl+selinux+xattrs
+
+PERMS规则仅用于访问控制，它将根据文件/目录权限，用户，组，访问控制权限，SELinux上下文和文件属性检测对文件或目录的任何更改。
+
+这只会检查文件内容和文件类型。
+
+CONTENT = sha256+ftype
+这是以前规则的扩展版本，它检查扩展内容，文件类型和访问。
+
+CONTENT_EX = sha256+ftype+p+u+g+n+acl+selinux+xattrs
+下面的DATAONLY规则将帮助检测所有文件/目录内数据的任何更改。
+
+DATAONLY =  p+n+u+g+s+acl+selinux+xattrs+sha256
+</code></pre>
+
+<pre><code>定义规则来观察文件和目录
+一旦你定义了规则，你可以指定要观看的文件和目录。 考虑到上面的PERMS规则，这个定义将检查根目录中所有文件的权限。
+
+/root/\..*  PERMS
+这将检查/ root目录中的所有文件以进行任何更改。
+
+/root/   CONTENT_EX
+为了帮助您检测/ etc /下所有文件/目录内数据的任何更改，请使用此。
+
+/etc/   DATAONLY 
+</code></pre>
+
+<h2 id="使用">使用</h2>
+
+<p>使用AIDE在Linux中检查文件和目录完整性</p>
+
+<p>首先构建一个数据库，对照将使用&ndash;init标志执行的检查。在系统连接到网络之前完成此操作。</p>
+
+<p>下面的命令将创建一个数据库，其中包含您在配置文件中选择的所有文件。</p>
+
+<p><code>aide --init</code></p>
+
+<p>然后在继续之前使用此命令将数据库重命名为/var/lib/aide/aide.db.gz 。</p>
+
+<p><code>mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz</code></p>
+
+<p>将数据库移到安全的位置,并确保更新配置文件以便从那里读取。</p>
+
+<p>在创建数据库之后，您现在可以使用&ndash;check标志来&ndash;check文件和目录的完整性。</p>
+
+<p><code>aide --check</code></p>
+
+<p>它将读取数据库中的快照，并将其与系统磁盘中找到的文件/目录进行比较。 如果发现您可能不期望的地方发生了变化，则会生成一份报告，然后您可以查看。</p>
+
+<p>在已经选择的文件发生任何更改的情况下，或者在配置文件中添加新的文件定义时，请始终使用&ndash;update选项更新数据库</p>
+
+<p><code>aide --update</code></p>
+
+                </section>
+            </article>
+
+            
+                
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+    
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/ifishzz">ifish</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://ifishzz.github.io//js/jquery-3.3.1.min.js"></script>
+<script src="https://ifishzz.github.io//js/main.js"></script>
+<script src="https://ifishzz.github.io//js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+  
+
+
+
+<script>
+var baiduAnalytics = '';
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?" + baiduAnalytics;
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+    </body>
+</html>
