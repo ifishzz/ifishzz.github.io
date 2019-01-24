@@ -63,6 +63,11 @@
   </url>
   
   <url>
+    <loc>https://ifishzz.github.io/posts/xxe/</loc>
+    <lastmod>2018-01-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://ifishzz.github.io/posts/%E5%AD%A6%E4%B9%A0/</loc>
     <lastmod>2018-01-21T00:00:00+00:00</lastmod>
   </url>
@@ -182,6 +187,12 @@
   <url>
     <loc>https://ifishzz.github.io/tags/xss/</loc>
     <lastmod>2018-12-30T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ifishzz.github.io/tags/xxe/</loc>
+    <lastmod>2018-01-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

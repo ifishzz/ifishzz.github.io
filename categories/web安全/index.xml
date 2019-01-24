@@ -47,5 +47,14 @@
       <description>横向，纵向 信息收集 子域名 site：topsec.com.cn 搜集子站 site: topsec.com.cn filetype:doc/txt 搜集敏感文件 site: topsec.com.cn 管理 /topsec.com.cn admin /topsec.com.cn login 搜集后台 site: topsec.com.cn intext:@topsec.com.cn 搜集邮箱 site: topsec.com.cn intitl</description>
     </item>
     
+    <item>
+      <title>xxe</title>
+      <link>https://ifishzz.github.io/posts/xxe/</link>
+      <pubDate>Wed, 24 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/xxe/</guid>
+      <description>0x00 xxe是什么 xml外部实体注入 0x01 xml基础 XML文档结构包括XML声明、DTD文档类型定义（可选）、文档元素 &amp;lt;!--XML申明--&amp;</description>
+    </item>
+    
   </channel>
 </rss>

