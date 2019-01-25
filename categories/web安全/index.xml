@@ -6,10 +6,19 @@
     <description>Recent content in Web安全 on if1sh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 31 Dec 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 24 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://ifishzz.github.io/categories/web%E5%AE%89%E5%85%A8/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>xxe</title>
+      <link>https://ifishzz.github.io/posts/xxe/</link>
+      <pubDate>Thu, 24 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/xxe/</guid>
+      <description>0x00 xxe是什么 xml外部实体注入 0x01 xml基础 XML文档结构包括XML声明、DTD文档类型定义（可选）、文档元素 &amp;lt;!--XML申明--&amp;</description>
+    </item>
     
     <item>
       <title>dnslog</title>
@@ -45,15 +54,6 @@
       
       <guid>https://ifishzz.github.io/posts/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</guid>
       <description>横向，纵向 信息收集 子域名 site：topsec.com.cn 搜集子站 site: topsec.com.cn filetype:doc/txt 搜集敏感文件 site: topsec.com.cn 管理 /topsec.com.cn admin /topsec.com.cn login 搜集后台 site: topsec.com.cn intext:@topsec.com.cn 搜集邮箱 site: topsec.com.cn intitl</description>
-    </item>
-    
-    <item>
-      <title>xxe</title>
-      <link>https://ifishzz.github.io/posts/xxe/</link>
-      <pubDate>Wed, 24 Jan 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://ifishzz.github.io/posts/xxe/</guid>
-      <description>0x00 xxe是什么 xml外部实体注入 0x01 xml基础 XML文档结构包括XML声明、DTD文档类型定义（可选）、文档元素 &amp;lt;!--XML申明--&amp;</description>
     </item>
     
   </channel>
