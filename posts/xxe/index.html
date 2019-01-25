@@ -50,7 +50,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 24, 2019 00:00
-                    · 3156 words
+                    · 3166 words
                     · 7 minute read
                       <span class="tags">
                       
@@ -89,6 +89,7 @@
 <li><a href="#json-content-type-xxe">JSON content-type XXE</a></li>
 </ul></li>
 <li><a href="#xxe防御">xxe防御</a></li>
+<li><a href="#参考资料">参考资料</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -554,6 +555,20 @@ dbf.setExpandEntityReferences(false);
 <pre><code>from lxml import etree
 xmlData = etree.parse(xmlSource,etree.XMLParser(resolve_entities=False))
 </code></pre>
+
+<h2 id="参考资料">参考资料</h2>
+
+<p><a href="https://xz.aliyun.com/t/3357#toc-15">https://xz.aliyun.com/t/3357#toc-15</a></p>
+
+<p><a href="https://www.cnblogs.com/backlion/p/9302528.html">https://www.cnblogs.com/backlion/p/9302528.html</a></p>
+
+<p><a href="https://security.tencent.com/index.php/blog/msg/69">https://security.tencent.com/index.php/blog/msg/69</a></p>
+
+<p><a href="https://www.freebuf.com/column/156863.html">https://www.freebuf.com/column/156863.html</a></p>
+
+<p><a href="https://xz.aliyun.com/t/2571">https://xz.aliyun.com/t/2571</a></p>
+
+<p><a href="https://www.cnblogs.com/zhaijiahui/p/9147595.html#autoid-5-1-2">https://www.cnblogs.com/zhaijiahui/p/9147595.html#autoid-5-1-2</a></p>
 
                 </section>
             </article>
