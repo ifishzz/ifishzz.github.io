@@ -50,7 +50,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 24, 2019 00:00
-                    · 3162 words
+                    · 3167 words
                     · 7 minute read
                       <span class="tags">
                       
@@ -76,9 +76,9 @@
 <li><a href="#dtd">DTD</a></li>
 <li><a href="#实体">实体</a></li>
 </ul></li>
-<li><a href="#能用xxe做什么">能用xxe做什么</a></li>
-<li><a href="#如何找到xxe">如何找到xxe</a></li>
-<li><a href="#xxe利用">xxe利用</a>
+<li><a href="#0x02-能用xxe做什么">0x02 能用xxe做什么</a></li>
+<li><a href="#0x03-如何找到xxe">0x03 如何找到xxe</a></li>
+<li><a href="#0x04-xxe利用">0x04 xxe利用</a>
 <ul>
 <li><a href="#normal-xxe">Normal XXE</a></li>
 <li><a href="#blind-oob-xxe">Blind OOB XXE</a></li>
@@ -89,8 +89,8 @@
 <li><a href="#xxe-dos">xxe dos</a></li>
 <li><a href="#json-content-type-xxe">JSON content-type XXE</a></li>
 </ul></li>
-<li><a href="#xxe防御">xxe防御</a></li>
-<li><a href="#参考资料">参考资料</a></li>
+<li><a href="#0x05-xxe防御">0x05 xxe防御</a></li>
+<li><a href="#0x06-参考资料">0x06 参考资料</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -197,18 +197,18 @@
 <p>调用过程为：参数实体dtd调用外部实体evil.xml，然后又调用参数实体all，接着调用通用实体send,参数实体只能在DTD中调用</p>
 
 <p>不同程序支持的协议不同
-<img src="/images/xxe1.jpg" alt="" /></p>
+<img src="/images/xxe1.png" alt="" /></p>
 
 <p>上图是默认支持协议，还可以支持其他，如PHP支持的扩展协议有
-<img src="/images/xxe2.jpg" alt="" /></p>
+<img src="/images/xxe2.png" alt="" /></p>
 
-<h2 id="能用xxe做什么">能用xxe做什么</h2>
+<h2 id="0x02-能用xxe做什么">0x02 能用xxe做什么</h2>
 
 <p>利用xxe漏洞可以进行拒绝服务攻击，文件读取，命令(代码)执行，SQL(XSS)注入，内外扫描端口，入侵内网站点等，内网探测和入侵是利用xxe中支持的协议进行内网主机和端口发现，可以理解是使用xxe进行SSRF的利用，基本上啥都能做了:-)</p>
 
 <p>一般xxe利用分为两大场景：有回显和无回显。有回显的情况可以直接在页面中看到Payload的执行结果或现象，无回显的情况又称为blind xxe，可以使用外带数据通道提取数据。</p>
 
-<h2 id="如何找到xxe">如何找到xxe</h2>
+<h2 id="0x03-如何找到xxe">0x03 如何找到xxe</h2>
 
 <p>尝试注入特殊字符，使XML失效，引发解析异常，明确后端使用XML传输数据:</p>
 
@@ -234,7 +234,7 @@
 
 <p>旧版的awvs有xxe验证</p>
 
-<h2 id="xxe利用">xxe利用</h2>
+<h2 id="0x04-xxe利用">0x04 xxe利用</h2>
 
 <h3 id="normal-xxe">Normal XXE</h3>
 
@@ -523,7 +523,7 @@ sys:x:3:3:sys:/dev:/bin/sh
 sync:x:4:65534:sync:/bin:/bin/sync....
 </code></pre>
 
-<h2 id="xxe防御">xxe防御</h2>
+<h2 id="0x05-xxe防御">0x05 xxe防御</h2>
 
 <p>使用语言中推荐的禁用外部实体的方法</p>
 
@@ -550,7 +550,7 @@ dbf.setExpandEntityReferences(false);
 xmlData = etree.parse(xmlSource,etree.XMLParser(resolve_entities=False))
 </code></pre>
 
-<h2 id="参考资料">参考资料</h2>
+<h2 id="0x06-参考资料">0x06 参考资料</h2>
 
 <p><a href="https://xz.aliyun.com/t/3357#toc-15">https://xz.aliyun.com/t/3357#toc-15</a></p>
 
