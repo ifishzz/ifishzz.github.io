@@ -6,10 +6,19 @@
     <description>Recent content on if1sh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 24 Jan 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 31 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://ifishzz.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>linux capture bash scripts actions</title>
+      <link>https://ifishzz.github.io/posts/linux%E8%AE%B0%E5%BD%95%E8%84%9A%E6%9C%AC%E8%A1%8C%E4%B8%BA/</link>
+      <pubDate>Thu, 31 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/linux%E8%AE%B0%E5%BD%95%E8%84%9A%E6%9C%AC%E8%A1%8C%E4%B8%BA/</guid>
+      <description>shell #!/bin/bash set -e exec 3&amp;gt;&amp;amp;1 4&amp;gt;&amp;amp;2 trap &#39;exec 2&amp;gt;&amp;amp;4 1&amp;gt;&amp;amp;3&#39; 0 1 2 3 exec 1&amp;gt;log.out 2&amp;gt;&amp;amp;1 return＆exit 0 说明: 0 - stdin 标准输入 1 - stdout 标准输出 2 - stderr 标准错误输出 exec 3&amp;gt;&amp;amp;1 4&amp;gt;&amp;amp;2 保存文件描述符，以便在</description>
+    </item>
     
     <item>
       <title>xxe</title>
@@ -27,6 +36,15 @@
       
       <guid>https://ifishzz.github.io/posts/aide/</guid>
       <description>Aide通过创建一个数据库（它只是文件系统的选定部分的一个快照），通过配置文件中定义的正则表达式规则来工作。 一旦这个数据库被初始化，你可以验</description>
+    </item>
+    
+    <item>
+      <title>关于学习</title>
+      <link>https://ifishzz.github.io/posts/%E5%AD%A6%E4%B9%A0/</link>
+      <pubDate>Mon, 21 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/%E5%AD%A6%E4%B9%A0/</guid>
+      <description>0x00 个人成长 确立方向,找出短板 该领域主要专家的工作是否都了解? 相关的环境是否了解? 相关的技术和工具是否实践? 不止于阅读 官方文档和相关好书 阅读漏</description>
     </item>
     
     <item>
@@ -126,15 +144,6 @@
       
       <guid>https://ifishzz.github.io/posts/markdown/</guid>
       <description>标题 在想要设置为标题的文字前面加#来表示 一个#是一级标题，二个#是二级标题，以此类推。支持六级标题 标准语法一般在#后跟个空格再写文字 字体 加粗</description>
-    </item>
-    
-    <item>
-      <title>关于学习</title>
-      <link>https://ifishzz.github.io/posts/%E5%AD%A6%E4%B9%A0/</link>
-      <pubDate>Sun, 21 Jan 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://ifishzz.github.io/posts/%E5%AD%A6%E4%B9%A0/</guid>
-      <description>0x00 个人成长 确立方向,找出短板 该领域主要专家的工作是否都了解? 相关的环境是否了解? 相关的技术和工具是否实践? 不止于阅读 官方文档和相关好书 阅读漏</description>
     </item>
     
   </channel>
