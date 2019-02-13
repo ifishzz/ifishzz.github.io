@@ -50,7 +50,7 @@
                     </h1>
                     <h2 class="headline">
                     Dec 30, 2018 00:00
-                    · 3163 words
+                    · 3195 words
                     · 7 minute read
                       <span class="tags">
                       
@@ -209,6 +209,8 @@ payload3:&quot;;alert(1)-
 <h2 id="0x03-一些过waf技巧">0x03 一些过waf技巧</h2>
 
 <ul>
+<li><p>`<code>'`&quot;;&gt;&lt;aaa bbb=ccc&gt;ddd&lt;aaa/&gt;</code> xss waf探针</p></li>
+
 <li><p>单次过滤规则绕过：有些规则仅进行一次过滤替换，可以通过双重复写绕过<code>&lt;scr&lt;script&gt;ipt&gt;</code></p></li>
 
 <li><p>大小写绕过：<code>&lt;sCript&gt;</code></p></li>
@@ -221,7 +223,7 @@ payload3:&quot;;alert(1)-
 
 <li><p>反引号妙用：在ie下使用</p></li>
 
-<li><p>长度限制时： <q/oncut=alert(1)>//在限制长度的地方很有效</p></li>
+<li><p>长度限制时： <code>&lt;q/oncut=alert(1)&gt;//</code>在限制长度的地方很有效</p></li>
 
 <li><p>单引号及双引号被过滤情况: <code>&lt;script&gt;alert(/jdq/)&lt;/script&gt;</code> //用双引号会把引号内的内容单独作为内容 用斜杠，则会连斜杠一起回显</p></li>
 

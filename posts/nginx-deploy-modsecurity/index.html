@@ -50,7 +50,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 17, 2019 00:00
-                    · 1003 words
+                    · 1007 words
                     · 3 minute read
                       <span class="tags">
                       
@@ -71,10 +71,10 @@
 <li>
 <ul>
 <li><a href="#0x01-环境配置">0x01 环境配置</a></li>
-<li><a href="#配置规则">配置规则</a></li>
-<li><a href="#配置nginx">配置nginx</a></li>
-<li><a href="#bug">bug</a></li>
-<li><a href="#启动nginx">启动nginx</a></li>
+<li><a href="#0x02-配置规则">0x02 配置规则</a></li>
+<li><a href="#0x03-配置nginx">0x03 配置nginx</a></li>
+<li><a href="#0x04-bug">0x04 bug</a></li>
+<li><a href="#0x05-启动nginx">0x05 启动nginx</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -122,7 +122,7 @@ make&amp;&amp;make install
 nginx -V
 </code></pre>
 
-<h2 id="配置规则">配置规则</h2>
+<h2 id="0x02-配置规则">0x02 配置规则</h2>
 
 <pre><code>cd /usr/local/nginx/
 git clone https://github.com/SpiderLabs/owasp-modsecurity-crs
@@ -145,7 +145,7 @@ SecDefaultAction &quot;phase:2,log,auditlog,pass&quot;
 将id:900110注释去掉,inbound设置入站阈值,比如30,outbound出站阈值默认
 </code></pre>
 
-<h2 id="配置nginx">配置nginx</h2>
+<h2 id="0x03-配置nginx">0x03 配置nginx</h2>
 
 <pre><code>vi /usr/local/nginx/nginx.conf
 
@@ -219,7 +219,7 @@ modsecurity_rules_file /usr/local/nginx/modsecurity.conf; #引入模块路径
 }
 </code></pre>
 
-<h2 id="bug">bug</h2>
+<h2 id="0x04-bug">0x04 bug</h2>
 
 <pre><code>bug1
 nginx: [emerg] &quot;modsecurity_rules_file&quot; directive Rules error. File: /usr/local/nginx/owasp-modsecurity-crs/rules/REQUEST-910-IP-REPUTATION.conf. Line: 73. Column: 22. This version of ModSecurity was not compiled with GeoIP or MaxMind support.  in /usr/local/nginx/nginx.conf:37
@@ -244,7 +244,7 @@ lsof -i :80
 kill -9
 </code></pre>
 
-<h2 id="启动nginx">启动nginx</h2>
+<h2 id="0x05-启动nginx">0x05 启动nginx</h2>
 
 <p>nginx -t 查看是否错误</p>
 

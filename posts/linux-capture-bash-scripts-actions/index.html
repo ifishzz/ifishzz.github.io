@@ -8,7 +8,7 @@
 		<meta name="author" content="ifish">
 		
 		<meta name="generator" content="Hugo 0.45.1" />
-		<title>关于学习 &middot; if1sh</title>
+		<title>linux capture bash scripts actions &middot; if1sh</title>
 		<link rel="shortcut icon" href="https://ifishzz.github.io//images/favicon.ico">
 		<link rel="stylesheet" href="https://ifishzz.github.io//css/style.css">
 		<link rel="stylesheet" href="https://ifishzz.github.io//css/highlight.css">
@@ -46,17 +46,17 @@
             <article>
                 <header>
                     <h1>
-                        关于学习
+                        linux capture bash scripts actions
                     </h1>
                     <h2 class="headline">
-                    Jan 21, 2019 00:00
-                    · 378 words
+                    Jan 31, 2019 00:00
+                    · 258 words
                     · 1 minute read
                       <span class="tags">
                       
                       
                           
-                              <a href="https://ifishzz.github.io//tags/%E5%AD%A6%E4%B9%A0">学习</a>
+                              <a href="https://ifishzz.github.io//tags/shell">shell</a>
                           
                       
                       
@@ -70,10 +70,7 @@
 <ul>
 <li>
 <ul>
-<li><a href="#0x00-个人成长">0x00 个人成长</a></li>
-<li><a href="#0x01-学习参考">0x01 学习参考</a></li>
-<li><a href="#0x02-学习方式">0x02 学习方式</a></li>
-<li><a href="#0x03提高效率">0x03提高效率</a></li>
+<li><a href="#shell">shell</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -83,73 +80,34 @@
                 <section id="post-body">
                     
 
-<h2 id="0x00-个人成长">0x00 个人成长</h2>
+<h2 id="shell">shell</h2>
 
-<ul>
-<li><p>确立方向,找出短板</p>
+<pre><code>#!/bin/bash
+set -e
+exec 3&gt;&amp;1 4&gt;&amp;2
+trap 'exec 2&gt;&amp;4 1&gt;&amp;3' 0 1 2 3
+exec 1&gt;log.out 2&gt;&amp;1
+return＆exit 0
+</code></pre>
 
-<ul>
-<li>该领域主要专家的工作是否都了解?</li>
-<li>相关的环境是否了解?</li>
-<li>相关的技术和工具是否实践?</li>
-</ul></li>
+<p>说明:</p>
 
-<li><p>不止于阅读</p>
+<pre><code>0 - stdin 标准输入
+1 - stdout 标准输出
+2 - stderr 标准错误输出
+</code></pre>
 
-<ul>
-<li>官方文档和相关好书</li>
-<li>阅读漏洞,工具源码</li>
-<li>编写exp</li>
-</ul></li>
-</ul>
+<p>exec 3&gt;&amp;1 4&gt;&amp;2</p>
 
-<h2 id="0x01-学习参考">0x01 学习参考</h2>
+<p>保存文件描述符，以便在重定向之前将它们还原为它们之前的任何内容，或者将它们用于输出到以下重定向之前的任何内容。</p>
 
-<ul>
-<li>短期参考是什么?比自己优秀的同龄人
+<p>trap &lsquo;exec 2&gt;&amp;4 1&gt;&amp;3&rsquo; 0 1 2 3</p>
 
-<ul>
-<li>阅读他们的文章和其他工作成果,从细节中观察他们的工作方式和学习方式</li>
-</ul></li>
-<li>中期参考是什么?方向上的业内专家
+<p>恢复特定信号的文件描述符。通常不必要，因为当子shell退出时它们应该被恢复。</p>
 
-<ul>
-<li>了解他们的成长规矩,跟踪他们关注的内容</li>
-</ul></li>
-<li>长期参考是什么?业内老牌企业和先锋企业
+<p>exec 1&gt;log.out 2&gt;&amp;1</p>
 
-<ul>
-<li>把握行业发展和技术趋势</li>
-</ul></li>
-</ul>
-
-<h2 id="0x02-学习方式">0x02 学习方式</h2>
-
-<ul>
-<li><p>以工具为线索</p>
-
-<ul>
-<li>通读手册</li>
-<li>每个工具分别有什么功能?原理是扫描?涉及哪些知识?</li>
-<li>能否改进优化?能否发展,组合出新功能?</li>
-</ul></li>
-
-<li><p>以专家为线索</p>
-
-<ul>
-<li>技术方向里有哪些专家?</li>
-<li>他们的主页,社交网络账号?以及关注的人?</li>
-<li>他们在该方向上有哪些作品?发表过哪些演讲?</li>
-</ul></li>
-</ul>
-
-<h2 id="0x03提高效率">0x03提高效率</h2>
-
-<ul>
-<li>做好预研,收集前人相关成果,避免无所谓的重复劳动</li>
-<li>在可行性判断阶段,能找到工具就不写代码</li>
-<li>做好笔记并定期整理</li>
-</ul>
+<p>重定向stdout到文件log.out然后重定向stderr到stdout。请注意，当您希望它们转到同一文件时，顺序很重要。在将stderr重定向到stdout之前，必须重定向stdout</p>
 
                 </section>
             </article>
