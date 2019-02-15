@@ -23,7 +23,7 @@
   </url>
   
   <url>
-    <loc>https://ifishzz.github.io/posts/%E5%AD%A6%E4%B9%A0/</loc>
+    <loc>https://ifishzz.github.io/posts/learn/</loc>
     <lastmod>2019-01-21T00:00:00+00:00</lastmod>
   </url>
   
@@ -130,6 +130,12 @@
   <url>
     <loc>https://ifishzz.github.io/tags/jxwaf/</loc>
     <lastmod>2019-02-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ifishzz.github.io/tags/learn/</loc>
+    <lastmod>2019-01-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -244,12 +250,6 @@
   <url>
     <loc>https://ifishzz.github.io/tags/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</loc>
     <lastmod>2018-12-21T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://ifishzz.github.io/tags/%E5%AD%A6%E4%B9%A0/</loc>
-    <lastmod>2019-01-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
