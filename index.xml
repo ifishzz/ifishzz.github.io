@@ -155,5 +155,14 @@
       <description>标题 在想要设置为标题的文字前面加#来表示 一个#是一级标题，二个#是二级标题，以此类推。支持六级标题 标准语法一般在#后跟个空格再写文字 字体 加粗</description>
     </item>
     
+    <item>
+      <title>About</title>
+      <link>https://ifishzz.github.io/links/</link>
+      <pubDate>Sat, 20 Jun 2015 14:02:37 +0200</pubDate>
+      
+      <guid>https://ifishzz.github.io/links/</guid>
+      <description>![]nbsec.xyz</description>
+    </item>
+    
   </channel>
 </rss>
