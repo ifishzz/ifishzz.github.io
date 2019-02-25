@@ -8,7 +8,7 @@
 		<meta name="author" content="ifish">
 		
 		<meta name="generator" content="Hugo 0.54.0" />
-		<title>learn &middot; if1sh</title>
+		<title>linux应急响应从入门到懵比 &middot; if1sh</title>
 		<link rel="shortcut icon" href="https://ifishzz.github.io//images/favicon.ico">
 		<link rel="stylesheet" href="https://ifishzz.github.io//css/style.css">
 		<link rel="stylesheet" href="https://ifishzz.github.io//css/highlight.css">
@@ -47,17 +47,17 @@
             <article>
                 <header>
                     <h1>
-                        learn
+                        linux应急响应从入门到懵比
                     </h1>
                     <h2 class="headline">
-                    Jan 21, 2019 00:00
-                    · 375 words
+                    Feb 25, 2019 00:00
+                    · 440 words
                     · 1 minute read
                       <span class="tags">
                       
                       
                           
-                              <a href="https://ifishzz.github.io//tags/learn">learn</a>
+                              <a href="https://ifishzz.github.io//tags/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94">应急响应</a>
                           
                       
                       
@@ -71,10 +71,8 @@
 <ul>
 <li>
 <ul>
-<li><a href="#0x00-个人成长">0x00 个人成长</a></li>
-<li><a href="#0x01-学习参考">0x01 学习参考</a></li>
-<li><a href="#0x02-学习方式">0x02 学习方式</a></li>
-<li><a href="#0x03-提高效率">0x03 提高效率</a></li>
+<li><a href="#0x01-应急响应流程">0x01 应急响应流程</a></li>
+<li><a href="#检测阶段">检测阶段</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -84,73 +82,33 @@
                 <section id="post-body">
                     
 
-<h2 id="0x00-个人成长">0x00 个人成长</h2>
+<h2 id="0x01-应急响应流程">0x01 应急响应流程</h2>
 
-<ul>
-<li><p>确立方向,找出短板</p>
+<p>检测阶段——&gt;抑制阶段——&gt;根除阶段——&gt;恢复阶段——&gt;跟踪总结</p>
 
-<ul>
-<li>该领域主要专家的工作是否都了解?</li>
-<li>相关的环境是否了解?</li>
-<li>相关的技术和工具是否实践?</li>
-</ul></li>
+<p><strong>检测阶段</strong>
+ 事件类型、事件影响范围、受影响系统、事件发展趋势、安全设备等。</p>
 
-<li><p>不止于阅读</p>
+<p><strong>抑制阶段</strong>
+ 物理遏制、网络遏制、主机遏制、应用遏制等。常见手段：断网、降权、网络封堵等。</p>
 
-<ul>
-<li>官方文档和相关好书</li>
-<li>阅读漏洞,工具源码</li>
-<li>编写exp</li>
-</ul></li>
-</ul>
+<p><strong>根除阶段</strong>
+ 系统基本信息、网络排查、进程排查、注册表排查、计划任务排查、服务排查、关键目录排查、用户组排查、事件日志排查、webshell排查、中间件日志排查、安全设备日志排查等。</p>
 
-<h2 id="0x01-学习参考">0x01 学习参考</h2>
+<p><strong>恢复阶段</strong>
+ 系统恢复、网络恢复、用户恢复、数据恢复以及重新部署,系统重装、补丁加固、网络恢复、密码重置、木马清除等。</p>
 
-<ul>
-<li>短期参考是什么?比自己优秀的同龄人
+<p><strong>跟踪总结</strong>
+ 调查事件原因，输出应急响应报告，提供安全建议、加强安全教育、避免同类事件再次发生。</p>
 
-<ul>
-<li>阅读他们的文章和其他工作成果,从细节中观察他们的工作方式和学习方式</li>
-</ul></li>
-<li>中期参考是什么?方向上的业内专家
+<h2 id="检测阶段">检测阶段</h2>
 
-<ul>
-<li>了解他们的成长规矩,跟踪他们关注的内容</li>
-</ul></li>
-<li>长期参考是什么?业内老牌企业和先锋企业
-
-<ul>
-<li>把握行业发展和技术趋势</li>
-</ul></li>
-</ul>
-
-<h2 id="0x02-学习方式">0x02 学习方式</h2>
-
-<ul>
-<li><p>以工具为线索</p>
-
-<ul>
-<li>通读手册</li>
-<li>每个工具分别有什么功能?原理是扫描?涉及哪些知识?</li>
-<li>能否改进优化?能否发展,组合出新功能?</li>
-</ul></li>
-
-<li><p>以专家为线索</p>
-
-<ul>
-<li>技术方向里有哪些专家?</li>
-<li>他们的主页,社交网络账号?以及关注的人?</li>
-<li>他们在该方向上有哪些作品?发表过哪些演讲?</li>
-</ul></li>
-</ul>
-
-<h2 id="0x03-提高效率">0x03 提高效率</h2>
-
-<ul>
-<li>做好预研,收集前人相关成果,避免无所谓的重复劳动</li>
-<li>在可行性判断阶段,能找到工具就不写代码</li>
-<li>做好笔记并定期整理</li>
-</ul>
+<p>事件类型
+Web入侵：挂马、篡改、Webshell
+系统入侵：系统异常、RDP爆破、SSH爆破、主机漏洞
+病毒木马：远控、后门、钓鱼、勒索软件
+信息泄漏：脱裤、数据库登录（弱口令）、git泄漏
+网络流量：频繁发包、批量请求、DDOS攻击、劫持、爬虫</p>
 
                 </section>
             </article>
