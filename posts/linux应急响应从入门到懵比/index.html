@@ -51,8 +51,8 @@
                     </h1>
                     <h2 class="headline">
                     Feb 25, 2019 00:00
-                    · 440 words
-                    · 1 minute read
+                    · 953 words
+                    · 2 minute read
                       <span class="tags">
                       
                       
@@ -71,8 +71,10 @@
 <ul>
 <li>
 <ul>
-<li><a href="#0x01-应急响应流程">0x01 应急响应流程</a></li>
-<li><a href="#检测阶段">检测阶段</a></li>
+<li><a href="#0x00-应急响应流程">0x00 应急响应流程</a></li>
+<li><a href="#0x01-检测阶段">0x01 检测阶段</a></li>
+<li><a href="#0x02-抑制阶段">0x02 抑制阶段</a></li>
+<li><a href="#0x03-分析阶段">0x03 分析阶段</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -82,9 +84,9 @@
                 <section id="post-body">
                     
 
-<h2 id="0x01-应急响应流程">0x01 应急响应流程</h2>
+<h2 id="0x00-应急响应流程">0x00 应急响应流程</h2>
 
-<p>检测阶段——&gt;抑制阶段——&gt;根除阶段——&gt;恢复阶段——&gt;跟踪总结</p>
+<p>检测阶段——&gt;抑制阶段——&gt;分析阶段——&gt;恢复阶段——&gt;跟踪总结</p>
 
 <p><strong>检测阶段</strong>
  事件类型、事件影响范围、受影响系统、事件发展趋势、安全设备等。</p>
@@ -92,7 +94,7 @@
 <p><strong>抑制阶段</strong>
  物理遏制、网络遏制、主机遏制、应用遏制等。常见手段：断网、降权、网络封堵等。</p>
 
-<p><strong>根除阶段</strong>
+<p><strong>分析阶段</strong>
  系统基本信息、网络排查、进程排查、注册表排查、计划任务排查、服务排查、关键目录排查、用户组排查、事件日志排查、webshell排查、中间件日志排查、安全设备日志排查等。</p>
 
 <p><strong>恢复阶段</strong>
@@ -101,14 +103,99 @@
 <p><strong>跟踪总结</strong>
  调查事件原因，输出应急响应报告，提供安全建议、加强安全教育、避免同类事件再次发生。</p>
 
-<h2 id="检测阶段">检测阶段</h2>
+<h2 id="0x01-检测阶段">0x01 检测阶段</h2>
 
-<p>事件类型
-Web入侵：挂马、篡改、Webshell
-系统入侵：系统异常、RDP爆破、SSH爆破、主机漏洞
-病毒木马：远控、后门、钓鱼、勒索软件
-信息泄漏：脱裤、数据库登录（弱口令）、git泄漏
-网络流量：频繁发包、批量请求、DDOS攻击、劫持、爬虫</p>
+<ul>
+<li><p>事件类型</p>
+
+<ul>
+<li><p>Web入侵：挂马、篡改、Webshell</p></li>
+
+<li><p>系统入侵：系统异常、RDP爆破、SSH爆破、主机漏洞</p></li>
+
+<li><p>病毒木马：远控、后门、钓鱼、勒索软件</p></li>
+
+<li><p>信息泄漏：脱裤、数据库登录（弱口令）、git泄漏</p></li>
+
+<li><p>网络流量：频繁发包、批量请求、DDOS攻击、劫持、爬虫</p></li>
+</ul></li>
+
+<li><p>系统架构</p>
+
+<ul>
+<li>系统名称 IP 地址 端口开放 物理机/虚拟机 主机名 设备型号 操作系统类型</li>
+<li>操作系统版本 管理后台ip地址 中间件类型 中间件版本 数据库类型 数据库版本 应用url</li>
+<li>应用端口 储存设备类型 储存设备型号 web 框架 中间件版本 第三方组件</li>
+</ul></li>
+
+<li><p>受影响系统</p>
+
+<ul>
+<li>确认感染文件特征</li>
+<li>确认感染时间
+    - linux : stat filename(access访问时间,modify内容修改时间,change属性改变时间)
+    - windows : 右键查看文件属性
+<br /></li>
+</ul></li>
+</ul>
+
+<h2 id="0x02-抑制阶段">0x02 抑制阶段</h2>
+
+<ul>
+<li>感染主机
+
+<ul>
+<li>网络隔离</li>
+<li>禁止使用u盘,移动硬盘</li>
+</ul></li>
+<li>未被感染主机
+
+<ul>
+<li>ACL隔离</li>
+<li>关闭ssh,rdp等协议</li>
+<li>文件备份</li>
+<li>禁止使用u盘,移动硬盘
+<br /></li>
+</ul></li>
+</ul>
+
+<h2 id="0x03-分析阶段">0x03 分析阶段</h2>
+
+<p>### web服务
+1. 检查最近创建的php文件和上传目录</p>
+
+<pre><code> 例如要查找24小时内被修改的php文件：
+
+    find ./ -mtime 0 -name &quot;*.php&quot;
+
+ 查找距现在 n*24H 内修改过的文件
+
+    find ./ -ctime -3 
+
+ find三种时间
+
+    atime 最后一次访问时间, 如 ls, more 等, 但 chmod, chown, ls, stat 等不会修改些时间, 使用 ls -utl 可以按此时间顺序查看
+
+    ctime 最后一次状态修改时间, 如 chmod, chown 等状态时间改变但修改时间不会改变, 使用 stat file 可以查看
+
+    mtime 最后一次内容修改时间, 如 vi 保存后等, 修改时间发生改变的话, atime 和 ctime 也相应跟着发生改变
+</code></pre>
+
+<ol>
+<li><p>使用Webshell查杀工具</p>
+
+<blockquote>
+<p>Windows下D盾等，Linux下河马等。</p>
+</blockquote></li>
+
+<li><p>与测试环境目录做对比</p>
+
+<blockquote>
+<p>diff -r {生产dir} {测试dir}</p>
+</blockquote></li>
+
+<li></li>
+</ol>
 
                 </section>
             </article>
