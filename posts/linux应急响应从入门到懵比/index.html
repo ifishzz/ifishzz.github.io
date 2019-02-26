@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     Feb 25, 2019 00:00
-                    · 953 words
+                    · 897 words
                     · 2 minute read
                       <span class="tags">
                       
@@ -74,7 +74,10 @@
 <li><a href="#0x00-应急响应流程">0x00 应急响应流程</a></li>
 <li><a href="#0x01-检测阶段">0x01 检测阶段</a></li>
 <li><a href="#0x02-抑制阶段">0x02 抑制阶段</a></li>
-<li><a href="#0x03-分析阶段">0x03 分析阶段</a></li>
+<li><a href="#0x03-分析阶段">0x03 分析阶段</a>
+<ul>
+<li><a href="#web服务">web服务</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -161,27 +164,30 @@
 
 <h2 id="0x03-分析阶段">0x03 分析阶段</h2>
 
-<p>### web服务
-1. 检查最近创建的php文件和上传目录</p>
-
-<pre><code> 例如要查找24小时内被修改的php文件：
-
-    find ./ -mtime 0 -name &quot;*.php&quot;
-
- 查找距现在 n*24H 内修改过的文件
-
-    find ./ -ctime -3 
-
- find三种时间
-
-    atime 最后一次访问时间, 如 ls, more 等, 但 chmod, chown, ls, stat 等不会修改些时间, 使用 ls -utl 可以按此时间顺序查看
-
-    ctime 最后一次状态修改时间, 如 chmod, chown 等状态时间改变但修改时间不会改变, 使用 stat file 可以查看
-
-    mtime 最后一次内容修改时间, 如 vi 保存后等, 修改时间发生改变的话, atime 和 ctime 也相应跟着发生改变
-</code></pre>
+<h3 id="web服务">web服务</h3>
 
 <ol>
+<li><p>检查最近创建的php文件和上传目录</p>
+
+<p>例如要查找24小时内被修改的php文件：</p>
+
+<pre><code>find ./ -mtime 0 -name &quot;*.php&quot;
+</code></pre>
+
+<p>查找距现在 n*24H 内修改过的文件</p>
+
+<pre><code>find ./ -ctime -3 
+</code></pre>
+
+<p>find三种时间</p>
+
+<pre><code>atime 最后一次访问时间, 使用 ls -utl 可以按此时间顺序查看
+
+ctime 最后一次状态修改时间, 使用 stat file 可以查看
+
+mtime 最后一次内容修改时间, vim查看会更改mtime时间
+</code></pre></li>
+
 <li><p>使用Webshell查杀工具</p>
 
 <blockquote>
