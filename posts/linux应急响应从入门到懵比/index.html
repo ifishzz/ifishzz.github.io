@@ -51,8 +51,8 @@
                     </h1>
                     <h2 class="headline">
                     Feb 25, 2019 00:00
-                    · 7598 words
-                    · 16 minute read
+                    · 11077 words
+                    · 23 minute read
                       <span class="tags">
                       
                       
@@ -83,6 +83,10 @@
 <li><a href="#敏感目录">敏感目录</a></li>
 <li><a href="#history">history</a></li>
 <li><a href="#开机启动">开机启动</a></li>
+<li><a href="#定时任务">定时任务</a></li>
+<li><a href="#rootkit">Rootkit</a></li>
+<li><a href="#病毒检测">病毒检测</a></li>
+<li><a href="#文件权限">文件权限</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -914,6 +918,417 @@ Removed symlink /etc/systemd/system/multi-user.target.wants/httpd.service.
 
 <pre><code>[root@localhost system]# systemctl is-enabled httpd.service
 enabled
+</code></pre>
+
+<p>CentOS7下rc.local文件默认不会在开机执行，我们来看一下rc.local文件的内容</p>
+
+<pre><code>[root@localhost system]# cat /etc/rc.local
+
+#!/bin/bash
+
+# THIS FILE IS ADDED FOR COMPATIBILITY PURPOSES
+
+#
+
+# It is highly advisable to create own systemd services or udev rules
+
+# to run scripts during boot instead of using this file.
+
+#
+
+# In contrast to previous versions due to parallel execution during boot
+
+# this script will NOT be run after all other services.
+
+#
+
+# Please note that you must run 'chmod +x /etc/rc.d/rc.local' to ensure
+
+# that this script will be executed during boot.
+</code></pre>
+
+<p>可以看到一段注释，翻译如下：</p>
+
+<pre><code>#这个文件是为了兼容性的问题而添加的。
+
+#强烈建议创建自己的systemd服务或udev规则来在开机时运行脚本而不是使用这个文件。
+
+#与以前的版本引导时的并行执行相比较，这个脚本将不会在其他所有的服务后执行。
+
+#请记住，你必须执行“chmod +x /etc/rc.d/rc.local”来确保确保这个脚本在引导时执行。
+
+</code></pre>
+
+<p>然后我们看/usr/lib/systemd/system/rc-local.service</p>
+
+<pre><code>[root@localhost system]# cat /usr/lib/systemd/system/rc-local.service | grep ExecStart
+ExecStart=/etc/rc.d/rc.local start
+</code></pre>
+
+<p>那我们启动下rc-local.service</p>
+
+<pre><code>[root@localhost system]# chmod u+x /etc/rc.d/rc.local
+[root@localhost system]# systemctl start rc-local
+</code></pre>
+
+<p>总结一下，针对CentOS7系统，需要排查的点：</p>
+
+<p>1）排查修改的service</p>
+
+<pre><code>find /usr/lib/systemd/system/ -name &quot;*.service&quot; | xargs ls -alt | head -n 5
+find /etc/systemd/system/ -name &quot;*.service&quot; | xargs ls -alt | head -n 5
+</code></pre>
+
+<p>2）/etc/rc.d/init.d</p>
+
+<p>3）/etc/rc.d/rc.local</p>
+
+<p>不过需要看/etc/rc.d/rc.local是否有x权限。</p>
+
+<h3 id="定时任务">定时任务</h3>
+
+<p>在应急响应中，最重要的一个点就是定时任务，例如Redis未授权通过持久化配置写入Crontab中。下面梳理一下定时任务相关的知识点：</p>
+
+<p>一般常用的定时任务crontab -l是用户级别的，保存在/var/spool/cron/{user}，每个用户都可以通过crontab -e编辑自己的定时任务列表。</p>
+
+<p>而/etc/crontab是系统级别的定时任务，只有Root账户可以修改。</p>
+
+<p>另外在应急的时候需要留意的点还有/etc/cron.hourly, /etc/cron.daily, /etc/cron.weekly,/etc/cron.monthly等周期性执行脚本的目录。例如我想每天执行一个脚本，只需要放到/etc/cron.daily下，并且赋予执行权限即可。</p>
+
+<p>CentOS6与CentOs7中：</p>
+
+<pre><code>[root@localhost /]# cat /etc/issue
+CentOS release 6.5 (Final)
+Kernel \r on an \m
+
+[root@localhost /]# cat /etc/crontab
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+HOME=/
+
+# For details see man 4 crontabs
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name command to be executed
+</code></pre>
+
+<p>可以看到默认的/etc/crontab为空了。那么/etc/cron.hourly, /etc/cron.daily, /etc/cron.weekly, /etc/cron.monthly下面的任务是怎么执行的？</p>
+
+<p>我们再仔细看一下，注意到CentOS5下的/etc/cron.d目录为空。</p>
+
+<pre><code>[root@jianshe_28 cron.daily]# ll /etc/cron.d
+total 0
+</code></pre>
+
+<p>而CentOS6下有一个0hourly</p>
+
+<pre><code>[root@localhost /]# ll /etc/cron.d
+total 12
+-rw-r--r--  1 root root 113 Jul 18 19:36 0hourly
+</code></pre>
+
+<p>看一下执行的任务</p>
+
+<pre><code>[root@localhost /]# cat /etc/cron.d/0hourly 
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+HOME=/
+01 * * * * root run-parts /etc/cron.hourly
+</code></pre>
+
+<p>然后看一下/etc/cron.hourly所执行的脚本</p>
+
+<pre><code>[root@localhost /]# ll /etc/cron.hourly
+total 4
+-rwxr-xr-x 1 root root 409 Jul 18 14:20 0anacron
+[root@localhost /]# cat /etc/cron.hourly/0anacron 
+#!/bin/bash
+# Skip excecution unless the date has changed from the previous run 
+if test -r /var/spool/anacron/cron.daily; then
+    day=`cat /var/spool/anacron/cron.daily`
+fi
+if [ `date +%Y%m%d` = &quot;$day&quot; ]; then
+    exit 0;
+fi
+
+# Skip excecution unless AC powered
+if test -x /usr/bin/on_ac_power; then
+    /usr/bin/on_ac_power &amp;&gt; /dev/null
+    if test $? -eq 1; then
+    exit 0
+    fi
+fi
+/usr/sbin/anacron -s
+</code></pre>
+
+<p>然后看一下/etc/anacrontab的内容</p>
+
+<pre><code>[root@localhost /]# cat /etc/anacrontab 
+# /etc/anacrontab: configuration file for anacron
+
+# See anacron(8) and anacrontab(5) for details.
+
+SHELL=/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+# the maximal random delay added to the base delay of the jobs
+RANDOM_DELAY=45
+# the jobs will be started during the following hours only
+START_HOURS_RANGE=3-22
+
+#period in days   delay in minutes   job-identifier   command
+1    5    cron.daily        nice run-parts /etc/cron.daily
+7    25    cron.weekly        nice run-parts /etc/cron.weekly
+@monthly 45    cron.monthly        nice run-parts /etc/cron.monthly
+</code></pre>
+
+<p>这里多了两条配置</p>
+
+<p>RANDOM_DELAY=45</p>
+
+<p>表示定时触发后随机延迟45分钟以内的时间再启动应用</p>
+
+<p>START_HOURS_RANGE=3-22</p>
+
+<p>表示程序在3时至22时之间会启动</p>
+
+<p>看到这里我们就明白了在CeontOS6 里面，crond会检查/etc/cron.d里面的配置，里面有一个
+0hourly文件，每小时去运行一次/etc/cron.hourly目录，该目录下面有一个0anacron文件，这样0anacron文件就能每小时运行一次，这里其实执行的是/usr/sbin/anacron -s。anacron读取配置文件/etc/anacrontab，将当前时间与/var/spool/anacron目录下面的文件里面的时间戳作对比，如果需要则去运行/etc/anacrontab对应的条目。</p>
+
+<p>总结：</p>
+
+<p>应急响应中关于定时任务应该排查的/etc/crontab,/etc/cron.d,/var/spool/cron/{user},然后顺藤摸瓜去看其他调用的目录/etc/cron.hourly, /etc/cron.daily, /etc/cron.weekly, /etc/cron.monthly，/etc/anacrontab 。</p>
+
+<p>其中容易忽视的就是/etc/anacrontab</p>
+
+<p>在CentOS6下我们做个测试：</p>
+
+<p>编辑/etc/anacrontab</p>
+
+<p>修改RANDOM_DELAY=1</p>
+
+<p>添加1 1 cron.test echo 1 &gt;&gt; /tmp/1.txt</p>
+
+<p>[root@localhost cron.weekly]# /usr/sbin/anacron -s
+等待一分多钟后，可以看到</p>
+
+<pre><code>[root@localhost cron.weekly]# cat /var/spool/anacron/cron.test 
+20170719
+[root@localhost cron.weekly]# cat /tmp/1.txt 
+1
+</code></pre>
+
+<h3 id="rootkit">Rootkit</h3>
+
+<p>1）检查命令替换</p>
+
+<p>系统完整性可以通过rpm自带的-Va来校验检查所有的rpm软件包,有哪些被篡改了,防止rpm也被替换,上传一个安全干净稳定版本rpm二进制到服务器上进行检查。
+例如我替换一下/bin/ps，然后使用rpm -qaV查看</p>
+
+<pre><code>[root@vincenthostname tmp]# rpm -qaV
+S.?....T. /bin/ps
+</code></pre>
+
+<p>2）比对命令的大小</p>
+
+<p>例如正常的ps和netstat大小</p>
+
+<pre><code>[root@vincent tmp]# ll /bin/ps
+-rwxr-xr-x 1 root root 87112 11月 15 2012 /bin/ps
+[root@vincent tmp]# ll /bin/netstat
+-rwxr-xr-x 1 root root 128216 5月 10 2012 /bin/netstat
+</code></pre>
+
+<pre><code>[root@DataNode110 admin]# ls -alt /bin/ | head -n 10
+total 10836
+-rwxr-xr-x 1 root root 625633 Aug 17 16:26 tawlqkazpu
+dr-xr-xr-x. 2 root root 4096 Aug 17 16:26 .
+-rwxr-xr-x 1 root root 1223123 Aug 17 11:30 ps
+-rwxr-xr-x 1 root root 1223123 Aug 17 11:30 netstat
+</code></pre>
+
+<p>可以看到ps和netstat是一样大的。</p>
+
+<p>3）查看命令的修改时间，按修改时间排序</p>
+
+<pre><code>ls -alt /bin/ | head -n 5
+</code></pre>
+
+<p>4）使用chkrootkit和rkhunter查看</p>
+
+<h3 id="病毒检测">病毒检测</h3>
+
+<pre><code>https://x.threatbook.cn/
+http://www.virscan.org
+https://www.virustotal.com/
+https://fireeye.ijinshan.com/
+</code></pre>
+
+<h3 id="文件权限">文件权限</h3>
+
+<p><strong>setfacl与getfacl</strong></p>
+
+<p>ACL 全称 Access Control Lists 翻译成中文叫”访问控制列表”,传统的 Linux 文件系统的权限控制是通过 user、group、other 与 r(读)、w(写)、x(执行) 的不同组合来实现的。随着应用的发展，这些权限组合已不能适应现时复杂的文件系统权限控制要求。 例如，目录 /data 的权限为：drwxr-x—，所有者与所属组均为 root，在不改变所有者的前提下，要求用户 tom 对该目录有完全访问权限 (rwx).考虑以下2种办法 (这里假设 tom 不属于 root group)</p>
+
+<p>(1) 给 /data 的 other 类别增加 rwx permission，这样由于 tom 会被归为 other 类别，那么他也将拥有 rwx 权限。</p>
+
+<p>(2) 将 tom 加入到 root group，为 root group 分配 rwx 权限，那么他也将拥有 rwx 权限。</p>
+
+<p>以上 2 种方法其实都不合适</p>
+
+<p>为了解决这些问题，Linux 开发出了一套新的文件系统权限管理方法，叫文件访问控制列表 (Access Control Lists, ACL)。简单地来说，ACL 就是可以设置特定用户或者用户组对于一个文件的操作权限。</p>
+
+<p>文件的所有者以及有CAP_FOWNER的用户进程可以设置一个文件的acl。（在目前的linux系统上，root用户是唯一有CAP_FOWNER能力的用户）</p>
+
+<p>ACL 有两种:</p>
+
+<p><strong>access ACL</strong></p>
+
+<p>针对文件和目录设置访问控制列表。</p>
+
+<p>一种是default ACL，只能针对目录设置。如果目录中的文件没有设置 ACL，它就会使用该目录的默认 ACL.</p>
+
+<p>1）getfacl</p>
+
+<p>获取文件权限</p>
+
+<pre><code>[root@bogon anacron]# getfacl cron.daily 
+# file: cron.daily
+# owner: root
+# group: root
+user::rw-
+group::---
+other::---
+</code></pre>
+
+<p>2）setfacl</p>
+
+<p>Access ACL</p>
+
+<p>比如我设置/tmp/1.sh的other权限为000，然后切换到vinc账户。</p>
+
+<pre><code>[vinc@vincent tmp]$ cat 1.sh
+cat: 1.sh: 权限不够
+</code></pre>
+
+<p>然后我们添加ACL</p>
+
+<pre><code>[root@vincent opt]# setfacl -m u:vinc:rwx /tmp/1.sh
+</code></pre>
+
+<p>然后我们使用ll查看，发现第一个字段文件权限第十位变成了+号</p>
+
+<pre><code>[root@vincent tmp]# ll 1.sh
+-rwxrwx---+ 1 root root 512 8月   9 03:21 1.sh
+</code></pre>
+
+<p>然后我们使用getfacl查看</p>
+
+<pre><code>[vinc@vincent tmp]$ getfacl 1.sh
+# file: 1.sh
+# owner: root
+# group: root
+user::rwx
+user:vinc:rwx
+group::r-x
+mask::rwx
+other::---
+</code></pre>
+
+<p>我们切换到vinc账户就可以查看内容了</p>
+
+<pre><code>[vinc@vincent tmp]$ cat 1.sh
+test
+</code></pre>
+
+<p>删除这条ACL</p>
+
+<pre><code>[root@vincent tmp]# setfacl -x u:vinc /tmp/1.sh
+</code></pre>
+
+<p>取消所有的ACL</p>
+
+<pre><code>[root@vincent tmp]# setfacl -b /tmp/1.sh
+</code></pre>
+
+<p><strong>Default ACl</strong></p>
+
+<p>前面所说都是access acl，针对文件而言，而default acl是指对于一个目录进行default acl设置，并且在此目录下建立的文件都将继承此目录的acl。</p>
+
+<pre><code>[root@vincent opt]# setfacl -d -m u:hehe:--- 1
+</code></pre>
+
+<p>来看下目录1的权限</p>
+
+<pre><code>[root@vincent opt]# getfacl -c 1
+user::rwx
+group::r-x
+other::r-x
+default:user::rwx
+default:user:hehe:---
+default:group::r-x
+default:mask::r-x
+default:other::r-x
+</code></pre>
+
+<p>我们在目录1下新建的文件都将继承这个权限。我们在目录1下新建一个文件，然后查看一下ACL</p>
+
+<pre><code>[vinc@vincent 1]$ getfacl 222
+# file: 222
+# owner: vinc
+# group: vinc
+user::rw-
+user:hehe:---
+group::r-x            #effective:r--
+mask::r--
+other::r--
+</code></pre>
+
+<p>切换到hehe账户，查看文件，提示权限不够。</p>
+
+<pre><code>[hehe@vincent 1]$ cat /opt/1/222
+cat: /opt/1/222: 权限不够
+</code></pre>
+
+<p><strong>lsattr和chattr</strong></p>
+
+<p>chattr</p>
+
+<p>修改属性能够提高系统的安全 性，但是它并不适合所有的目录。chattr命令不能保护/、/dev、/tmp、/var目录</p>
+
+<p>a：即append，设定该参数后，只能向文件中添加数据，而不能删除，多用于服务器日志文件安
+全，只有root才能设定这个属性。</p>
+
+<p>i：设定文件不能被删除、改名、设定链接关系，同时不能写入或新增内容。i参数对于文件 系统的安全设置有很大帮助。</p>
+
+<p>s：保密性地删除文件或目录，即硬盘空间被全部收回。</p>
+
+<p>u：与s相反，当设定为u时，数据内容其实还存在磁盘中，可以用于undeletion。</p>
+
+<p>例子：</p>
+
+<p>设置/etc/resolv.conf为不可修改</p>
+
+<pre><code>[root@vincent tmp]# chattr +i /etc/resolv.conf 
+[root@vincent tmp]# lsattr /etc/resolv.conf 
+----i--------e- /etc/resolv.conf
+[root@vincent tmp]# echo &quot;&quot; &gt; /etc/resolv.conf 
+-bash: /etc/resolv.conf: 权限不够
+</code></pre>
+
+<p>lsattr
+查看文件权限</p>
+
+<pre><code>[root@vincent tmp]# lsattr 1.txt 
+-----a-------e- 1.txt
 </code></pre>
 
                 </section>
