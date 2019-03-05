@@ -165,12 +165,12 @@
     </item>
     
     <item>
-      <title></title>
+      <title>install</title>
       <link>https://ifishzz.github.io/posts/install/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 05 Mar 2018 00:00:00 +0000</pubDate>
       
       <guid>https://ifishzz.github.io/posts/install/</guid>
-      <description></description>
+      <description>install 1.添加kali官方源 vim /etc/apt/sources.list deb http://http.kali.org/kali kali-rolling main non-free contrib apt-get update 2.google拼音 apt-get install fcitx fcitx-googlepinyin 3.zim 4.google browser wget &amp;lt;https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb&amp;gt; apt install gdebi gdebi google.deb 进不去的情况 whereis google-chrome-stable vi /usr/bin/google-chrome-stable exec -a &amp;quot;$0&amp;quot; &amp;quot;$HERE/chrome&amp;quot; &amp;quot;$@&amp;quot; --user-data-dir --no-sandbox 5.xmind https://www.xmind.net/download/ 6.virtualbox apt-get install linux-headers-$(uname -r)</description>
     </item>
     
     <item>
