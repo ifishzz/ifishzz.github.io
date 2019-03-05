@@ -6,19 +6,10 @@
     <description>Recent content on if1sh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 05 Mar 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 25 Feb 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://ifishzz.github.io/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>install</title>
-      <link>https://ifishzz.github.io/posts/install/</link>
-      <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://ifishzz.github.io/posts/install/</guid>
-      <description>install 1.添加kali官方源 vim /etc/apt/sources.list deb http://http.kali.org/kali kali-rolling main non-free contrib apt-get update 2.google拼音 apt-get install fcitx fcitx-googlepinyin 3.zim 4.google browser wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb apt install gdebi gdebi google.deb 进不去的情况 whereis google-chrome-stable vi /usr/bin/google-chrome-stable exec -a &amp;quot;$0&amp;quot; &amp;quot;$HERE/chrome&amp;quot; &amp;quot;$@&amp;quot; --user-data-dir --no-sandbox 5.xmind https://www.xmind.net/download/ 6.virtualbox apt-get install linux-headers-$(uname -r)</description>
-    </item>
     
     <item>
       <title>linux应急响应从入门到懵比</title>
@@ -171,6 +162,15 @@
       
       <guid>https://ifishzz.github.io/posts/markdown/</guid>
       <description>标题 在想要设置为标题的文字前面加#来表示 一个#是一级标题，二个#是二级标题，以此类推。支持六级标题 标准语法一般在#后跟个空格再写文字 字体 加粗</description>
+    </item>
+    
+    <item>
+      <title>install</title>
+      <link>https://ifishzz.github.io/posts/install/</link>
+      <pubDate>Mon, 05 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/install/</guid>
+      <description>install 1.添加kali官方源 vim /etc/apt/sources.list deb http://http.kali.org/kali kali-rolling main non-free contrib apt-get update 2.google拼音 apt-get install fcitx fcitx-googlepinyin 3.zim 4.google browser wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb apt install gdebi gdebi google.deb 进不去的情况 whereis google-chrome-stable vi /usr/bin/google-chrome-stable exec -a &amp;quot;$0&amp;quot; &amp;quot;$HERE/chrome&amp;quot; &amp;quot;$@&amp;quot; --user-data-dir --no-sandbox 5.xmind https://www.xmind.net/download/ 6.virtualbox apt-get install linux-headers-$(uname -r)</description>
     </item>
     
     <item>
