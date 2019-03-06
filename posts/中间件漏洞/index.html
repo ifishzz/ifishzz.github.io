@@ -72,8 +72,19 @@
 <li>
 <ul>
 <li><a href="#0x00-中间件">0x00 中间件</a></li>
-<li><a href="#tomcat">Tomcat</a></li>
-<li><a href="#jboss">jBoss</a></li>
+<li><a href="#0x01-tomcat">0x01 Tomcat</a>
+<ul>
+<li><a href="#tomcat口令爆破">tomcat口令爆破</a></li>
+<li><a href="#war漏洞">war漏洞</a></li>
+<li><a href="#漏洞修复">漏洞修复</a></li>
+</ul></li>
+<li><a href="#0x02-jboss">0x02 jBoss</a>
+<ul>
+<li><a href="#war漏洞-1">war漏洞</a></li>
+<li><a href="#漏洞修复-1">漏洞修复</a></li>
+<li><a href="#反序列化漏洞">反序列化漏洞</a></li>
+<li><a href="#漏洞修复-2">漏洞修复</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -111,7 +122,7 @@
 
 <p>web服务器只是提供静态网页解析（如apache），或者提供跳转的这么一种服务。而web中间件（其包含web容器）可以解析动态语言，比如tomcat可以解析jsp（因为tomcat含有jsp容器），当然它也可以解析静态资源，因此它既是web中间件也是web服务器。不过tomcat解析静态资源的速度不如apache，因此常常两者结合使用。</p>
 
-<h2 id="tomcat">Tomcat</h2>
+<h2 id="0x01-tomcat">0x01 Tomcat</h2>
 
 <p>tomcat是apache的一个中间件软件，其可以提供jsp或者php的解析服务，为了方便远程管理与部署，安装完tomcat以后默认会有一个管理页面，管理员只需要远程上传一个WAR格式的文件，便可以将内容发布到网站，这一功能方便了管理员的同时也给黑客打开了方便之门，除此之外，tomcat还有一些样本页面，如果处理不当也会导致安全问题。</p>
 
@@ -127,11 +138,11 @@ admin admin
 admin 123456
 </code></pre>
 
-<p><strong>tomcat口令爆破</strong></p>
+<h3 id="tomcat口令爆破">tomcat口令爆破</h3>
 
 <p>在默认不对tomcat做任何配置的时候爆破是无效的，而如果设置了账号密码就可以进行爆破。Tomcat的认证比较弱，Base64(用户名:密码)编码，请求响应码如果不是401（未经授权：访问由于凭据无效被拒绝。）即表示登录成功。登录成功后，可直接上传war文件，getshell（当然上传war文件需要manager权限）</p>
 
-<p><strong>war漏洞</strong></p>
+<h3 id="war漏洞">war漏洞</h3>
 
 <p>.jsp shell文件打包为war文件：</p>
 
@@ -140,11 +151,14 @@ admin 123456
 
 <p>进入后台war file to deploy上传</p>
 
-<p><strong>漏洞修复</strong>
-- 删除远程部署页面，或者限定页面的访问权限。
-- 找到/conf/tomcat-users.xml修改用户名密码以及权限。</p>
+<h3 id="漏洞修复">漏洞修复</h3>
 
-<h2 id="jboss">jBoss</h2>
+<ul>
+<li>删除远程部署页面，或者限定页面的访问权限。</li>
+<li>找到/conf/tomcat-users.xml修改用户名密码以及权限。</li>
+</ul>
+
+<h2 id="0x02-jboss">0x02 jBoss</h2>
 
 <p>jBoss是一个基于J2EE的开发源代码的应用服务器。 JBoss是一个管理EJB的容器和服务器，支持EJB1.1、EJB 2.0和EJB3的规范。但JBoss核心服务不包括支持servlet/JSP的WEB容器，一般与Tomcat或Jetty绑定使用。与tomcat类似的是jboss也有远程部署平台，但不需要登陆。漏洞利用过程与tomcat类似</p>
 
@@ -152,21 +166,23 @@ admin 123456
 
 <p><a href="http://localhost:8080">http://localhost:8080</a></p>
 
-<p><strong>war漏洞</strong>
-访问管理页面，查看jboss配置页面中的JMX Console，这是JBoss的管理台程序，进入后找到Jboss.deployment包，该包下有flavor=URL.type=DeploymentSccanner选项。进入部署页面后便可以上传war文件，但与tomcat不同的是它不是本地上传war文件，而是从远程地址下载，因此需要自己准备一个文件服务器，用于远程下载war到目标jboss服务器上。具体方法是在部署页面找到”ADDURL”方法，输入URL地址，点击invoke。除了以上方法外，JMX-Console提供的BSH方法，同样也可以部署war包。</p>
+<h3 id="war漏洞-1">war漏洞</h3>
 
-<p><strong>漏洞修复</strong>
-开启jmx-console密码认证</p>
+<p>访问管理页面，查看jboss配置页面中的JMX Console，这是JBoss的管理台程序，进入后找到Jboss.deployment包，该包下有flavor=URL.type=DeploymentSccanner选项。进入部署页面后便可以上传war文件，但与tomcat不同的是它不是本地上传war文件，而是从远程地址下载，因此需要自己准备一个文件服务器，用于远程下载war到目标jboss服务器上。具体方法是在部署页面找到”ADDURL”方法，输入URL地址，点击invoke。除了以上方法外，JMX-Console提供的BSH方法，同样也可以部署war包。</p>
+
+<h3 id="漏洞修复-1">漏洞修复</h3>
+
+<p>开启jmx-console密码认证</p>
 
 <p>删除jmx-console.war与web-console.war</p>
 
-<p><strong>反序列化漏洞</strong></p>
+<h3 id="反序列化漏洞">反序列化漏洞</h3>
 
 <p><a href="http://localhost:8080/invoker/readonly">http://localhost:8080/invoker/readonly</a></p>
 
 <p>返回500，说明页面存在，此页面有反序列化漏洞</p>
 
-<p><strong>漏洞修复</strong></p>
+<h3 id="漏洞修复-2">漏洞修复</h3>
 
 <p>有效解决方案：升级到JBOSS AS7版本</p>
 
