@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     Mar 5, 2019 00:00
-                    · 1718 words
+                    · 1720 words
                     · 4 minute read
                       <span class="tags">
                       
@@ -76,14 +76,11 @@
 <ul>
 <li><a href="#tomcat口令爆破">tomcat口令爆破</a></li>
 <li><a href="#war漏洞">war漏洞</a></li>
-<li><a href="#漏洞修复">漏洞修复</a></li>
 </ul></li>
 <li><a href="#0x02-jboss">0x02 jBoss</a>
 <ul>
 <li><a href="#war漏洞-1">war漏洞</a></li>
-<li><a href="#漏洞修复-1">漏洞修复</a></li>
 <li><a href="#反序列化漏洞">反序列化漏洞</a></li>
-<li><a href="#漏洞修复-2">漏洞修复</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -151,12 +148,9 @@ admin 123456
 
 <p>进入后台war file to deploy上传</p>
 
-<h3 id="漏洞修复">漏洞修复</h3>
-
-<ul>
-<li>删除远程部署页面，或者限定页面的访问权限。</li>
-<li>找到/conf/tomcat-users.xml修改用户名密码以及权限。</li>
-</ul>
+<p><strong>漏洞修复</strong>
+- 删除远程部署页面，或者限定页面的访问权限。
+- 找到/conf/tomcat-users.xml修改用户名密码以及权限。</p>
 
 <h2 id="0x02-jboss">0x02 jBoss</h2>
 
@@ -170,9 +164,8 @@ admin 123456
 
 <p>访问管理页面，查看jboss配置页面中的JMX Console，这是JBoss的管理台程序，进入后找到Jboss.deployment包，该包下有flavor=URL.type=DeploymentSccanner选项。进入部署页面后便可以上传war文件，但与tomcat不同的是它不是本地上传war文件，而是从远程地址下载，因此需要自己准备一个文件服务器，用于远程下载war到目标jboss服务器上。具体方法是在部署页面找到”ADDURL”方法，输入URL地址，点击invoke。除了以上方法外，JMX-Console提供的BSH方法，同样也可以部署war包。</p>
 
-<h3 id="漏洞修复-1">漏洞修复</h3>
-
-<p>开启jmx-console密码认证</p>
+<p><strong>漏洞修复</strong>
+开启jmx-console密码认证</p>
 
 <p>删除jmx-console.war与web-console.war</p>
 
@@ -182,7 +175,7 @@ admin 123456
 
 <p>返回500，说明页面存在，此页面有反序列化漏洞</p>
 
-<h3 id="漏洞修复-2">漏洞修复</h3>
+<p><strong>漏洞修复</strong></p>
 
 <p>有效解决方案：升级到JBOSS AS7版本</p>
 
