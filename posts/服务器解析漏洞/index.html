@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     Mar 7, 2019 00:00
-                    · 606 words
+                    · 719 words
                     · 2 minute read
                       <span class="tags">
                       
@@ -141,12 +141,27 @@ cat 1.php &gt;&gt; 1.jpg
 
 <p>在Fast-CGI关闭的情况下，Nginx &lt;=0.8.37 依然存在解析漏洞</p>
 
-<p>Ngnix空字节可远程执行代码漏洞</p>
+<ol>
+<li>Ngnix空字节可远程执行代码漏洞</li>
+</ol>
 
 <pre><code>/1.jpg/1.php
 /1.jpg%00.php
 /1.jpg/%20\0.php
 </code></pre>
+
+<ol>
+<li>修复方案</li>
+<li>修改php.ini文件，将cgi.fix_pathinfo的值设置为0;</li>
+<li>在Nginx配置文件中添加以下代码：</li>
+</ol>
+
+<pre><code>　　if ( $fastcgi_script_name ~ ..*/.*php )         {
+　　return 403;
+　　}
+</code></pre>
+
+<p>　　这行代码的意思是当匹配到类似test.jpg/a.php的URL时，将返回403错误代码。</p>
 
                 </section>
             </article>
