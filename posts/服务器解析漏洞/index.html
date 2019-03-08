@@ -71,10 +71,34 @@
 <ul>
 <li>
 <ul>
-<li><a href="#iis解析漏洞">IIS解析漏洞</a></li>
+<li><a href="#iis解析漏洞">IIS解析漏洞</a>
+<ul>
+<li>
+<ul>
+<li><a href="#目录解析">目录解析</a></li>
+<li><a href="#文件解析">文件解析</a></li>
+<li><a href="#默认解析">默认解析</a></li>
+<li><a href="#修复方案">修复方案</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#畸形解析漏洞">畸形解析漏洞</a></li>
-<li><a href="#nginx解析漏洞">nginx解析漏洞</a></li>
-<li><a href="#apache解析漏洞">apache解析漏洞</a></li>
+<li><a href="#nginx解析漏洞">nginx解析漏洞</a>
+<ul>
+<li>
+<ul>
+<li><a href="#ngnix空字节可远程执行代码漏洞">Ngnix空字节可远程执行代码漏洞</a></li>
+<li><a href="#修复方案-1">修复方案</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#apache解析漏洞">apache解析漏洞</a>
+<ul>
+<li>
+<ul>
+<li><a href="#后缀解析">后缀解析</a></li>
+<li><a href="#其余配置漏洞">其余配置漏洞</a></li>
+<li><a href="#修复方案-2">修复方案</a></li>
+</ul></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -88,32 +112,26 @@
 
 <p>IIS 6.0 解析利用方法有两种：</p>
 
-<ol>
-<li>目录解析</li>
-</ol>
+<h4 id="目录解析">目录解析</h4>
 
 <pre><code>/xx.asp/xx.jpg
 /xx.asa/xx.jpg
 </code></pre>
 
-<ol>
-<li>文件解析</li>
-</ol>
+<h4 id="文件解析">文件解析</h4>
 
 <pre><code>/xx.asp;.jpg  
 /xx.asp:.jpg(此处需抓包修改文件名)
 </code></pre>
 
-<ol>
-<li><p>默认解析</p>
+<h4 id="默认解析">默认解析</h4>
 
 <pre><code>/xx.asa
 /xx.cer
 /xx.cdx
-</code></pre></li>
+</code></pre>
 
-<li><p>修复方案</p></li>
-</ol>
+<h4 id="修复方案">修复方案</h4>
 
 <ul>
 <li><p>目前尚无微软官方的补丁，可以通过自己编写正则，阻止上传xx.asp;.jpg类型的文件名。</p></li>
@@ -144,18 +162,14 @@ cat 1.php &gt;&gt; 1.jpg
 
 <p>在Fast-CGI关闭的情况下，Nginx &lt;=0.8.37 依然存在解析漏洞</p>
 
-<ol>
-<li>Ngnix空字节可远程执行代码漏洞</li>
-</ol>
+<h4 id="ngnix空字节可远程执行代码漏洞">Ngnix空字节可远程执行代码漏洞</h4>
 
 <pre><code>/1.jpg/1.php
 /1.jpg%00.php
 /1.jpg/%20\0.php
 </code></pre>
 
-<ol>
-<li>修复方案</li>
-</ol>
+<h4 id="修复方案-1">修复方案</h4>
 
 <ul>
 <li><p>修改php.ini文件，将cgi.fix_pathinfo的值设置为0;</p></li>
@@ -174,16 +188,12 @@ cat 1.php &gt;&gt; 1.jpg
 
 <p>Apache 解析文件的规则是从右到左开始判断解析,直到可识别</p>
 
-<ol>
-<li>后缀解析</li>
-</ol>
+<h4 id="后缀解析">后缀解析</h4>
 
 <pre><code>/xx.php.php3.phtml.php4.php5 
 </code></pre>
 
-<ol>
-<li>其余配置漏洞</li>
-</ol>
+<h4 id="其余配置漏洞">其余配置漏洞</h4>
 
 <ul>
 <li><p>如果在 Apache 的 conf 里有这样一行配置 <code>AddHandler php5-script .php</code>这时只要文件名里包含.php 即使文件名是 test2.php.jpg 也会以 php 来执行。</p></li>
@@ -191,11 +201,12 @@ cat 1.php &gt;&gt; 1.jpg
 <li><p>如果在 Apache 的 conf 里有这样一行配置 <code>AddType application/x-httpd-php .jpg</code>即使扩展名是 jpg，一样能以 php 方式执行。</p></li>
 </ul>
 
-<ol>
-<li>修复方案</li>
+<h4 id="修复方案-2">修复方案</h4>
+
+<ul>
 <li>apache配置文件，禁止.php.这样的文件执行，配置文件里面加入
 <br /></li>
-</ol>
+</ul>
 
 <pre><code>&lt;Files ~ “.(php.|php3.)”&gt;
         Order Allow,Deny
