@@ -51,8 +51,8 @@
                     </h1>
                     <h2 class="headline">
                     Mar 7, 2019 00:00
-                    · 719 words
-                    · 2 minute read
+                    · 1048 words
+                    · 3 minute read
                       <span class="tags">
                       
                       
@@ -74,6 +74,7 @@
 <li><a href="#iis解析漏洞">IIS解析漏洞</a></li>
 <li><a href="#畸形解析漏洞">畸形解析漏洞</a></li>
 <li><a href="#nginx解析漏洞">nginx解析漏洞</a></li>
+<li><a href="#apache解析漏洞">apache解析漏洞</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -156,12 +157,64 @@ cat 1.php &gt;&gt; 1.jpg
 <li>在Nginx配置文件中添加以下代码：</li>
 </ol>
 
-<pre><code>　　if ( $fastcgi_script_name ~ ..*/.*php )         {
+<pre><code>　　if ( $fastcgi_script_name ~ ..*/.*php ){
 　　return 403;
 　　}
 </code></pre>
 
 <p>　　这行代码的意思是当匹配到类似test.jpg/a.php的URL时，将返回403错误代码。</p>
+
+<h2 id="apache解析漏洞">apache解析漏洞</h2>
+
+<p>Apache 解析文件的规则是从右到左开始判断解析,直到可识别</p>
+
+<ol>
+<li>后缀解析</li>
+</ol>
+
+<pre><code>/xx.php.php3.phtml.php4.php5 
+</code></pre>
+
+<ol>
+<li>其余配置漏洞</li>
+</ol>
+
+<ul>
+<li><p>如果在 Apache 的 conf 里有这样一行配置 <code>AddHandler php5-script .php</code>这时只要文件名里包含.php 即使文件名是 test2.php.jpg 也会以 php 来执行。</p></li>
+
+<li><p>如果在 Apache 的 conf 里有这样一行配置 <code>AddType application/x-httpd-php .jpg</code>即使扩展名是 jpg，一样能以 php 方式执行。</p></li>
+</ul>
+
+<ol>
+<li>修复方案</li>
+<li>apache配置文件，禁止.php.这样的文件执行，配置文件里面加入
+<br /></li>
+</ol>
+
+<pre><code>&lt;Files ~ “.(php.|php3.)”&gt;
+        Order Allow,Deny
+        Deny from all
+&lt;/Files&gt;
+</code></pre>
+
+<ul>
+<li><p>用伪静态能解决这个问题，重写类似.php.*这类文件，打开apache的httpd.conf找到LoadModule rewrite_module modules/mod_rewrite.so</p>
+
+<p>把#号去掉，重启apache,在网站根目录下建立.htaccess文件,代码如下:</p></li>
+</ul>
+
+<pre><code>&lt;IfModule mod_rewrite.c&gt;
+RewriteEngine On
+RewriteRule .(php.|php3.) /index.php
+RewriteRule .(pHp.|pHp3.) /index.php
+RewriteRule .(phP.|phP3.) /index.php
+RewriteRule .(Php.|Php3.) /index.php
+RewriteRule .(PHp.|PHp3.) /index.php
+RewriteRule .(PhP.|PhP3.) /index.php
+RewriteRule .(pHP.|pHP3.) /index.php
+RewriteRule .(PHP.|PHP3.) /index.php
+&lt;/IfModule&gt;
+</code></pre>
 
                 </section>
             </article>
