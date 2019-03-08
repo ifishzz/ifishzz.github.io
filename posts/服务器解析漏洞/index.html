@@ -113,11 +113,13 @@
 </code></pre></li>
 
 <li><p>修复方案</p></li>
+</ol>
 
+<ul>
 <li><p>目前尚无微软官方的补丁，可以通过自己编写正则，阻止上传xx.asp;.jpg类型的文件名。</p></li>
 
 <li><p>做好权限设置，限制用户创建文件夹。</p></li>
-</ol>
+</ul>
 
 <h2 id="畸形解析漏洞">畸形解析漏洞</h2>
 
@@ -153,9 +155,13 @@ cat 1.php &gt;&gt; 1.jpg
 
 <ol>
 <li>修复方案</li>
-<li>修改php.ini文件，将cgi.fix_pathinfo的值设置为0;</li>
-<li>在Nginx配置文件中添加以下代码：</li>
 </ol>
+
+<ul>
+<li><p>修改php.ini文件，将cgi.fix_pathinfo的值设置为0;</p></li>
+
+<li><p>在Nginx配置文件中添加以下代码：</p></li>
+</ul>
 
 <pre><code>　　if ( $fastcgi_script_name ~ ..*/.*php ){
 　　return 403;
