@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     Mar 7, 2019 00:00
-                    · 590 words
+                    · 606 words
                     · 2 minute read
                       <span class="tags">
                       
@@ -85,8 +85,11 @@
 
 <h2 id="iis解析漏洞">IIS解析漏洞</h2>
 
-<p>IIS 6.0 解析利用方法有两种：
-1. 目录解析</p>
+<p>IIS 6.0 解析利用方法有两种：</p>
+
+<ol>
+<li>目录解析</li>
+</ol>
 
 <pre><code>/xx.asp/xx.jpg
 /xx.asa/xx.jpg
@@ -137,6 +140,8 @@ cat 1.php &gt;&gt; 1.jpg
 <p>Nginx &lt;=0.8.37</p>
 
 <p>在Fast-CGI关闭的情况下，Nginx &lt;=0.8.37 依然存在解析漏洞</p>
+
+<p>Ngnix空字节可远程执行代码漏洞</p>
 
 <pre><code>/1.jpg/1.php
 /1.jpg%00.php
