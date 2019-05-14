@@ -53,7 +53,7 @@
                     </h1>
                     <h2 class="headline">
                     Mar 5, 2018 00:00
-                    · 110 words
+                    · 168 words
                     · 1 minute read
                       <span class="tags">
                       
@@ -110,7 +110,7 @@ exec -a &quot;$0&quot; &quot;$HERE/chrome&quot; &quot;$@&quot; --user-data-dir -
 
 <p>6.virtualbox</p>
 
-<pre><code>apt-get install linux-headers-$(uname -r) -y &amp;&amp;  apt-get install virtualbox virtualbox-guest-additions-iso -y
+<pre><code>apt-get install linux-headers-$(uname -r) -y &amp;&amp;  apt-get install virtualbox virtualbox-qt virtualbox-guest-additions-iso -y
 wget http://download.virtualbox.org/virtualbox/5.2.24/Oracle_VM_VirtualBox_Extension_Pack-5.2.24.vbox-extpack
 </code></pre>
 
@@ -143,6 +143,32 @@ flameshot gui
 
 <pre><code>ssh-keygen -t rsa -C &quot;ifish@tuatnota.com&quot;
 cat ~/.ssh/id_rsa.pub
+</code></pre>
+
+<p>11.elessr</p>
+
+<pre><code>自動 瀏覽器走默認
+
+手動 配12333（http）
+
+手動 配1888（socks）
+</code></pre>
+
+<p>12.vmware</p>
+
+<pre><code>https://www.vmware.com/products/workstation-pro/workstation-pro-evaluation.html
+
+chmod +x 
+
+GV7N2-DQZ00-4897Y-27ZNX-NV0TD
+</code></pre>
+
+<p>13.mount</p>
+
+<pre><code>sudo mkfs.ext4 /dev/sdb
+sudo vim /etc/fstab
+blkid /dev/sdb
+UUID=33a994e0-8898-4ce7-9aee-e7bd9f14f4b8 /opt ext4 defaults 0 0
 </code></pre>
 
                 </section>
