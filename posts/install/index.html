@@ -53,7 +53,7 @@
                     </h1>
                     <h2 class="headline">
                     Mar 5, 2018 00:00
-                    · 168 words
+                    · 162 words
                     · 1 minute read
                       <span class="tags">
                       
@@ -72,7 +72,7 @@
                 <section id="post-body">
                     <p>install</p>
 
-<p>1.添加kali官方源</p>
+<p>1.source</p>
 
 <pre><code>vim /etc/apt/sources.list
 deb http://http.kali.org/kali kali-rolling main non-free contrib
@@ -165,7 +165,9 @@ GV7N2-DQZ00-4897Y-27ZNX-NV0TD
 
 <p>13.mount</p>
 
-<pre><code>sudo mkfs.ext4 /dev/sdb
+<pre><code>mount /dev/sdb /opt
+lsblk 
+sudo mkfs.ext4 /dev/sdb
 sudo vim /etc/fstab
 blkid /dev/sdb
 UUID=33a994e0-8898-4ce7-9aee-e7bd9f14f4b8 /opt ext4 defaults 0 0
