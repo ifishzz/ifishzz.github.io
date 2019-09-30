@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Poc on if1sh</title>
+    <link>https://ifishzz.github.io/tags/poc/</link>
+    <description>Recent content in Poc on if1sh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 30 Sep 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://ifishzz.github.io/tags/poc/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>phpstudy复现</title>
+      <link>https://ifishzz.github.io/posts/phpstudy%E5%A4%8D%E7%8E%B0/</link>
+      <pubDate>Mon, 30 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://ifishzz.github.io/posts/phpstudy%E5%A4%8D%E7%8E%B0/</guid>
+      <description>phpstudy复现 为什么会复现 明队给我考了一份源码，说是审一审 熟练的打开尘封的win，源码一拖，打开就几个php文件，网站都还没有搭建起来</description>
+    </item>
+    
+  </channel>
+</rss>
