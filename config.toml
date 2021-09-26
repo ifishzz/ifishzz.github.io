@@ -2,7 +2,7 @@
 # 站点配置
 
 baseURL = "https://if1sh.com/"
-title = "南国绿剑"
+title = "ifish"
 languageCode = "zh-CN"
 hasCJKLanguage = true
 # 版权信息（支持 Markdown）
