@@ -210,7 +210,7 @@ uglyURLs = false
         post = "user-circle"
 
      [[menu.main]]
-        url = "/link/"
+        url = "/links/"
         name = "友情链接"
         weight = 6
         pre = "internal"
