@@ -7,13 +7,18 @@
     },
     "history": [
         {
-            "last_accessed_time": "2021-10-08T13:05:56Z",
-            "line_number": 24,
+            "last_accessed_time": "2021-10-14T11:55:56Z",
+            "line_number": -1,
+            "path": "笔记.md"
+        },
+        {
+            "last_accessed_time": "2021-10-15T19:49:06Z",
+            "line_number": 3,
             "path": "阅读一本书.md"
         },
         {
-            "last_accessed_time": "2021-10-08T13:05:56Z",
-            "line_number": 198,
+            "last_accessed_time": "2021-10-15T19:49:06Z",
+            "line_number": 11,
             "path": "代码审计方法论.md"
         }
     ],
