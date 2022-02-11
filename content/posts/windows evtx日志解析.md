@@ -1,6 +1,6 @@
 ---
 title: windows evtx日志解析
-date: 2022-2-9
+date: 2022-02-09
 categories: ["防","Window日志分析"]
 tags: ["Window日志分析"]
 ---
