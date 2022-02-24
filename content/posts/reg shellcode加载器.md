@@ -1,8 +1,8 @@
 ---
 title: reg shellcode加载器
 date: 2022-02-20
-categories: ["免杀"]
-tags: []
+categories: ["攻","免杀"]
+tags: ["免杀"]
 ---
 
 ```
