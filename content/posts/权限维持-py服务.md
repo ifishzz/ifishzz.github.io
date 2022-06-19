@@ -5,6 +5,9 @@ categories: ["攻","权限维持"]
 tags: ["权限维持"]
 ---
 
+# 权限维持-py服务
+
+
 ```
 # encoding=utf-8
 import win32serviceutil
