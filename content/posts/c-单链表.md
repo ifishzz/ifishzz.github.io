@@ -20,7 +20,7 @@ typedef struct list {
 
 
 list *crete_list() {
-
+       
     //用malloc开辟一块list大小的内存,返回一个list的指针
     list *l = malloc(sizeof(list));
 
